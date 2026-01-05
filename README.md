@@ -1,0 +1,1 @@
+# MacEngDB: The all-in-one hub for career and course resources for McMaster Engineers.
