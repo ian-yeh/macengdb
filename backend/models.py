@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Literal
-from datetime import datetime
+#from datetime import datetime
 
 # Course Models
 class CourseBase(BaseModel):
