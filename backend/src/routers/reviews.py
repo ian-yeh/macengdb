@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Literal
-from models import Review
-from database import get_reviews_by_course_id
+from src.utils.schemas import Review
+from src.utils.database import get_reviews_by_course_id
 
 router = APIRouter()
 
