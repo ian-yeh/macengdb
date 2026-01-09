@@ -56,8 +56,8 @@ export default function LandingPage() {
                   <button
                     key={dept}
                     className={`py-2 px-4 border rounded-md font-inter text-sm cursor-pointer transition-all ${selectedDepartment === dept
-                        ? 'border-[#333] bg-[#333] text-white'
-                        : 'border-[#ddd] bg-white text-[#666] hover:border-[#333] hover:bg-[#333] hover:text-white'
+                      ? 'border-[#333] bg-[#333] text-white'
+                      : 'border-[#ddd] bg-white text-[#666] hover:border-[#333] hover:bg-[#333] hover:text-white'
                       }`}
                     onClick={() => setSelectedDepartment(dept)}
                   >
