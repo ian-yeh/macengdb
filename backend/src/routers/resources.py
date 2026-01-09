@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Literal, Optional
-from models import Resource
-from database import get_resources_by_course_id
+from src.utils.schemas import Resource
+from src.utils.database import get_resources_by_course_id
 
 router = APIRouter()
 

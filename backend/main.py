@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import courses, reviews, resources
+from src.routers import courses, reviews, resources
 
 app = FastAPI(
     title="MacEng Course Database API",

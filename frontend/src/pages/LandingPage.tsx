@@ -22,10 +22,12 @@ export default function LandingPage() {
     navigate(`/course/${courseId}`);
   };
 
+  console.log(courses);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       <main>
         <section className="py-20 text-center">
           <div className="max-w-[1200px] mx-auto px-5">
@@ -53,11 +55,10 @@ export default function LandingPage() {
                 {departments.map(dept => (
                   <button
                     key={dept}
-                    className={`py-2 px-4 border rounded-md font-inter text-sm cursor-pointer transition-all ${
-                      selectedDepartment === dept 
-                        ? 'border-[#333] bg-[#333] text-white' 
+                    className={`py-2 px-4 border rounded-md font-inter text-sm cursor-pointer transition-all ${selectedDepartment === dept
+                        ? 'border-[#333] bg-[#333] text-white'
                         : 'border-[#ddd] bg-white text-[#666] hover:border-[#333] hover:bg-[#333] hover:text-white'
-                    }`}
+                      }`}
                     onClick={() => setSelectedDepartment(dept)}
                   >
                     {dept}

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
-from models import Course
-from database import get_all_courses, get_course_by_id
+from src.utils.schemas import Course
+from src.utils.database import get_all_courses, get_course_by_id
 
 router = APIRouter()
 
@@ -15,6 +15,7 @@ async def get_courses(
     Used by the Landing Page.
     """
     courses = get_all_courses()
+    print(courses)
     
     # Apply search filter
     if search:
