@@ -31,6 +31,35 @@ export default function LandingPage() {
         navigate(`/company/${companyId}`);
     };
 
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex flex-col">
+                <Header />
+                <div className="flex-1 flex items-center justify-center text-[#666]">
+                    <div className="text-center">
+                        <div className="text-4xl mb-4">⏳</div>
+                        <p>Loading companies...</p>
+                    </div>
+                </div>
+                <Footer />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex flex-col">
+                <Header />
+                <div className="flex-1 flex flex-col items-center justify-center text-[#666]">
+                    <div className="text-4xl mb-4">⚠️</div>
+                    <h2 className="text-xl font-semibold mb-2">Failed to load companies</h2>
+                    <p className="text-sm">Please try again later.</p>
+                </div>
+                <Footer />
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen flex flex-col">
             <Header />
