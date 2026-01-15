@@ -23,38 +23,29 @@ def get_db():
     finally:
         db.close()
 
-def get_all_courses() -> List[Course]:
-    """Get all courses from database"""
-    from src.utils.models import Course
+def get_all_companies() -> List[Company]:
+    """Get all companies from database"""
+    from src.utils.models import Company
     db = SessionLocal()
     try:
-        return db.query(Course).all()
+        return db.query(Company).all()
     finally:
         db.close()
 
-def get_course_by_id(course_id: int):
-    """Get a specific course by ID"""
-    from src.utils.models import Course
+def get_company_by_id(company_id: int):
+    """Get a specific company by ID"""
+    from src.utils.models import Company
     db = SessionLocal()
     try:
-        return db.query(Course).filter(Course.id == course_id).first()
+        return db.query(Company).filter(Company.id == company_id).first()
     finally:
         db.close()
 
-def get_reviews_by_course_id(course_id: int):
-    """Get all reviews for a specific course"""
-    from src.utils.models import Review
+def get_reviews_by_company_id(company_id: int):
+    """Get all reviews for a specific company"""
+    from src.utils.models import CompanyReview
     db = SessionLocal()
     try:
-        return db.query(Review).filter(Review.course_id == course_id).all()
-    finally:
-        db.close()
-
-def get_resources_by_course_id(course_id: int):
-    """Get all resources for a specific course"""
-    from src.utils.models import Resource
-    db = SessionLocal()
-    try:
-        return db.query(Resource).filter(Resource.course_id == course_id).all()
+        return db.query(CompanyReview).filter(CompanyReview.company_id == company_id).all()
     finally:
         db.close()

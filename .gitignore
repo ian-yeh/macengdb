@@ -113,3 +113,5 @@ logs/
 # Temporary files
 tmp/
 temp/
+
+api_docs.md
