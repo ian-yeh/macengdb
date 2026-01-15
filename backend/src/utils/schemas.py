@@ -1,29 +1,38 @@
 from pydantic import BaseModel, Field
-from typing import List, Literal
+from typing import Optional
+from datetime import datetime
 
 # Company Models
 class CompanyBase(BaseModel):
     name: str
     industry: str
-    rating: float
-    review_count: int = Field(alias="reviewCount")
-    description: str | None = None
-
-    class Config:
-        populate_by_name = True
+    rating: float = 0.0
+    review_count: int = 0
 
 class Company(CompanyBase):
     id: int
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
-        populate_by_name = True
 
 class CompanyCreate(CompanyBase):
     pass
 
-class ReviewBase(BaseModel):
-    company_id: int
+# Experience Models
+class ExperienceBase(BaseModel):
     title: str
-    rating: float
-    review: str
+    description: str
+
+class Experience(ExperienceBase):
+    id: int
+    company_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ExperienceCreate(ExperienceBase):
+    company_id: int

@@ -2,23 +2,17 @@ export interface Company {
     id: number;
     name: string;
     industry: string;
-    location: string;
     rating: number;
-    hiringCount: number;
-    reviewCount: number;
-    description: string;
+    review_count: number;
+    created_at: string;
+    updated_at: string;
 }
 
-export interface CompanyReview {
+export interface Experience {
     id: number;
-    companyId: number;
-    position: string;
-    rating: number;
-    workLifeBalance: number;
-    salary: string;
-    reviewText: string;
-    pros: string;
-    cons: string;
-    term: string;
-    createdAt: string;
+    company_id: number;
+    title: string;
+    description: string;
+    created_at: string;
+    updated_at: string;
 }

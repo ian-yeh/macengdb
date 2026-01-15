@@ -1,8 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCompany } from '../api/api';
+import { fetchCompany, fetchCompanyExperiences } from '../api/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import ExperiencesSection from '../components/companyPage/ExperiencesSection';
 
 export default function CompanyPage() {
     const { companyId } = useParams<{ companyId: string }>();
@@ -14,9 +15,15 @@ export default function CompanyPage() {
         enabled: !!companyId,
     });
 
-    console.log(company);
+    const { data: experiences, isLoading: experiencesLoading, error: experiencesError } = useQuery({
+        queryKey: ['experiences', companyId],
+        queryFn: () => fetchCompanyExperiences(companyId!),
+        enabled: !!companyId,
+    });
 
-    if (isLoading) {
+    console.log(company, experiences);
+
+    if (isLoading || experiencesLoading) {
         return (
             <div className="min-h-screen flex flex-col">
                 <Header />
@@ -31,7 +38,7 @@ export default function CompanyPage() {
         );
     }
 
-    if (error || !company) {
+    if (error || !company || experiencesError || !experiences) {
         return (
             <div className="min-h-screen flex flex-col">
                 <Header />
@@ -75,12 +82,10 @@ export default function CompanyPage() {
                                         <h1 className="font-playfair text-[42px] font-bold text-[#222] max-md:text-[32px] leading-tight">
                                             {company.name}
                                         </h1>
-                                        <div className="text-[#666] font-inter">{company.industry} • {company.location || 'Location N/A'}</div>
+                                        <div className="text-[#666] font-inter">{company.industry}</div>
                                     </div>
                                 </div>
-                                <p className="text-lg text-[#666] leading-relaxed max-w-[700px]">
-                                    {company.description || "No description available."}
-                                </p>
+
                             </div>
 
                             <div className="flex gap-5 max-md:w-full max-md:justify-between">
@@ -89,8 +94,8 @@ export default function CompanyPage() {
                                     <div className="text-[13px] text-[#888]">Overall Rating</div>
                                 </div>
                                 <div className="bg-white py-5 px-6 rounded-xl border border-[#e0e0e0] text-center min-w-[120px] shadow-sm">
-                                    <div className="text-2xl font-semibold text-[#333] mb-1">💬 {company.reviewCount || 0}</div>
-                                    <div className="text-[13px] text-[#888]">Reviews</div>
+                                    <div className="text-2xl font-semibold text-[#333] mb-1">💬 {company.review_count || 0}</div>
+                                    <div className="text-[13px] text-[#888]">Experiences</div>
                                 </div>
                             </div>
                         </div>
@@ -98,15 +103,7 @@ export default function CompanyPage() {
                 </section>
 
                 {/* Experiences Section */}
-                <section className="py-10 pb-20">
-                    <div className="max-w-[1200px] mx-auto px-5">
-                        <h3 className="text-2xl font-playfair text-[#333] mb-8">Experiences</h3>
-                        <div className="text-center py-20 text-[#666] bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                            <div className="text-4xl mb-4">💼</div>
-                            <p className="text-lg">Experiences coming soon!</p>
-                        </div>
-                    </div>
-                </section>
+                <ExperiencesSection experiences={experiences} />
             </main>
 
             <Footer />
