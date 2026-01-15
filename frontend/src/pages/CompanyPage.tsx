@@ -82,7 +82,7 @@ export default function CompanyPage() {
                                         <h1 className="font-playfair text-[42px] font-bold text-[#222] max-md:text-[32px] leading-tight">
                                             {company.name}
                                         </h1>
-                                        <div className="text-[#666] font-inter">{company.industry}</div>
+                                        <div className="text-[#666] font-inter">{company.industries.join(' • ')}</div>
                                     </div>
                                 </div>
 

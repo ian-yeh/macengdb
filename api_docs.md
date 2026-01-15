@@ -1,84 +1,123 @@
 # MacEngDB API Docs
 
-### Database Models
+## Database Models
 
-**Company**: 
+### User
+- id: int (primary key)
+- email: string (unique, must be @mcmaster.ca)
+- password_hash: string
+- name: string (display name)
+- program: enum (Software, Electrical, Mechanical, Civil, Chemical, Materials, Engineering Physics, Computer, Mechatronics)
+- graduation_year: int (e.g., 2025)
+- role: enum (Student, Alumni) - auto-determined by graduation year
+- is_verified: boolean (email verification)
+- created_at: datetime
+- updated_at: datetime
+- experiences: Experience[] (one-to-many)
+
+### Company
 - id: int (primary key)
 - name: string (max 255)
-- industry: string (max 100, indexed)
-- rating: float (default 0.0)
-- review_count: int (default 0)
+- industries: string[] (array of industry names)
+- rating: float (default 0.0, computed from experiences)
 - created_at: datetime
 - updated_at: datetime
-- experiences: Experience[] (one-to-many relationship)
+- experiences: Experience[] (one-to-many)
 
-**Experience**: 
+### Experience
 - id: int (primary key)
+- user_id: int (foreign key → users.id)
 - company_id: int (foreign key → companies.id)
-- title: string (max 255)
-- description: text
+- position: string (e.g., "Software Engineering Intern")
+- term: string (e.g., "Summer 2024", "Fall 2023")
+- offer_received: boolean
+- difficulty: int (1-5 scale)
+- stages: JSON (structured interview stages)
+- tips: text (optional advice)
 - created_at: datetime
 - updated_at: datetime
-- company: Company (back-reference)
 
-
-### Landing Page
-
-GET /api/companies
-- Get all companies from the database.
-
-URL Parameters:
-- search: string (optional, filter by name)
-- industry: string (optional, filter by industry)
-
-Response Body: 
+#### Experience.stages JSON structure:
 ```json
-{
-    "companies": Company[]
-}
+[
+  {
+    "name": "Online Assessment",
+    "duration": "60 min",
+    "questions": ["2 LeetCode mediums", "Multiple choice on data structures"]
+  },
+  {
+    "name": "Technical Interview",
+    "duration": "45 min",
+    "questions": ["System design: URL shortener", "Behavioral mixed in"]
+  },
+  {
+    "name": "Final Round",
+    "duration": "30 min",
+    "questions": ["Team fit discussion", "Questions about projects"]
+  }
+]
 ```
 
-### Company Page
+---
 
-GET /api/companies/{companyId}
-- Get a specific company by ID.
+## API Endpoints
 
-Response Body:
-```json
-Company
-```
-
-GET /api/companies/{companyId}/experiences
-- Get all experiences for a specific company.
-
-Response Body:
-```json
-{
-    "experiences": Experience[]
-}
-```
-
-### Company Page
-
-GET /api/company/{companyId}
-
-GET /api/company/{companyId}/reviews
-
-### Auth Pages
-
-POST /api/auth/login
+### Auth
 
 POST /api/auth/signup
+- Register with McMaster email (@mcmaster.ca required)
 
-### Profile Page
-GET /api/{userId}/profile
+POST /api/auth/login
+- Login with email/password
 
-POST /api/{userId}/update
+POST /api/auth/verify
+- Verify email with token
 
-GET /api/{userId}/reviews
+POST /api/auth/logout
+- Logout current session
 
-POST /api/{userId}/reviews/{reviewId}
-- For editing certain reviews
+---
 
-### Add Review Page
-POST /api/{companyId}/review
+### Companies
+
+GET /api/companies
+- Get all companies
+
+Query Parameters:
+- search: string (filter by name or industry)
+- industry: string (filter companies that include this industry)
+
+GET /api/companies/{companyId}
+- Get company by ID
+
+GET /api/companies/{companyId}/experiences
+- Get all experiences for a company
+
+---
+
+### Experiences
+
+POST /api/experiences
+- Create new experience (requires auth)
+
+GET /api/experiences/{experienceId}
+- Get experience by ID
+
+PUT /api/experiences/{experienceId}
+- Update experience (owner only)
+
+DELETE /api/experiences/{experienceId}
+- Delete experience (owner only)
+
+---
+
+### User Profile
+
+GET /api/users/me
+- Get current user profile (requires auth)
+
+PUT /api/users/me
+- Update current user profile
+
+GET /api/users/{userId}/experiences
+- Get all experiences by a user
