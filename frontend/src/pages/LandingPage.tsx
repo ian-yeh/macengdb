@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { type Company, type CompanyReview } from '../api/types';
+import { type Company } from '../api/types';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCompanies, fetchCompanyReviews } from '../api/api';
+import { fetchCompanies } from '../api/api';
 
 // Mock data
 export default function LandingPage() {
@@ -94,26 +94,18 @@ export default function LandingPage() {
                                         {company.name}
                                     </h3>
                                     <div className="font-inter text-sm text-[#666] mb-3">
-                                        {company.industry} • {company.location}
+                                        {company.industry}
                                     </div>
-
-                                    <p className="text-sm text-[#666] mb-4 line-clamp-2">
-                                        {company.description}
-                                    </p>
 
                                     <div className="flex gap-5 mb-4 text-sm flex-wrap">
                                         <div className="flex items-center gap-1.5 text-[#666]">
                                             <span>⭐</span>
                                             <span className="text-[#333] font-semibold">{company.rating.toFixed(1)}</span>
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-[#666]">
-                                            <span>💼</span>
-                                            <span>{company.hiringCount} positions</span>
-                                        </div>
                                     </div>
 
                                     <div className="flex gap-3 pt-4 border-t border-[#f0f0f0] text-[13px] text-[#888]">
-                                        <span className="flex items-center gap-1">💬 {company.reviewCount} reviews</span>
+                                        <span className="flex items-center gap-1">💬 {company.review_count} experiences</span>
                                     </div>
                                 </div>
                             ))}

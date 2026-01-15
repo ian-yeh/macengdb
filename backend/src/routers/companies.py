@@ -1,34 +1,46 @@
 from fastapi import APIRouter
 from typing import List
-from src.utils.schemas import Company
-from src.utils.database import get_all_companies, get_company_by_id
-from src.utils.models import Company as CompanyModel
-from src.utils.database import get_reviews_by_company_id
-from src.utils.schemas import ReviewBase as Review
+from src.utils.schemas import Company as CompanySchema, Experience as ExperienceSchema
+from src.utils.crud import get_all_companies, get_company_by_id, get_experiences_by_company_id
 
 router = APIRouter()
 
-@router.get("/companies", response_model=List[Company])
+@router.get("/companies", response_model=List[CompanySchema])
 async def get_companies():
     """
     Get all companies.
     Used by the Landing Page.
+
+    Returns:
+        List[CompanySchema]: List of companies
     """
     return get_all_companies()
 
-@router.get("/companies/{company_id}", response_model=Company)
+@router.get("/companies/{company_id}", response_model=CompanySchema)
 async def get_company(company_id: int):
     """
     Get a specific company by ID.
     Used by the Company Page.
+
+    Args:
+        company_id (int): ID of the company
+
+    Returns:
+        CompanySchema: Company object
     """
     return get_company_by_id(company_id)
 
-@router.get("/companies/{company_id}/reviews", response_model=List[Review])
-async def get_company_reviews(company_id: int):
+@router.get("/companies/{company_id}/experiences", response_model=List[ExperienceSchema])
+async def get_company_experiences(company_id: int):
     """
-    Get all reviews for a specific company.
+    Get all experiences for a specific company.
     Used by the Company Page.
+
+    Args:
+        company_id (int): ID of the company
+
+    Returns:
+        List[ExperienceSchema]: List of experiences
     """
-    return get_reviews_by_company_id(company_id)
+    return get_experiences_by_company_id(company_id)
 

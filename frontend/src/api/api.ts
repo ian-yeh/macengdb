@@ -1,4 +1,4 @@
-import { type Company } from './types';
+import { type Company, type Experience } from './types';
 //import { mockReviews } from '../lib/types';
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -19,9 +19,14 @@ export async function fetchCompanies(searchQuery?: string, industry?: string): P
   return response.json();
 }
 
-export async function fetchCompanyReviews() {
-  //return mockReviews;
-  return;
+export async function fetchCompanyExperiences(companyId: string): Promise<Experience[]> {
+  const response = await fetch(`${API_BASE_URL}/companies/${companyId}/experiences`);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch company experiences');
+  }
+
+  return response.json();
 }
 
 export async function fetchCompany(companyId: string): Promise<Company> {
@@ -31,5 +36,5 @@ export async function fetchCompany(companyId: string): Promise<Company> {
     throw new Error('Failed to fetch company');
   }
 
-  return response.json();
+  return await response.json() as Company;
 }
