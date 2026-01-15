@@ -22,8 +22,8 @@ export default function LandingPage() {
 
     const filteredCompanies = companies.filter((company: Company) => {
         const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            company.industry.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesIndustry = selectedIndustry === 'All' || company.industry === selectedIndustry;
+            company.industries.some(ind => ind.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesIndustry = selectedIndustry === 'All' || company.industries.includes(selectedIndustry);
         return matchesSearch && matchesIndustry;
     });
 
@@ -94,7 +94,7 @@ export default function LandingPage() {
                                         {company.name}
                                     </h3>
                                     <div className="font-inter text-sm text-[#666] mb-3">
-                                        {company.industry}
+                                        {company.industries.join(' • ')}
                                     </div>
 
                                     <div className="flex gap-5 mb-4 text-sm flex-wrap">

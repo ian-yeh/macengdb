@@ -1,7 +1,7 @@
 export interface Company {
     id: number;
     name: string;
-    industry: string;
+    industries: string[];
     rating: number;
     review_count: number;
     created_at: string;
