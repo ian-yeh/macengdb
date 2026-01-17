@@ -50,6 +50,7 @@ def create_experience(
         stages=stages_data,  # Store as JSON
         tips=experience.tips
     )
+
     db.add(db_experience)
     db.commit()
     db.refresh(db_experience)

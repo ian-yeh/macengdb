@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON, Enum as ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 from src.utils.database import Base
 from datetime import datetime
@@ -19,5 +19,5 @@ class ExperienceModel(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
-    user = relationship("User", back_populates="experiences")
-    company = relationship("Company", back_populates="experiences")
+    user = relationship("UserModel", back_populates="experiences")
+    company = relationship("CompanyModel", back_populates="experiences")

@@ -25,10 +25,12 @@ def search_companies_by_name(db: Session, query: str, limit: int = 10) -> List[C
 
 def create_company(db: Session, company: CompanyCreate) -> CompanyModel:
     """Create a new company"""
-    db_company = CompanyModel(**company.model_dump())
+
+    db_company = CompanyModel(company.name, company.industries, company.rating)
     db.add(db_company)
     db.commit()
     db.refresh(db_company)
+
     return db_company
 
 def delete_company(db: Session, company_id: int) -> bool:

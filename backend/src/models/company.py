@@ -14,5 +14,5 @@ class CompanyModel(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
-    experiences = relationship("Experience", back_populates="company", cascade="all, delete-orphan")
+    experiences = relationship("ExperienceModel", back_populates="company", cascade="all, delete-orphan")
 
