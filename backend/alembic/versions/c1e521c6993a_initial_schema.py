@@ -1,8 +1,8 @@
-"""create all tables
+"""initial_schema
 
-Revision ID: b88b0e217e5c
-Revises: a308a5455630
-Create Date: 2026-01-17 12:12:04.359415
+Revision ID: c1e521c6993a
+Revises: 
+Create Date: 2026-01-21 14:55:03.574933
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'b88b0e217e5c'
-down_revision: Union[str, Sequence[str], None] = 'a308a5455630'
+revision: str = 'c1e521c6993a'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -34,7 +34,7 @@ def upgrade() -> None:
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
-    sa.Column('password_hash', sa.String(length=255), nullable=False),
+    sa.Column('supabase_user_id', sa.String(length=255), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('program', sa.Enum('SOFTWARE', 'ELECTRICAL', 'COMPUTER', 'MECHANICAL', 'MECHATRONICS', 'CIVIL', 'CHEMICAL', 'MATERIALS', 'ENGINEERING_PHYSICS', name='program'), nullable=False),
     sa.Column('graduation_year', sa.Integer(), nullable=False),

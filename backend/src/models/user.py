@@ -8,7 +8,7 @@ from src.utils.database import Base
 import enum
 from datetime import datetime
 
-class ProgramEnum(enum.Enum):
+class Program(enum.Enum):
     SOFTWARE = "Software"
     ELECTRICAL = "Electrical"
     COMPUTER = "Computer"
@@ -24,9 +24,9 @@ class UserModel(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)
+    supabase_user_id = Column(String(255), nullable=False)
     name = Column(String(255), nullable=False)
-    program = Column(SQLEnum(ProgramEnum), nullable=False)
+    program = Column(SQLEnum(Program), nullable=False)
     graduation_year = Column(Integer, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
