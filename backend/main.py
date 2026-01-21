@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.routers import companies
+from src.routers import company, experience
 
 app = FastAPI(
     title="MacEng Course Database API",
@@ -18,7 +18,8 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(companies.router, prefix="/api", tags=["companies"])
+app.include_router(company.router, prefix="/api", tags=["companies"])
+app.include_router(experience.router, prefix="/api", tags=["experience"])
 
 @app.get("/")
 async def root():

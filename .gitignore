@@ -113,3 +113,6 @@ logs/
 # Temporary files
 tmp/
 temp/
+
+# Mock data
+mock_data/

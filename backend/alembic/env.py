@@ -20,9 +20,9 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-from src.utils.models import Base
+from src.utils.database import Base
+# Import all models so their tables are registered with Base.metadata
+from src.models import CompanyModel, ExperienceModel, UserModel
 
 target_metadata = Base.metadata
 
