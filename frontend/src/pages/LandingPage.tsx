@@ -1,20 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { type Company } from '../api/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompanies } from '../api/api';
+import { Link } from 'react-router-dom';
 
-// Mock data
 export default function LandingPage() {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedIndustry, setSelectedIndustry] = useState('All');
 
-    const industries = ['All', 'Technology', 'Automotive & Energy', 'Finance', 'Consulting', 'Manufacturing'];
-
-    // fetching companies for front page
     const { data: companies = [], isLoading, error } = useQuery({
         queryKey: ['companies'],
         queryFn: () => fetchCompanies(),
@@ -23,8 +17,7 @@ export default function LandingPage() {
     const filteredCompanies = companies.filter((company: Company) => {
         const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             company.industries.some(ind => ind.toLowerCase().includes(searchQuery.toLowerCase()));
-        const matchesIndustry = selectedIndustry === 'All' || company.industries.includes(selectedIndustry);
-        return matchesSearch && matchesIndustry;
+        return matchesSearch;
     });
 
     const handleCompanyClick = (companyId: number) => {
@@ -33,125 +26,130 @@ export default function LandingPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex flex-col">
-                <Header />
-                <div className="flex-1 flex items-center justify-center text-[#666]">
-                    <div className="text-center">
-                        <div className="text-4xl mb-4">⏳</div>
-                        <p>Loading companies...</p>
-                    </div>
+            <div className="min-h-screen flex items-center justify-center text-[#666]">
+                <div className="text-center">
+                    <p className="italic">Loading companies...</p>
                 </div>
-                <Footer />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen flex flex-col">
-                <Header />
-                <div className="flex-1 flex flex-col items-center justify-center text-[#666]">
-                    <div className="text-4xl mb-4">⚠️</div>
-                    <h2 className="text-xl font-semibold mb-2">Failed to load companies</h2>
-                    <p className="text-sm">Please try again later.</p>
-                </div>
-                <Footer />
+            <div className="min-h-screen flex flex-col items-center justify-center text-[#666]">
+                <p className="italic">Failed to load companies. Please try again later.</p>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen flex flex-col">
-            <Header />
+        <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
+            {/* Header */}
+            <header className="mb-8">
+                <div className='flex justify-between items-center'>
+                    <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mb-6">
+                        MacEngDB
+                    </h1>
+                    <Link to="/signin" className="no-underline">
+                        <h3 className='text-maceng-maroon hover:text-maceng-orange transition-colors mb-6'>Sign in</h3>
+                    </Link>
+                </div>
+                <p className="text-[15px] leading-relaxed text-[#333] max-w-2xl mb-4">
+                    Welcome to the interview database of engineering students at{' '}
+                    <a
+                        href="https://www.eng.mcmaster.ca/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange"
+                    >
+                        McMaster University
+                    </a>{' '}
+                    in Hamilton, Ontario, Canada. This is an ongoing project to document co-op and internship
+                    interview experiences, helping students prepare smarter.
+                </p>
+                <p className="text-[15px] leading-relaxed text-[#333]">
+                    If you're a McMaster Engineering student, we welcome your contributions (
+                    <a
+                        href="#contribute"
+                        className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange"
+                    >
+                        submit an experience
+                    </a>
+                    ).
+                </p>
+            </header>
 
-            <main>
-                <section className="py-20 text-center">
-                    <div className="max-w-[1200px] mx-auto px-5">
-                        <h1 className="text-[56px] mb-5 text-[#222] font-playfair font-semibold max-md:text-4xl">
-                            Helping McMaster Engineering Students Prep Smarter for Co-op & Internships
-                        </h1>
-                        <p className="text-xl text-[#666] mb-10 max-w-[600px] mx-auto">
-                            Insider interview knowledge from McMaster Engineering students.
-                        </p>
-                        <div className="max-w-[600px] mx-auto mb-[60px] relative">
-                            <input
-                                type="text"
-                                placeholder="Search companies (e.g., Tesla, Google, Apple...)"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full py-4 px-5 text-base border-2 border-[#ddd] rounded-lg font-inter bg-white transition-colors focus:outline-none focus:border-[#333]"
-                            />
-                        </div>
-                    </div>
-                </section>
+            {/* Search */}
+            <div className="mb-8">
+                <input
+                    type="text"
+                    placeholder="Search companies..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full max-w-md py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
+                />
+            </div>
 
-                <section className="py-10 pb-20">
-                    <div className="max-w-[1200px] mx-auto px-5">
-                        <div className="flex justify-between items-center mb-[30px] flex-wrap gap-5">
-                            <h2 className="text-4xl text-[#222] font-playfair">Find Companies</h2>
-                            <div className="flex gap-2.5 flex-wrap">
-                                {industries.map(industry => (
-                                    <button
-                                        key={industry}
-                                        className={`py-2 px-4 border rounded-md font-inter text-sm cursor-pointer transition-all ${selectedIndustry === industry
-                                            ? 'border-[#333] bg-[#333] text-white'
-                                            : 'border-[#ddd] bg-white text-[#666] hover:border-[#333] hover:bg-[#333] hover:text-white'
-                                            }`}
-                                        onClick={() => setSelectedIndustry(industry)}
-                                    >
-                                        {industry}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-[repeat(auto-fill,minmax(350px,1fr))] gap-6 max-md:grid-cols-1">
-                            {filteredCompanies.map((company: Company) => (
-                                <div
-                                    key={company.id}
-                                    className="bg-white rounded-xl p-6 border border-[#e0e0e0] transition-all cursor-pointer hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
-                                    onClick={() => handleCompanyClick(company.id)}
-                                >
-                                    {/* Company Logo Placeholder */}
-                                    <div className="w-16 h-16 mb-4 bg-gradient-to-br from-[#f0f0f0] to-[#e0e0e0] rounded-lg flex items-center justify-center border border-[#ddd]">
-                                        <span className="text-2xl font-bold text-[#999]">
-                                            {company.name.charAt(0)}
-                                        </span>
-                                    </div>
-
-                                    <h3 className="font-playfair text-[22px] font-semibold mb-2 text-[#222]">
+            {/* Company List Table */}
+            <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-[15px]">
+                    <thead>
+                        <tr className="border-b-2 border-maceng-maroon/20">
+                            <th className="text-left py-3 pr-8 font-playfair italic text-maceng-maroon font-normal text-lg">
+                                Company
+                            </th>
+                            <th className="text-left py-3 pr-8 font-playfair italic text-maceng-maroon font-normal text-lg">
+                                Industry
+                            </th>
+                            <th className="text-left py-3 pr-8 font-playfair italic text-maceng-maroon font-normal text-lg">
+                                Rating
+                            </th>
+                            <th className="text-left py-3 font-playfair italic text-maceng-maroon font-normal text-lg">
+                                Experiences
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredCompanies.map((company: Company) => (
+                            <tr
+                                key={company.id}
+                                className="border-b border-[#e5e5e5] hover:bg-[#fafafa] transition-colors cursor-pointer"
+                                onClick={() => handleCompanyClick(company.id)}
+                            >
+                                <td className="py-2.5 pr-8">
+                                    <span className="font-medium text-[#333] hover:text-maceng-orange transition-colors">
                                         {company.name}
-                                    </h3>
-                                    <div className="font-inter text-sm text-[#666] mb-3">
-                                        {company.industries.join(' • ')}
-                                    </div>
+                                    </span>
+                                </td>
+                                <td className="py-2.5 pr-8 text-[#555]">
+                                    {company.industries.join(', ')}
+                                </td>
+                                <td className="py-2.5 pr-8 text-[#555]">
+                                    {company.rating.toFixed(1)}
+                                </td>
+                                <td className="py-2.5">
+                                    <span className="font-mono text-maceng-orange">
+                                        {company.review_count}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
 
-                                    <div className="flex gap-5 mb-4 text-sm flex-wrap">
-                                        <div className="flex items-center gap-1.5 text-[#666]">
-                                            <span>⭐</span>
-                                            <span className="text-[#333] font-semibold">{company.rating.toFixed(1)}</span>
-                                        </div>
-                                    </div>
+            {filteredCompanies.length === 0 && (
+                <div className="text-center py-12 text-[#666] italic">
+                    No companies found matching your search.
+                </div>
+            )}
 
-                                    <div className="flex gap-3 pt-4 border-t border-[#f0f0f0] text-[13px] text-[#888]">
-                                        <span className="flex items-center gap-1">💬 {company.review_count} experiences</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {filteredCompanies.length === 0 && (
-                            <div className="text-center py-20 text-[#666]">
-                                <div className="text-4xl mb-4">🔍</div>
-                                <p>No companies found matching your search.</p>
-                            </div>
-                        )}
-                    </div>
-                </section>
-
-            </main>
-
-            <Footer />
+            {/* Footer */}
+            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] text-[13px] text-[#666]">
+                <p>
+                    © {new Date().getFullYear()} MacEngDB · Built by McMaster Engineering students
+                </p>
+            </footer>
         </div>
     );
 }
