@@ -24,7 +24,7 @@ class UserModel(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
-    supabase_user_id = Column(String(255), nullable=False)
+    supabase_user_id = Column(String(255), unique=True, nullable=False, index=True)
     name = Column(String(255), nullable=False)
     program = Column(SQLEnum(Program), nullable=False)
     graduation_year = Column(Integer, nullable=False)

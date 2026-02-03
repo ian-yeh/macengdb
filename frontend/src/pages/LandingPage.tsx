@@ -4,10 +4,12 @@ import { type Company } from '../api/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompanies } from '../api/api';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 export default function LandingPage() {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
+    const { user, loading: authLoading, signOut } = useAuth();
 
     const { data: companies = [], isLoading, error } = useQuery({
         queryKey: ['companies'],
@@ -22,6 +24,10 @@ export default function LandingPage() {
 
     const handleCompanyClick = (companyId: number) => {
         navigate(`/company/${companyId}`);
+    };
+
+    const handleSignOut = async () => {
+        await signOut();
     };
 
     if (isLoading) {
@@ -50,9 +56,23 @@ export default function LandingPage() {
                     <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mb-6">
                         MacEngDB
                     </h1>
-                    <Link to="/signin" className="no-underline">
-                        <h3 className='text-maceng-maroon hover:text-maceng-orange transition-colors mb-6'>Sign in</h3>
-                    </Link>
+                    {!authLoading && (
+                        user ? (
+                            <div className="flex items-center gap-4 mb-6">
+                                <span className="text-sm text-[#666]">{user.email}</span>
+                                <button
+                                    onClick={handleSignOut}
+                                    className="text-maceng-maroon hover:text-maceng-orange transition-colors text-sm"
+                                >
+                                    Sign out
+                                </button>
+                            </div>
+                        ) : (
+                            <Link to="/signin" className="no-underline">
+                                <span className='text-maceng-maroon hover:text-maceng-orange transition-colors mb-6 block'>Sign in</span>
+                            </Link>
+                        )
+                    )}
                 </div>
                 <p className="text-[15px] leading-relaxed text-[#333] max-w-2xl mb-4">
                     Welcome to the interview database of engineering students at{' '}
