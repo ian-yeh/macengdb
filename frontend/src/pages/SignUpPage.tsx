@@ -68,6 +68,7 @@ export default function SignUpPage() {
 
         // Check if we got a session (email confirmation disabled) or not (email confirmation enabled)
         const token = data.session?.access_token;
+        console.log("Token", token);
 
         if (token) {
             // Email confirmation disabled - register immediately

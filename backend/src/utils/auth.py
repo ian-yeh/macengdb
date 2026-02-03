@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 
 # Load .env from backend directory (3 levels up from this file)
 env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+print(f"DEBUG: Loading .env from: {env_path}")
+print(f"DEBUG: .env exists: {env_path.exists()}")
 load_dotenv(env_path)
 
 import httpx
@@ -29,6 +31,8 @@ security = HTTPBearer()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 # Fallback: JWT secret for HS256 tokens (older Supabase projects)
 SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
+
+print(f"DEBUG: SUPABASE_URL loaded: {SUPABASE_URL}")
 
 
 @lru_cache(maxsize=1)
