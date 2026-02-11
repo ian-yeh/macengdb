@@ -192,7 +192,7 @@ export default function LandingPage() {
             </div>
 
             {/* Company List Table */}
-            <div className="overflow-x-auto mb-8">
+            <div className="overflow-x-auto overflow-y-hidden mb-8">
                 <table className="w-full border-collapse">
                     <thead>
                         <tr className="border-b-2 border-maceng-maroon/20">
