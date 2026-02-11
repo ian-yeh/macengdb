@@ -1,13 +1,10 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompany, fetchCompanyExperiences } from '../api/api';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import ExperiencesSection from '../components/companyPage/ExperiencesSection';
+import { type Experience as ExperienceType } from '../api/types';
 
 export default function CompanyPage() {
     const { companyId } = useParams<{ companyId: string }>();
-    const navigate = useNavigate();
 
     const { data: company, isLoading, error } = useQuery({
         queryKey: ['company', companyId],
@@ -15,98 +12,135 @@ export default function CompanyPage() {
         enabled: !!companyId,
     });
 
-    const { data: experiences, isLoading: experiencesLoading, error: experiencesError } = useQuery({
+    const { data: experiences = [], isLoading: experiencesLoading, error: experiencesError } = useQuery({
         queryKey: ['experiences', companyId],
         queryFn: () => fetchCompanyExperiences(companyId!),
         enabled: !!companyId,
     });
 
-    console.log(company, experiences);
-
     if (isLoading || experiencesLoading) {
         return (
-            <div className="min-h-screen flex flex-col">
-                <Header />
-                <div className="flex-1 flex items-center justify-center text-[#666]">
-                    <div className="text-center">
-                        <div className="text-4xl mb-4">⏳</div>
-                        <p>Loading company details...</p>
-                    </div>
-                </div>
-                <Footer />
+            <div className="min-h-screen flex items-center justify-center text-[#666]">
+                <p className="italic">Loading company details...</p>
             </div>
         );
     }
 
-    if (error || !company || experiencesError || !experiences) {
+    if (error || !company || experiencesError) {
         return (
-            <div className="min-h-screen flex flex-col">
-                <Header />
-                <div className="flex-1 flex flex-col items-center justify-center text-[#666]">
-                    <h1 className="text-2xl font-bold mb-4">Company not found</h1>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="bg-[#333] text-white py-2.5 px-6 rounded-md hover:bg-[#555] transition-colors"
-                    >
-                        Back to Companies
-                    </button>
-                </div>
-                <Footer />
+            <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
+                <Link to="/" className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange">
+                    ← Back to companies
+                </Link>
+                <p className="mt-8 text-[#666] italic">Company not found.</p>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen flex flex-col">
-            <Header />
+        <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
+            {/* Header */}
+            <header className="mb-8">
+                <Link
+                    to="/"
+                    className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange text-sm"
+                >
+                    ← Back to companies
+                </Link>
 
-            <main>
-                {/* Company Header Section */}
-                <section className="bg-gradient-to-b from-white to-[#f9f9f9] py-10 pb-[60px] border-b border-[#e0e0e0]">
-                    <div className="max-w-[1200px] mx-auto px-5">
-                        <button
-                            className="bg-transparent border-none text-[#666] text-sm cursor-pointer mb-5 py-2 px-3 rounded-md transition-colors hover:bg-[#f0f0f0]"
-                            onClick={() => navigate('/')}
-                        >
-                            ← Back to Companies
-                        </button>
-                        <div className="grid grid-cols-[1fr_auto] gap-10 items-start max-md:grid-cols-1">
-                            <div>
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-[#f0f0f0] to-[#e0e0e0] rounded-lg flex items-center justify-center border border-[#ddd]">
-                                        <span className="text-3xl font-bold text-[#999]">
-                                            {company.name?.charAt(0)}
-                                        </span>
+                <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mt-6 mb-2">
+                    {company.name}
+                </h1>
+
+                <p className="text-[15px] text-[#555] mb-4">
+                    {company.industries.join(' · ')}
+                </p>
+
+                <div className="flex gap-8 text-sm text-[#666] border-b border-[#e5e5e5] pb-6">
+                    <span>
+                        <span className="text-maceng-maroon font-medium">{company.rating?.toFixed(1) || '—'}</span> rating
+                    </span>
+                    <span>
+                        <span className="text-maceng-maroon font-medium">{experiences.length}</span> experiences
+                    </span>
+                </div>
+            </header>
+
+            {/* Experiences List */}
+            <section>
+                <h2 className="font-playfair italic text-maceng-maroon text-xl mb-6">
+                    Interview Experiences
+                </h2>
+
+                {experiences.length === 0 ? (
+                    <p className="text-[#666] italic py-8">
+                        No experiences shared yet. Be the first to{' '}
+                        <Link to="/submit" className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange">
+                            submit an experience
+                        </Link>.
+                    </p>
+                ) : (
+                    <div className="space-y-8">
+                        {experiences.map((experience: ExperienceType) => {
+                            const formattedDate = new Date(experience.created_at).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                            });
+
+                            return (
+                                <article key={experience.id} className="border-b border-[#e5e5e5] pb-6">
+                                    <div className="flex justify-between items-baseline mb-2 flex-wrap gap-2">
+                                        <h3 className="font-medium text-[#333]">{experience.position}</h3>
+                                        <span className="text-sm text-[#888] font-mono">{experience.term}</span>
                                     </div>
-                                    <div>
-                                        <h1 className="font-playfair text-[42px] font-bold text-[#222] max-md:text-[32px] leading-tight">
-                                            {company.name}
-                                        </h1>
-                                        <div className="text-[#666] font-inter">{company.industries.join(' • ')}</div>
+
+                                    <div className="flex gap-4 text-sm text-[#666] mb-3">
+                                        <span>Difficulty: <span className="font-medium text-maceng-maroon">{experience.difficulty}/5</span></span>
+                                        <span>{experience.offer_received ? '✅ Offer received' : '❌ No offer'}</span>
                                     </div>
-                                </div>
 
-                            </div>
+                                    {experience.stages && experience.stages.length > 0 && (
+                                        <div className="mb-3">
+                                            <p className="text-xs uppercase tracking-wide text-[#888] font-medium mb-2">Interview Stages</p>
+                                            <div className="space-y-2">
+                                                {experience.stages.map((stage, i) => (
+                                                    <div key={i} className="text-sm text-[#444] bg-[#fafafa] rounded p-2.5">
+                                                        <span className="font-medium">{stage.name}</span>
+                                                        {stage.duration && <span className="text-[#888]"> · {stage.duration}</span>}
+                                                        {stage.questions.length > 0 && (
+                                                            <ul className="mt-1 ml-4 list-disc text-[#555]">
+                                                                {stage.questions.map((q, j) => (
+                                                                    <li key={j}>{q}</li>
+                                                                ))}
+                                                            </ul>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
-                            <div className="flex gap-5 max-md:w-full max-md:justify-between">
-                                <div className="bg-white py-5 px-6 rounded-xl border border-[#e0e0e0] text-center min-w-[120px] shadow-sm">
-                                    <div className="text-2xl font-semibold text-[#333] mb-1">⭐ {company.rating?.toFixed(1) || '0.0'}</div>
-                                    <div className="text-[13px] text-[#888]">Overall Rating</div>
-                                </div>
-                                <div className="bg-white py-5 px-6 rounded-xl border border-[#e0e0e0] text-center min-w-[120px] shadow-sm">
-                                    <div className="text-2xl font-semibold text-[#333] mb-1">💬 {company.review_count || 0}</div>
-                                    <div className="text-[13px] text-[#888]">Experiences</div>
-                                </div>
-                            </div>
-                        </div>
+                                    {experience.tips && (
+                                        <div className="text-sm text-[#444] bg-[#fffbf5] border-l-2 border-maceng-orange/30 pl-3 py-1">
+                                            <span className="text-xs uppercase tracking-wide text-[#888] font-medium">Tips: </span>
+                                            {experience.tips}
+                                        </div>
+                                    )}
+
+                                    <p className="text-xs text-[#aaa] mt-2">{formattedDate}</p>
+                                </article>
+                            );
+                        })}
                     </div>
-                </section>
+                )}
+            </section>
 
-                {/* Experiences Section */}
-                <ExperiencesSection experiences={experiences} />
-            </main>
-
-            <Footer />
+            {/* Footer */}
+            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] text-[13px] text-[#666]">
+                <p>
+                    © {new Date().getFullYear()} MacEngDB · Built by McMaster Engineering students
+                </p>
+            </footer>
         </div>
     );
 }

@@ -9,9 +9,11 @@ export default {
       fontFamily: {
         'playfair': ['"Playfair Display"', 'serif'],
         'inter': ['Inter', 'sans-serif'],
+        'mono': ['"IBM Plex Mono"', 'Consolas', 'monospace'],
       },
       colors: {
-        'maceng-maroon': '#A6192E',
+        'maceng-maroon': '#7A2518',
+        'maceng-orange': '#C25E1B',
       },
     },
   },

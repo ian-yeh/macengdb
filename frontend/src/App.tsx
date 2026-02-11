@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
-import './App.css';
 import CompanyPage from './pages/CompanyPage';
+import SubmitExperiencePage from './pages/SubmitExperiencePage';
+import './App.css';
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/company/:companyId" element={<CompanyPage />} />
+        <Route path="/submit" element={<SubmitExperiencePage />} />
       </Routes>
     </Router>
   );

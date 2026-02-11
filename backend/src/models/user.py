@@ -8,7 +8,8 @@ from src.utils.database import Base
 import enum
 from datetime import datetime
 
-class Program(enum.Enum):
+class Program(str, enum.Enum):
+    """Using str, Enum to ensure values are stored as strings"""
     SOFTWARE = "Software"
     ELECTRICAL = "Electrical"
     COMPUTER = "Computer"
@@ -24,9 +25,9 @@ class UserModel(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
-    supabase_user_id = Column(String(255), nullable=False)
+    supabase_user_id = Column(String(255), unique=True, nullable=False, index=True)
     name = Column(String(255), nullable=False)
-    program = Column(SQLEnum(Program), nullable=False)
+    program = Column(SQLEnum(Program, values_callable=lambda x: [e.value for e in x]), nullable=False)
     graduation_year = Column(Integer, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

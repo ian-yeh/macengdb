@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 
 from src.models.experience import ExperienceModel
-from src.schemas.experience import ExperienceCreate, ExperienceUpdate
+from src.schemas.experience import ExperienceCreate, ExperienceUpdate, ExperienceSubmit
 
 def get_experience_by_id(db: Session, experience_id: int) -> Optional[ExperienceModel]:
     """Get a specific experience by ID"""
@@ -48,6 +48,29 @@ def create_experience(
         offer_received=experience.offer_received,
         difficulty=experience.difficulty,
         stages=stages_data,  # Store as JSON
+        tips=experience.tips
+    )
+
+    db.add(db_experience)
+    db.commit()
+    db.refresh(db_experience)
+    return db_experience
+
+def create_experience_anonymous(
+    db: Session, 
+    experience: ExperienceSubmit
+) -> ExperienceModel:
+    """Create a new experience from anonymous submission (no auth)"""
+    stages_data = [stage.model_dump() for stage in experience.stages]
+    
+    db_experience = ExperienceModel(
+        submitter_email=experience.submitter_email,
+        company_id=experience.company_id,
+        position=experience.position,
+        term=experience.term,
+        offer_received=experience.offer_received,
+        difficulty=experience.difficulty,
+        stages=stages_data,
         tips=experience.tips
     )
 

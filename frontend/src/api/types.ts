@@ -8,11 +8,34 @@ export interface Company {
     updated_at: string;
 }
 
+export interface InterviewStage {
+    name: string;
+    duration?: string;
+    questions: string[];
+}
+
 export interface Experience {
     id: number;
+    user_id: number | null;
     company_id: number;
-    title: string;
-    description: string;
+    submitter_email: string;
+    position: string;
+    term: string;
+    offer_received: boolean;
+    difficulty: number;
+    stages: InterviewStage[];
+    tips: string | null;
     created_at: string;
     updated_at: string;
+}
+
+export interface ExperienceSubmitData {
+    submitter_email: string;
+    company_id: number;
+    position: string;
+    term: string;
+    offer_received: boolean;
+    difficulty: number;
+    stages: InterviewStage[];
+    tips?: string;
 }
