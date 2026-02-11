@@ -1,10 +1,12 @@
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
 pydantic>=2.10.0
+pydantic-settings
 email-validator
 sqlalchemy
 alembic
 psycopg2-binary
 python-dotenv
 python-jose[cryptography]
+python-multipart
 httpx

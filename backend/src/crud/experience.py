@@ -12,9 +12,10 @@ def get_experience_by_id(db: Session, experience_id: int) -> Optional[Experience
         .first()
 
 def get_experiences_by_company_id(db: Session, company_id: int) -> List[ExperienceModel]:
-    """Get all experiences for a specific company"""
+    """Get all APPROVED experiences for a specific company"""
     return db.query(ExperienceModel)\
         .filter(ExperienceModel.company_id == company_id)\
+        .filter(ExperienceModel.status == 'approved')\
         .all()
 
 def get_experiences_by_user_id(db: Session, user_id: int) -> List[ExperienceModel]:
@@ -24,12 +25,31 @@ def get_experiences_by_user_id(db: Session, user_id: int) -> List[ExperienceMode
         .all()
 
 def get_all_experiences(db: Session, skip: int = 0, limit: int = 100) -> List[ExperienceModel]:
-    """Get all experiences with pagination"""
+    """Get all approved experiences with pagination"""
     return db.query(ExperienceModel)\
         .options(joinedload(ExperienceModel.company))\
+        .filter(ExperienceModel.status == 'approved')\
         .offset(skip)\
         .limit(limit)\
         .all()
+
+def get_pending_experiences(db: Session) -> List[ExperienceModel]:
+    """Get all pending experiences for admin review"""
+    return db.query(ExperienceModel)\
+        .options(joinedload(ExperienceModel.company))\
+        .filter(ExperienceModel.status == 'pending')\
+        .order_by(ExperienceModel.created_at.desc())\
+        .all()
+
+def update_experience_status(db: Session, experience_id: int, status: str) -> Optional[ExperienceModel]:
+    """Update the status of an experience (approve/reject)"""
+    db_experience = get_experience_by_id(db, experience_id)
+    if not db_experience:
+        return None
+    db_experience.status = status
+    db.commit()
+    db.refresh(db_experience)
+    return db_experience
 
 def create_experience(
     db: Session, 
@@ -48,7 +68,8 @@ def create_experience(
         offer_received=experience.offer_received,
         difficulty=experience.difficulty,
         stages=stages_data,  # Store as JSON
-        tips=experience.tips
+        tips=experience.tips,
+        status='pending'
     )
 
     db.add(db_experience)
@@ -71,7 +92,8 @@ def create_experience_anonymous(
         offer_received=experience.offer_received,
         difficulty=experience.difficulty,
         stages=stages_data,
-        tips=experience.tips
+        tips=experience.tips,
+        status='pending'
     )
 
     db.add(db_experience)

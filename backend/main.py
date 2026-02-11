@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.routers import company, experience, user
+from src.routers import company, experience, user, company_request
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = FastAPI(
     title="MacEng Course Database API",
@@ -9,14 +13,10 @@ app = FastAPI(
 )
 
 # CORS configuration to allow frontend to communicate with backend
+cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=[origin.strip() for origin in cors_origins.split(",")],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,6 +26,7 @@ app.add_middleware(
 app.include_router(company.router, prefix="/api", tags=["companies"])
 app.include_router(experience.router, prefix="/api", tags=["experience"])
 app.include_router(user.router, prefix="/api/users", tags=["user"])
+app.include_router(company_request.router, prefix="/api", tags=["company-requests"])
 
 @app.get("/")
 async def root():
