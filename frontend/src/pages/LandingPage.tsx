@@ -2,26 +2,52 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { type Company } from '../api/types';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCompanies } from '../api/api';
+import { fetchCompanies, submitCompanyRequest } from '../api/api';
 import Loader from '../components/Loader';
 
 export default function LandingPage() {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
+    const [showRequestModal, setShowRequestModal] = useState(false);
+    const [requestName, setRequestName] = useState('');
+    const [requestStatus, setRequestStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
     const { data: companies = [], isLoading, error } = useQuery({
         queryKey: ['companies'],
         queryFn: () => fetchCompanies(),
     });
 
-    const filteredCompanies = companies.filter((company: Company) => {
-        const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            company.industries.some(ind => ind.toLowerCase().includes(searchQuery.toLowerCase()));
-        return matchesSearch;
-    });
+    const filteredCompanies = companies
+        .filter((company: Company) => {
+            const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                company.industries.some(ind => ind.toLowerCase().includes(searchQuery.toLowerCase()));
+            return matchesSearch;
+        })
+        .sort((a: Company, b: Company) => b.experience_count - a.experience_count || a.name.localeCompare(b.name));
+
+    const totalPages = Math.max(1, Math.ceil(filteredCompanies.length / ITEMS_PER_PAGE));
+    const safePage = Math.min(currentPage, totalPages);
+    const paginatedCompanies = filteredCompanies.slice(
+        (safePage - 1) * ITEMS_PER_PAGE,
+        safePage * ITEMS_PER_PAGE
+    );
 
     const handleCompanyClick = (companyId: number) => {
         navigate(`/company/${companyId}`);
+    };
+
+    const handleRequestSubmit = async () => {
+        if (!requestName.trim()) return;
+        setRequestStatus('submitting');
+        try {
+            await submitCompanyRequest(requestName.trim());
+            setRequestStatus('success');
+            setRequestName('');
+        } catch {
+            setRequestStatus('error');
+        }
     };
 
     if (isLoading) {
@@ -64,9 +90,74 @@ export default function LandingPage() {
                     >
                         submit an experience
                     </Link>
-                    ).
+                    ). Don't see your company?{' '}
+                    <button
+                        onClick={() => { setShowRequestModal(true); setRequestStatus('idle'); setRequestName(''); }}
+                        className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange cursor-pointer bg-transparent border-none p-0 font-inherit text-inherit"
+                    >
+                        Request it
+                    </button>
+                    .
                 </p>
             </header>
+
+            {/* Company Request Modal */}
+            {showRequestModal && (
+                <div
+                    className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
+                    onClick={() => setShowRequestModal(false)}
+                >
+                    <div
+                        className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 className="font-playfair text-lg text-maceng-maroon mb-1">Request a Company</h3>
+                        <p className="text-xs text-[#888] mb-4">An admin will review and add it shortly.</p>
+
+                        {requestStatus === 'success' ? (
+                            <div className="text-center py-4">
+                                <p className="text-green-600 font-medium text-sm">✓ Request submitted!</p>
+                                <button
+                                    onClick={() => setShowRequestModal(false)}
+                                    className="mt-3 text-xs text-[#888] hover:text-[#333]"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <input
+                                    type="text"
+                                    value={requestName}
+                                    onChange={(e) => setRequestName(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && requestName.trim() && handleRequestSubmit()}
+                                    placeholder="Company name"
+                                    autoFocus
+                                    className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon mb-3"
+                                />
+                                {requestStatus === 'error' && (
+                                    <p className="text-xs text-red-600 mb-2">Failed to submit. Try again.</p>
+                                )}
+                                <div className="flex gap-2 justify-end">
+                                    <button
+                                        onClick={() => setShowRequestModal(false)}
+                                        className="px-3 py-1.5 text-sm text-[#666] hover:text-[#333] transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleRequestSubmit}
+                                        disabled={!requestName.trim() || requestStatus === 'submitting'}
+                                        className="px-4 py-1.5 bg-maceng-maroon text-white text-sm rounded font-medium hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50"
+                                    >
+                                        {requestStatus === 'submitting' ? 'Sending...' : 'Submit'}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Search */}
             <div className="mb-8">
@@ -74,7 +165,10 @@ export default function LandingPage() {
                     type="text"
                     placeholder="Search company or industry..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setCurrentPage(1);
+                    }}
                     className="w-full max-w-md py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
                 />
             </div>
@@ -91,14 +185,14 @@ export default function LandingPage() {
                                 Industry
                             </th>
                             <th className="text-left py-3 pr-8 font-playfair italic text-maceng-maroon font-normal text-lg">
-                                Rating
+                                Experiences
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredCompanies.map((company: Company, index: number) => (
+                        {paginatedCompanies.map((company: Company, index: number) => (
                             <tr
-                                key={`${company.id}-${searchQuery}`}
+                                key={`${company.id}-${searchQuery}-${safePage}`}
                                 className="border-b border-[#e5e5e5] hover:bg-[#fafafa] transition-colors cursor-pointer animate-row-in"
                                 style={{ animationDelay: `${index * 40}ms` }}
                                 onClick={() => handleCompanyClick(company.id)}
@@ -112,7 +206,7 @@ export default function LandingPage() {
                                     {company.industries.join(', ')}
                                 </td>
                                 <td className="py-2.5 pr-8 text-[#555]">
-                                    {company.rating.toFixed(1)}
+                                    {company.experience_count}
                                 </td>
                             </tr>
                         ))}
@@ -123,6 +217,38 @@ export default function LandingPage() {
             {filteredCompanies.length === 0 && (
                 <div className="text-center py-12 text-[#666] italic">
                     No companies found matching your search.
+                </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-8">
+                    <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={safePage === 1}
+                        className="px-3 py-1.5 text-sm rounded border border-[#ddd] text-[#555] hover:bg-[#fafafa] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                        ←
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                        <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`px-3 py-1.5 text-sm rounded border transition-colors ${page === safePage
+                                ? 'bg-maceng-maroon text-white border-maceng-maroon'
+                                : 'border-[#ddd] text-[#555] hover:bg-[#fafafa]'
+                                }`}
+                        >
+                            {page}
+                        </button>
+                    ))}
+                    <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={safePage === totalPages}
+                        className="px-3 py-1.5 text-sm rounded border border-[#ddd] text-[#555] hover:bg-[#fafafa] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                        →
+                    </button>
                 </div>
             )}
 

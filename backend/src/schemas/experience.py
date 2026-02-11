@@ -29,6 +29,7 @@ class ExperienceResponse(ExperienceBase):
     user_id: Optional[int] = None
     company_id: int
     submitter_email: str
+    status: str = 'pending'
     created_at: datetime
     updated_at: datetime
 

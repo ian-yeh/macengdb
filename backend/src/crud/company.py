@@ -1,12 +1,25 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
 
 from src.models import CompanyModel
+from src.models.experience import ExperienceModel
 from src.schemas import CompanyCreate#, CompanyUpdate
 
-def get_all_companies(db: Session) -> List[CompanyModel]:
-    """Get all companies from database"""
-    return db.query(CompanyModel).all()
+def get_all_companies(db: Session):
+    """Get all companies with approved experience counts in a single query"""
+    results = (
+        db.query(CompanyModel, func.count(ExperienceModel.id).label('experience_count'))
+        .outerjoin(
+            ExperienceModel,
+            (CompanyModel.id == ExperienceModel.company_id) & (ExperienceModel.status == 'approved')
+        )
+        .group_by(CompanyModel.id)
+        .all()
+    )
+    for company, count in results:
+        company.experience_count = count
+    return [company for company, _ in results]
 
 def get_company_by_id(db: Session, company_id: int) -> Optional[CompanyModel]:
     """Get a specific company by ID"""

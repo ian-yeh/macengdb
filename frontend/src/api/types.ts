@@ -3,7 +3,7 @@ export interface Company {
     name: string;
     industries: string[];
     rating: number;
-    review_count: number;
+    experience_count: number;
     created_at: string;
     updated_at: string;
 }
@@ -25,6 +25,7 @@ export interface Experience {
     difficulty: number;
     stages: InterviewStage[];
     tips: string | null;
+    status: string;
     created_at: string;
     updated_at: string;
 }
@@ -38,4 +39,11 @@ export interface ExperienceSubmitData {
     difficulty: number;
     stages: InterviewStage[];
     tips?: string;
+}
+
+export interface CompanyRequest {
+    id: number;
+    name: string;
+    status: string;
+    created_at: string;
 }

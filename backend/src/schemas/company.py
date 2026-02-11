@@ -11,6 +11,7 @@ class CompanyBase(BaseModel):
 
 class CompanyResponse(CompanyBase):
     id: int # unique company id
+    experience_count: int = 0
     created_at: datetime
     updated_at: datetime
 

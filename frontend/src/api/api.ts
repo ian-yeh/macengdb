@@ -1,6 +1,6 @@
-import { type Company, type Experience, type ExperienceSubmitData } from './types';
+import { type Company, type Experience, type ExperienceSubmitData, type CompanyRequest } from './types';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api`;
 
 // companies API
 export async function fetchCompanies(searchQuery?: string, industry?: string): Promise<Company[]> {
@@ -64,4 +64,89 @@ export async function submitExperience(data: ExperienceSubmitData): Promise<Expe
   }
 
   return response.json();
+}
+
+// Admin API functions
+
+export async function fetchPendingExperiences(adminKey: string): Promise<Experience[]> {
+  const response = await fetch(`${API_BASE_URL}/admin/experiences/pending`, {
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) {
+    if (response.status === 403) throw new Error('Invalid admin key');
+    throw new Error('Failed to fetch pending experiences');
+  }
+
+  return response.json();
+}
+
+export async function approveExperience(id: number, adminKey: string): Promise<Experience> {
+  const response = await fetch(`${API_BASE_URL}/admin/experiences/${id}/approve`, {
+    method: 'PATCH',
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to approve experience');
+  return response.json();
+}
+
+export async function rejectExperience(id: number, adminKey: string): Promise<Experience> {
+  const response = await fetch(`${API_BASE_URL}/admin/experiences/${id}/reject`, {
+    method: 'PATCH',
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to reject experience');
+  return response.json();
+}
+
+export async function deleteExperience(id: number, adminKey: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/admin/experiences/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to delete experience');
+}
+
+// Company Request API functions
+
+export async function submitCompanyRequest(name: string): Promise<CompanyRequest> {
+  const response = await fetch(`${API_BASE_URL}/company-requests`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) throw new Error('Failed to submit company request');
+  return response.json();
+}
+
+export async function fetchPendingCompanyRequests(adminKey: string): Promise<CompanyRequest[]> {
+  const response = await fetch(`${API_BASE_URL}/admin/company-requests`, {
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to fetch company requests');
+  return response.json();
+}
+
+export async function approveCompanyRequest(id: number, adminKey: string): Promise<Company> {
+  const response = await fetch(`${API_BASE_URL}/admin/company-requests/${id}/approve`, {
+    method: 'PATCH',
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to approve company request');
+  return response.json();
+}
+
+export async function rejectCompanyRequest(id: number, adminKey: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/admin/company-requests/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to reject company request');
 }
