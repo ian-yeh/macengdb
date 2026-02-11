@@ -7,8 +7,9 @@ class ExperienceModel(Base):
     __tablename__ = "experiences"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Nullable for anonymous submissions
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+    submitter_email = Column(String(255), nullable=False)  # McMaster email for tracking
     position = Column(String(255), nullable=False)
     term = Column(String(50), nullable=False)
     offer_received = Column(Boolean, default=False, nullable=False)

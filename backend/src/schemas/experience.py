@@ -26,8 +26,9 @@ class ExperienceBase(BaseModel):
 
 class ExperienceResponse(ExperienceBase):
     id: int
-    user_id: int
+    user_id: Optional[int] = None
     company_id: int
+    submitter_email: str
     created_at: datetime
     updated_at: datetime
 
@@ -36,6 +37,19 @@ class ExperienceResponse(ExperienceBase):
 
 class ExperienceCreate(ExperienceBase):
     company_id: int
+
+class ExperienceSubmit(ExperienceBase):
+    """Schema for anonymous experience submission (no auth required)."""
+    company_id: int
+    submitter_email: str
+
+    @field_validator('submitter_email')
+    @classmethod
+    def validate_mcmaster_email(cls, v: str) -> str:
+        v = v.strip().lower()
+        if not v.endswith('@mcmaster.ca'):
+            raise ValueError('Must be a McMaster email address (@mcmaster.ca)')
+        return v
 
 class ExperienceUpdate(BaseModel):
     position: Optional[str] = None

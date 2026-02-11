@@ -20,6 +20,18 @@ async def get_companies(
     """
     return crud.get_all_companies(db)
 
+@router.get("/companies/search", response_model=List[CompanyResponse])
+async def search_companies(
+    q: str = "",
+    db: Session = Depends(get_db)
+):
+    """
+    Search companies by name (for form autocomplete).
+    """
+    if not q.strip():
+        return crud.get_all_companies(db)
+    return crud.search_companies_by_name(db, q)
+
 @router.get("/companies/{company_id}", response_model=CompanyResponse)
 async def get_company(
     company_id: int,

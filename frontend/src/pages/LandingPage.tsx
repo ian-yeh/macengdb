@@ -1,15 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { type Company } from '../api/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompanies } from '../api/api';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
 
 export default function LandingPage() {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
-    const { user, loading: authLoading, signOut } = useAuth();
 
     const { data: companies = [], isLoading, error } = useQuery({
         queryKey: ['companies'],
@@ -24,10 +21,6 @@ export default function LandingPage() {
 
     const handleCompanyClick = (companyId: number) => {
         navigate(`/company/${companyId}`);
-    };
-
-    const handleSignOut = async () => {
-        await signOut();
     };
 
     if (isLoading) {
@@ -52,28 +45,9 @@ export default function LandingPage() {
         <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
             {/* Header */}
             <header className="mb-8">
-                <div className='flex justify-between items-center'>
-                    <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mb-6">
-                        MacEngDB
-                    </h1>
-                    {!authLoading && (
-                        user ? (
-                            <div className="flex items-center gap-4 mb-6">
-                                <span className="text-sm text-[#666]">{user.email}</span>
-                                <button
-                                    onClick={handleSignOut}
-                                    className="text-maceng-maroon hover:text-maceng-orange transition-colors text-sm"
-                                >
-                                    Sign out
-                                </button>
-                            </div>
-                        ) : (
-                            <Link to="/signin" className="no-underline">
-                                <span className='text-maceng-maroon hover:text-maceng-orange transition-colors mb-6 block'>Sign in</span>
-                            </Link>
-                        )
-                    )}
-                </div>
+                <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mb-6">
+                    MacEngDB
+                </h1>
                 <p className="text-[15px] leading-relaxed text-[#333] max-w-2xl mb-4">
                     Welcome to the interview database of engineering students at{' '}
                     <a
@@ -88,13 +62,13 @@ export default function LandingPage() {
                     interview experiences, helping students prepare smarter.
                 </p>
                 <p className="text-[15px] leading-relaxed text-[#333]">
-                    If you're a McMaster Engineering student, we welcome your contributions (
-                    <a
-                        href="#contribute"
+                    If you're a McMaster Engineering student, we welcome your contributions ({' '}
+                    <Link
+                        to="/submit"
                         className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange"
                     >
                         submit an experience
-                    </a>
+                    </Link>
                     ).
                 </p>
             </header>
@@ -124,9 +98,6 @@ export default function LandingPage() {
                             <th className="text-left py-3 pr-8 font-playfair italic text-maceng-maroon font-normal text-lg">
                                 Rating
                             </th>
-                            <th className="text-left py-3 font-playfair italic text-maceng-maroon font-normal text-lg">
-                                Experiences
-                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -146,11 +117,6 @@ export default function LandingPage() {
                                 </td>
                                 <td className="py-2.5 pr-8 text-[#555]">
                                     {company.rating.toFixed(1)}
-                                </td>
-                                <td className="py-2.5">
-                                    <span className="font-mono text-maceng-orange">
-                                        {company.review_count}
-                                    </span>
                                 </td>
                             </tr>
                         ))}

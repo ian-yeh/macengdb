@@ -1,11 +1,10 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompany, fetchCompanyExperiences } from '../api/api';
 import { type Experience as ExperienceType } from '../api/types';
 
 export default function CompanyPage() {
     const { companyId } = useParams<{ companyId: string }>();
-    const navigate = useNavigate();
 
     const { data: company, isLoading, error } = useQuery({
         queryKey: ['company', companyId],
@@ -62,7 +61,7 @@ export default function CompanyPage() {
                         <span className="text-maceng-maroon font-medium">{company.rating?.toFixed(1) || '—'}</span> rating
                     </span>
                     <span>
-                        <span className="text-maceng-maroon font-medium">{company.review_count || 0}</span> experiences
+                        <span className="text-maceng-maroon font-medium">{experiences.length}</span> experiences
                     </span>
                 </div>
             </header>
@@ -76,9 +75,9 @@ export default function CompanyPage() {
                 {experiences.length === 0 ? (
                     <p className="text-[#666] italic py-8">
                         No experiences shared yet. Be the first to{' '}
-                        <a href="#contribute" className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange">
+                        <Link to="/submit" className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange">
                             submit an experience
-                        </a>.
+                        </Link>.
                     </p>
                 ) : (
                     <div className="space-y-8">
@@ -91,12 +90,44 @@ export default function CompanyPage() {
                             return (
                                 <article key={experience.id} className="border-b border-[#e5e5e5] pb-6">
                                     <div className="flex justify-between items-baseline mb-2 flex-wrap gap-2">
-                                        <h3 className="font-medium text-[#333]">{experience.title}</h3>
-                                        <span className="text-sm text-[#888] font-mono">{formattedDate}</span>
+                                        <h3 className="font-medium text-[#333]">{experience.position}</h3>
+                                        <span className="text-sm text-[#888] font-mono">{experience.term}</span>
                                     </div>
-                                    <p className="text-[15px] text-[#444] leading-relaxed whitespace-pre-wrap">
-                                        {experience.description}
-                                    </p>
+
+                                    <div className="flex gap-4 text-sm text-[#666] mb-3">
+                                        <span>Difficulty: <span className="font-medium text-maceng-maroon">{experience.difficulty}/5</span></span>
+                                        <span>{experience.offer_received ? '✅ Offer received' : '❌ No offer'}</span>
+                                    </div>
+
+                                    {experience.stages && experience.stages.length > 0 && (
+                                        <div className="mb-3">
+                                            <p className="text-xs uppercase tracking-wide text-[#888] font-medium mb-2">Interview Stages</p>
+                                            <div className="space-y-2">
+                                                {experience.stages.map((stage, i) => (
+                                                    <div key={i} className="text-sm text-[#444] bg-[#fafafa] rounded p-2.5">
+                                                        <span className="font-medium">{stage.name}</span>
+                                                        {stage.duration && <span className="text-[#888]"> · {stage.duration}</span>}
+                                                        {stage.questions.length > 0 && (
+                                                            <ul className="mt-1 ml-4 list-disc text-[#555]">
+                                                                {stage.questions.map((q, j) => (
+                                                                    <li key={j}>{q}</li>
+                                                                ))}
+                                                            </ul>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {experience.tips && (
+                                        <div className="text-sm text-[#444] bg-[#fffbf5] border-l-2 border-maceng-orange/30 pl-3 py-1">
+                                            <span className="text-xs uppercase tracking-wide text-[#888] font-medium">Tips: </span>
+                                            {experience.tips}
+                                        </div>
+                                    )}
+
+                                    <p className="text-xs text-[#aaa] mt-2">{formattedDate}</p>
                                 </article>
                             );
                         })}
