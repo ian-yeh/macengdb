@@ -34,6 +34,7 @@ export default function SubmitExperiencePage() {
     const suggestionsRef = useRef<HTMLDivElement>(null);
     const [showRequestModal, setShowRequestModal] = useState(false);
     const [requestName, setRequestName] = useState('');
+    const [requestEmail, setRequestEmail] = useState('');
     const [requestStatus, setRequestStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
     // Company search
@@ -97,9 +98,10 @@ export default function SubmitExperiencePage() {
         if (!requestName.trim()) return;
         setRequestStatus('submitting');
         try {
-            await submitCompanyRequest(requestName.trim());
+            await submitCompanyRequest(requestName.trim(), requestEmail.trim() || undefined);
             setRequestStatus('success');
             setRequestName('');
+            setRequestEmail('');
         } catch {
             setRequestStatus('error');
         }
@@ -485,10 +487,17 @@ export default function SubmitExperiencePage() {
                                     type="text"
                                     value={requestName}
                                     onChange={(e) => setRequestName(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && requestName.trim() && handleRequestSubmit()}
                                     placeholder="Company name"
                                     autoFocus
-                                    className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon mb-3"
+                                    className="w-full py-2.5 px-3.5 text-sm border border-[#ddd] rounded-lg font-inter bg-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all mb-3"
+                                />
+                                <input
+                                    type="email"
+                                    value={requestEmail}
+                                    onChange={(e) => setRequestEmail(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && requestName.trim() && handleRequestSubmit()}
+                                    placeholder="Your email (optional)"
+                                    className="w-full py-2.5 px-3.5 text-sm border border-[#ddd] rounded-lg font-inter bg-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all mb-4"
                                 />
                                 {requestStatus === 'error' && (
                                     <p className="text-xs text-red-600 mb-2">Failed to submit. Try again.</p>

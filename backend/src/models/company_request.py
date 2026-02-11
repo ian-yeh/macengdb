@@ -7,5 +7,6 @@ class CompanyRequestModel(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
+    requester_email = Column(String(255), nullable=True)
     status = Column(String(20), nullable=False, default='pending')  # pending, approved, rejected
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

@@ -112,11 +112,11 @@ export async function deleteExperience(id: number, adminKey: string): Promise<vo
 
 // Company Request API functions
 
-export async function submitCompanyRequest(name: string): Promise<CompanyRequest> {
+export async function submitCompanyRequest(name: string, email?: string): Promise<CompanyRequest> {
   const response = await fetch(`${API_BASE_URL}/company-requests`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, requester_email: email }),
   });
 
   if (!response.ok) throw new Error('Failed to submit company request');

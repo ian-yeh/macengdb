@@ -4,9 +4,13 @@ from typing import List, Optional
 from src.models.company_request import CompanyRequestModel
 from src.models.company import CompanyModel
 
-def create_company_request(db: Session, name: str) -> CompanyRequestModel:
+def create_company_request(db: Session, name: str, requester_email: Optional[str] = None) -> CompanyRequestModel:
     """Create a new company request"""
-    db_request = CompanyRequestModel(name=name.strip(), status='pending')
+    db_request = CompanyRequestModel(
+        name=name.strip(), 
+        requester_email=requester_email.strip() if requester_email else None,
+        status='pending'
+    )
     db.add(db_request)
     db.commit()
     db.refresh(db_request)

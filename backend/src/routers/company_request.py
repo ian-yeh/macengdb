@@ -22,7 +22,7 @@ async def submit_company_request(
     db: Session = Depends(get_db)
 ):
     """Submit a request for a new company (no auth required)."""
-    return crud.create_company_request(db, request.name)
+    return crud.create_company_request(db, request.name, request.requester_email)
 
 # --- Admin endpoints ---
 

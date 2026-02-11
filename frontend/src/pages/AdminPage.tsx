@@ -178,9 +178,16 @@ export default function AdminPage() {
                             });
                             return (
                                 <div key={req.id} className="flex items-center justify-between border border-[#e5e5e5] rounded-lg px-5 py-3 bg-white animate-row-in">
-                                    <div>
-                                        <span className="font-medium text-[#222] text-sm">{req.name}</span>
-                                        <span className="text-xs text-[#aaa] ml-3">{date}</span>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3">
+                                            <span className="font-semibold text-[#222] text-[15px]">{req.name}</span>
+                                            <span className="text-xs text-[#aaa]">{date}</span>
+                                        </div>
+                                        {req.requester_email && (
+                                            <div className="text-[11px] text-maceng-orange font-medium mt-0.5">
+                                                Requested by: {req.requester_email}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {feedback?.key === `req-${req.id}` && (

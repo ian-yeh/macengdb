@@ -44,6 +44,7 @@ export interface ExperienceSubmitData {
 export interface CompanyRequest {
     id: number;
     name: string;
+    requester_email: string | null;
     status: string;
     created_at: string;
 }
