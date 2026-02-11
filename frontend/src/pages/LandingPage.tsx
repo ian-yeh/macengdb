@@ -80,24 +80,26 @@ export default function LandingPage() {
                         McMaster University
                     </a>{' '}
                     in Hamilton, Ontario, Canada. This is an ongoing project to document co-op and internship
-                    interview experiences, helping students prepare smarter.
+                    interview experiences, helping MacEng students prepare smarter.
                 </p>
-                <p className="text-[15px] leading-relaxed text-[#333]">
+                <p className="text-[15px] leading-relaxed text-[#333] mb-3">
                     If you're a <span className="font-bold text-maceng-maroon">McMaster</span> student, we welcome your contributions (
                     <Link
                         to="/submit"
-                        className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange"
+                        className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange font-medium"
                     >
                         submit an experience
                     </Link>
-                    ). Don't see your company?{' '}
+                    ).
+                </p>
+                <p className="text-[12px] leading-relaxed text-[#666]">
+                    Don't see your company?{' '}
                     <button
                         onClick={() => { setShowRequestModal(true); setRequestStatus('idle'); setRequestName(''); }}
-                        className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange cursor-pointer bg-transparent border-none p-0 font-inherit text-inherit"
+                        className="text-maceng-orange font-semibold hover:text-maceng-maroon transition-colors cursor-pointer bg-transparent border-none p-0 inline-flex items-center gap-0.5"
                     >
-                        Request it
+                        Request it <span className="text-[10px]">→</span>
                     </button>
-                    .
                 </p>
             </header>
 
