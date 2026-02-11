@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { type Company } from '../api/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompanies } from '../api/api';
+import Loader from '../components/Loader';
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -24,13 +25,7 @@ export default function LandingPage() {
     };
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center text-[#666]">
-                <div className="text-center">
-                    <p className="italic">Loading companies...</p>
-                </div>
-            </div>
-        );
+        return <Loader message="Loading companies..." />;
     }
 
     if (error) {
@@ -48,7 +43,7 @@ export default function LandingPage() {
                 <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mb-6">
                     MacEngDB
                 </h1>
-                <p className="text-[15px] leading-relaxed text-[#333] max-w-2xl mb-4">
+                <p className="text-[15px] leading-relaxed text-[#333] mb-4">
                     Welcome to the interview database of engineering students at{' '}
                     <a
                         href="https://www.eng.mcmaster.ca/"
@@ -62,7 +57,7 @@ export default function LandingPage() {
                     interview experiences, helping students prepare smarter.
                 </p>
                 <p className="text-[15px] leading-relaxed text-[#333]">
-                    If you're a McMaster Engineering student, we welcome your contributions ({' '}
+                    If you're a <span className="font-bold text-maceng-maroon">McMaster</span> student, we welcome your contributions (
                     <Link
                         to="/submit"
                         className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange"
@@ -77,7 +72,7 @@ export default function LandingPage() {
             <div className="mb-8">
                 <input
                     type="text"
-                    placeholder="Search companies..."
+                    placeholder="Search company or industry..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full max-w-md py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
@@ -101,10 +96,11 @@ export default function LandingPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredCompanies.map((company: Company) => (
+                        {filteredCompanies.map((company: Company, index: number) => (
                             <tr
-                                key={company.id}
-                                className="border-b border-[#e5e5e5] hover:bg-[#fafafa] transition-colors cursor-pointer"
+                                key={`${company.id}-${searchQuery}`}
+                                className="border-b border-[#e5e5e5] hover:bg-[#fafafa] transition-colors cursor-pointer animate-row-in"
+                                style={{ animationDelay: `${index * 40}ms` }}
                                 onClick={() => handleCompanyClick(company.id)}
                             >
                                 <td className="py-2.5 pr-8">
