@@ -1,4 +1,4 @@
-name: Deployment Check
+name: CI Lint and Build Checks
 
 on: 
   push:
