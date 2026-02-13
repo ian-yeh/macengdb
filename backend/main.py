@@ -9,11 +9,14 @@ load_dotenv()
 app = FastAPI(
     title="MacEng Course Database API",
     description="API for McMaster Engineering course reviews and resources",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # CORS configuration to allow frontend to communicate with backend
-cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000")
+cors_origins = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000",
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[origin.strip() for origin in cors_origins.split(",")],
@@ -28,9 +31,11 @@ app.include_router(experience.router, prefix="/api", tags=["experience"])
 app.include_router(user.router, prefix="/api/users", tags=["user"])
 app.include_router(company_request.router, prefix="/api", tags=["company-requests"])
 
+
 @app.get("/")
 async def root():
     return "MacEng Course Database API"
+
 
 @app.get("/health")
 async def health_check():

@@ -4,15 +4,17 @@ from typing import List, Optional
 
 from src.models import CompanyModel
 from src.models.experience import ExperienceModel
-from src.schemas import CompanyCreate#, CompanyUpdate
+from src.schemas import CompanyCreate  # , CompanyUpdate
+
 
 def get_all_companies(db: Session):
     """Get all companies with approved experience counts in a single query"""
     results = (
-        db.query(CompanyModel, func.count(ExperienceModel.id).label('experience_count'))
+        db.query(CompanyModel, func.count(ExperienceModel.id).label("experience_count"))
         .outerjoin(
             ExperienceModel,
-            (CompanyModel.id == ExperienceModel.company_id) & (ExperienceModel.status == 'approved')
+            (CompanyModel.id == ExperienceModel.company_id)
+            & (ExperienceModel.status == "approved"),
         )
         .group_by(CompanyModel.id)
         .all()
@@ -21,20 +23,28 @@ def get_all_companies(db: Session):
         company.experience_count = count
     return [company for company, _ in results]
 
+
 def get_company_by_id(db: Session, company_id: int) -> Optional[CompanyModel]:
     """Get a specific company by ID"""
     return db.query(CompanyModel).filter(CompanyModel.id == company_id).first()
+
 
 def get_company_by_name(db: Session, name: str) -> Optional[CompanyModel]:
     """Get a company by exact name"""
     return db.query(CompanyModel).filter(CompanyModel.name == name).first()
 
-def search_companies_by_name(db: Session, query: str, limit: int = 10) -> List[CompanyModel]:
+
+def search_companies_by_name(
+    db: Session, query: str, limit: int = 10
+) -> List[CompanyModel]:
     """Search companies by name (case-insensitive)"""
-    return db.query(CompanyModel)\
-        .filter(CompanyModel.name.ilike(f"%{query}%"))\
-        .limit(limit)\
+    return (
+        db.query(CompanyModel)
+        .filter(CompanyModel.name.ilike(f"%{query}%"))
+        .limit(limit)
         .all()
+    )
+
 
 def create_company(db: Session, company: CompanyCreate) -> CompanyModel:
     """Create a new company"""
@@ -46,27 +56,28 @@ def create_company(db: Session, company: CompanyCreate) -> CompanyModel:
 
     return db_company
 
+
 def delete_company(db: Session, company_id: int) -> bool:
     """Delete a company"""
     db_company = get_company_by_id(db, company_id)
     if not db_company:
         return False
-    
+
     db.delete(db_company)
     db.commit()
     return True
 
-#def update_company(db: Session, company_id: int, company: CompanyUpdate) -> Optional[CompanyModel]:
+
+# def update_company(db: Session, company_id: int, company: CompanyUpdate) -> Optional[CompanyModel]:
 #    """Update an existing company"""
 #    db_company = get_company_by_id(db, company_id)
 #    if not db_company:
 #        return None
-#    
+#
 #    update_data = company.model_dump(exclude_unset=True)
 #    for field, value in update_data.items():
 #        setattr(db_company, field, value)
-#    
+#
 #    db.commit()
 #    db.refresh(db_company)
 #    return db_company
-

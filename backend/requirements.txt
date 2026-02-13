@@ -10,3 +10,4 @@ python-dotenv
 python-jose[cryptography]
 python-multipart
 httpx
+black
