@@ -1,0 +1,10 @@
+name: Deployment Check
+
+on: push
+
+jobs:
+    type-check:
+        runs-on: ubuntu-latest
+    
+    frontend-build:
+        runs-on: ubuntu-latest
