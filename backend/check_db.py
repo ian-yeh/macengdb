@@ -26,7 +26,7 @@ else:
     print("\n[INFO] company_requests table does NOT exist.")
 
 if "experiences" in tables:
-    columns = [c['name'] for c in inspector.get_columns("experiences")]
+    columns = [c["name"] for c in inspector.get_columns("experiences")]
     if "status" in columns:
         print("[INFO] experiences.status column exists.")
     else:
