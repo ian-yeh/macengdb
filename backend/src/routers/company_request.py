@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from src.schemas.company_request import CompanyRequestCreate, CompanyRequestResponse
-from src.schemas.company import CompanyResponse
+from src.schemas.company import CompanyResponse, CompanyApprove
 import src.crud.company_request as crud
 from src.utils.database import get_db
-from typing import List
+from typing import List, Optional
 import os
 
 router = APIRouter()
@@ -42,11 +42,14 @@ async def get_pending_company_requests(
 )
 async def approve_company_request(
     request_id: int,
+    approval_data: Optional[CompanyApprove] = None,
     db: Session = Depends(get_db),
     _admin_key: str = Depends(verify_admin_key),
 ):
     """Approve a company request — creates the company."""
-    company = crud.approve_request(db, request_id)
+    # Handle optional body
+    industries = approval_data.industries if approval_data else []
+    company = crud.approve_request(db, request_id, industries)
     if not company:
         raise HTTPException(status_code=404, detail="Request not found")
     company.experience_count = 0
