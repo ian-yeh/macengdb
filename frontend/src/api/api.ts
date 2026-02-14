@@ -132,10 +132,14 @@ export async function fetchPendingCompanyRequests(adminKey: string): Promise<Com
   return response.json();
 }
 
-export async function approveCompanyRequest(id: number, adminKey: string): Promise<Company> {
+export async function approveCompanyRequest(id: number, adminKey: string, industries: string[] = []): Promise<Company> {
   const response = await fetch(`${API_BASE_URL}/admin/company-requests/${id}/approve`, {
     method: 'PATCH',
-    headers: { 'X-Admin-Key': adminKey },
+    headers: {
+      'X-Admin-Key': adminKey,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ industries }),
   });
 
   if (!response.ok) throw new Error('Failed to approve company request');

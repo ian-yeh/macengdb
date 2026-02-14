@@ -30,7 +30,9 @@ def get_pending_requests(db: Session) -> List[CompanyRequestModel]:
     )
 
 
-def approve_request(db: Session, request_id: int) -> Optional[CompanyModel]:
+def approve_request(
+    db: Session, request_id: int, industries: List[str] = []
+) -> Optional[CompanyModel]:
     """Approve a request — creates the company and marks request as approved"""
     req = (
         db.query(CompanyRequestModel)
@@ -41,7 +43,7 @@ def approve_request(db: Session, request_id: int) -> Optional[CompanyModel]:
         return None
 
     # Create the company
-    company = CompanyModel(name=req.name, industries=[])
+    company = CompanyModel(name=req.name, industries=industries)
     db.add(company)
     req.status = "approved"
     db.commit()

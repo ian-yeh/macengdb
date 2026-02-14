@@ -23,3 +23,7 @@ class CompanyResponse(CompanyBase):
 
 class CompanyCreate(CompanyBase):
     pass
+
+
+class CompanyApprove(BaseModel):
+    industries: List[str] = []

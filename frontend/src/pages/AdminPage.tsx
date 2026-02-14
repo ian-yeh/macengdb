@@ -82,10 +82,14 @@ export default function AdminPage() {
         } catch { showFeedback(`exp-${id}`, 'Failed', 'error'); }
     };
 
-    // Company request actions
+    const [requestIndustries, setRequestIndustries] = useState<Record<number, string>>({});
+
     const handleApproveReq = async (id: number) => {
         try {
-            await approveCompanyRequest(id, adminKey);
+            const industries = requestIndustries[id]
+                ? requestIndustries[id].split(',').map(s => s.trim()).filter(s => s !== '')
+                : [];
+            await approveCompanyRequest(id, adminKey, industries);
             showFeedback(`req-${id}`, 'Company created!', 'success');
             queryClient.invalidateQueries({ queryKey: ['admin'] });
             queryClient.invalidateQueries({ queryKey: ['companies'] });
@@ -177,36 +181,51 @@ export default function AdminPage() {
                                 month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                             });
                             return (
-                                <div key={req.id} className="flex items-center justify-between border border-[#e5e5e5] rounded-lg px-5 py-3 bg-white animate-row-in">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3">
-                                            <span className="font-semibold text-[#222] text-[15px]">{req.name}</span>
-                                            <span className="text-xs text-[#aaa]">{date}</span>
-                                        </div>
-                                        {req.requester_email && (
-                                            <div className="text-[11px] text-maceng-orange font-medium mt-0.5">
-                                                Requested by: {req.requester_email}
+                                <div key={req.id} className="flex flex-col border border-[#e5e5e5] rounded-lg bg-white overflow-hidden animate-row-in">
+                                    <div className="flex items-center justify-between px-5 py-3 border-b border-[#f5f5f5]">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-3">
+                                                <span className="font-semibold text-[#222] text-[15px]">{req.name}</span>
+                                                <span className="text-xs text-[#aaa]">{date}</span>
                                             </div>
-                                        )}
+                                            {req.requester_email && (
+                                                <div className="text-[11px] text-maceng-orange font-medium mt-0.5">
+                                                    Requested by: {req.requester_email}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => handleRejectReq(req.id)}
+                                                className="px-3 py-1.5 text-[#888] text-xs font-medium hover:text-red-600 transition-colors"
+                                            >
+                                                Reject
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        {feedback?.key === `req-${req.id}` && (
-                                            <span className={`text-xs ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                                                {feedback.message}
-                                            </span>
-                                        )}
-                                        <button
-                                            onClick={() => handleApproveReq(req.id)}
-                                            className="px-3 py-1.5 bg-green-600 text-white text-xs rounded font-medium hover:bg-green-700 transition-colors"
-                                        >
-                                            ✓ Add
-                                        </button>
-                                        <button
-                                            onClick={() => handleRejectReq(req.id)}
-                                            className="px-3 py-1.5 bg-[#f0f0f0] text-[#666] text-xs rounded font-medium hover:bg-[#e0e0e0] transition-colors"
-                                        >
-                                            ✗ Reject
-                                        </button>
+                                    <div className="bg-[#fafafa] px-5 py-3 flex items-center gap-4">
+                                        <div className="flex-1">
+                                            <input
+                                                type="text"
+                                                placeholder="Industries (comma separated: Tech, Finance...)"
+                                                value={requestIndustries[req.id] || ''}
+                                                onChange={(e) => setRequestIndustries({ ...requestIndustries, [req.id]: e.target.value })}
+                                                className="w-full bg-white border border-[#ddd] rounded px-3 py-1.5 text-xs focus:outline-none focus:border-maceng-maroon"
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            {feedback?.key === `req-${req.id}` && (
+                                                <span className={`text-xs ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                                                    {feedback.message}
+                                                </span>
+                                            )}
+                                            <button
+                                                onClick={() => handleApproveReq(req.id)}
+                                                className="px-4 py-1.5 bg-maceng-maroon text-white text-xs rounded font-medium hover:bg-maceng-maroon/90 shadow-sm transition-all"
+                                            >
+                                                Approve & Create
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             );
