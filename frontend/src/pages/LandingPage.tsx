@@ -192,17 +192,17 @@ export default function LandingPage() {
             </div>
 
             {/* Company List Table */}
-            <div className="overflow-x-auto overflow-y-hidden mb-8">
+            <div className="mb-8 overflow-hidden">
                 <table className="w-full border-collapse">
                     <thead>
                         <tr className="border-b-2 border-maceng-maroon/20">
-                            <th className="text-left py-3 pr-6 font-playfair italic text-maceng-maroon font-semibold text-[16px] uppercase tracking-wider">
+                            <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
                                 Company
                             </th>
-                            <th className="text-left py-3 pr-6 font-playfair italic text-maceng-maroon font-semibold text-[16px] uppercase tracking-wider">
+                            <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon font-semibold text-[16px] uppercase tracking-wider">
                                 Industry
                             </th>
-                            <th className="text-center py-3 font-playfair italic text-maceng-maroon font-semibold text-[16px] uppercase tracking-wider w-32">
+                            <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
                                 Experiences
                             </th>
                         </tr>
@@ -215,15 +215,20 @@ export default function LandingPage() {
                                 style={{ animationDelay: `${index * 30}ms` }}
                                 onClick={() => handleCompanyClick(company.id)}
                             >
-                                <td className="py-3 pr-6 transition-transform group-hover:translate-x-1 duration-200">
-                                    <span className="font-semibold text-[#333] group-hover:text-maceng-orange transition-colors">
-                                        {company.name}
-                                    </span>
+                                <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
+                                    <div className="flex flex-col">
+                                        <span className="font-semibold text-[#333] group-hover:text-maceng-orange transition-colors">
+                                            {company.name}
+                                        </span>
+                                        <span className="md:hidden text-[#888] text-[11px] italic font-inter mt-0.5 line-clamp-1">
+                                            {company.industries.join(', ')}
+                                        </span>
+                                    </div>
                                 </td>
-                                <td className="py-3 pr-6 text-[#777] text-sm italic font-inter leading-tight">
+                                <td className="hidden md:table-cell py-3 pr-6 text-[#777] text-sm italic font-inter leading-tight">
                                     {company.industries.join(', ')}
                                 </td>
-                                <td className="py-3 text-center">
+                                <td className="py-3 text-right md:text-center">
                                     {company.experience_count > 0 ? (
                                         <span className="font-bold text-maceng-maroon text-[15px]">
                                             {company.experience_count}
