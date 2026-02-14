@@ -5,6 +5,9 @@ import { searchCompanies, submitExperience, submitCompanyRequest } from '../api/
 import { type Company, type InterviewStage, type ExperienceSubmitData } from '../api/types';
 
 const TERM_OPTIONS = [
+    'Winter 2021', 'Spring 2021', 'Summer 2021', 'Fall 2021',
+    'Winter 2022', 'Spring 2022', 'Summer 2022', 'Fall 2022',
+    'Winter 2023', 'Spring 2023', 'Summer 2023', 'Fall 2023',
     'Winter 2024', 'Spring 2024', 'Summer 2024', 'Fall 2024',
     'Winter 2025', 'Spring 2025', 'Summer 2025', 'Fall 2025',
     'Winter 2026', 'Spring 2026', 'Summer 2026', 'Fall 2026',
