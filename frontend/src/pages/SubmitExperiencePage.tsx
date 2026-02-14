@@ -230,7 +230,7 @@ export default function SubmitExperiencePage() {
                         className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
                         required
                     />
-                    <p className="text-xs text-[#888] mt-1">Must be a @mcmaster.ca email address</p>
+                    <p className="text-xs text-[#888] mt-1">Must be a @mcmaster.ca email address. Don't worry, this is only to verify you're a student and prevent spam. Your identity remains anonymous. </p>
                 </div>
 
                 {/* Company Search */}
