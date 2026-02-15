@@ -25,6 +25,7 @@ export interface Experience {
     difficulty: number;
     stages: InterviewStage[];
     tips: string | null;
+    interview_acquisition: string | null;
     status: string;
     created_at: string;
     updated_at: string;
@@ -39,6 +40,7 @@ export interface ExperienceSubmitData {
     difficulty: number;
     stages: InterviewStage[];
     tips?: string;
+    interview_acquisition?: string;
 }
 
 export interface CompanyRequest {

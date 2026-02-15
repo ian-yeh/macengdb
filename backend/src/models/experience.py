@@ -28,6 +28,7 @@ class ExperienceModel(Base):
     difficulty = Column(Integer, nullable=False)  # 1-5 scale
     stages = Column(JSON, nullable=False, default=[])  # Interview stages
     tips = Column(Text, nullable=True)
+    interview_acquisition = Column(String(255), nullable=True)
     status = Column(
         String(20), nullable=False, default="pending"
     )  # pending, approved, rejected

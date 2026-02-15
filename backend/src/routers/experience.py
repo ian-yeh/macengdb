@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from src.schemas import ExperienceResponse, ExperienceCreate, ExperienceSubmit
 import src.crud.experience as crud
 from src.utils.database import get_db
+from src.utils.limiter import limiter
 from typing import List, Optional
 import os
 
@@ -19,7 +20,9 @@ def verify_admin_key(x_admin_key: str = Header(...)):
 
 
 @router.post("/experiences/submit", response_model=ExperienceResponse)
+@limiter.limit("5/minute")
 async def submit_experience(
+    request: Request,
     experience: ExperienceSubmit,
     db: Session = Depends(get_db),
 ):

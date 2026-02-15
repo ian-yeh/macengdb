@@ -18,6 +18,7 @@ class ExperienceBase(BaseModel):
     difficulty: int  # 1-5
     stages: List[InterviewStage] = []
     tips: Optional[str] = None
+    interview_acquisition: Optional[str] = None
 
     @field_validator("difficulty")
     @classmethod

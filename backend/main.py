@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.routers import company, experience, user, company_request
+from src.utils.limiter import limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
 from dotenv import load_dotenv
 import os
 
@@ -11,6 +14,10 @@ app = FastAPI(
     description="API for McMaster Engineering course reviews and resources",
     version="1.0.0",
 )
+
+# Initialize Limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS configuration to allow frontend to communicate with backend
 cors_origins = os.getenv(
