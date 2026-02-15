@@ -86,6 +86,7 @@ def create_experience(
         difficulty=experience.difficulty,
         stages=stages_data,  # Store as JSON
         tips=experience.tips,
+        interview_acquisition=experience.interview_acquisition,
         status="pending",
     )
 
@@ -110,6 +111,7 @@ def create_experience_anonymous(
         difficulty=experience.difficulty,
         stages=stages_data,
         tips=experience.tips,
+        interview_acquisition=experience.interview_acquisition,
         status="pending",
     )
 

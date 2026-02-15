@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from src.schemas.company_request import CompanyRequestCreate, CompanyRequestResponse
 from src.schemas.company import CompanyResponse, CompanyApprove
 import src.crud.company_request as crud
 from src.utils.database import get_db
+from src.utils.limiter import limiter
 from typing import List, Optional
 import os
 
@@ -19,11 +20,13 @@ def verify_admin_key(x_admin_key: str = Header(...)):
 
 
 @router.post("/company-requests", response_model=CompanyRequestResponse)
+@limiter.limit("5/minute")
 async def submit_company_request(
-    request: CompanyRequestCreate, db: Session = Depends(get_db)
+    request: Request,
+    payload: CompanyRequestCreate, db: Session = Depends(get_db)
 ):
     """Submit a request for a new company (no auth required)."""
-    return crud.create_company_request(db, request.name, request.requester_email)
+    return crud.create_company_request(db, payload.name, payload.requester_email)
 
 
 # --- Admin endpoints ---

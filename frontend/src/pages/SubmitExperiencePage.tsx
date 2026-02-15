@@ -26,6 +26,7 @@ export default function SubmitExperiencePage() {
     const [difficulty, setDifficulty] = useState(3);
     const [stages, setStages] = useState<InterviewStage[]>([]);
     const [tips, setTips] = useState('');
+    const [interviewAcquisition, setInterviewAcquisition] = useState('');
 
     // UI state
     const [submitting, setSubmitting] = useState(false);
@@ -141,6 +142,7 @@ export default function SubmitExperiencePage() {
             difficulty,
             stages: stages.filter(s => s.name.trim()), // Only include filled-in stages
             tips: tips.trim() || undefined,
+            interview_acquisition: interviewAcquisition.trim() || undefined,
         };
 
         setSubmitting(true);
@@ -185,6 +187,7 @@ export default function SubmitExperiencePage() {
                                 setDifficulty(3);
                                 setStages([]);
                                 setTips('');
+                                setInterviewAcquisition('');
                             }}
                             className="px-6 py-2.5 border border-maceng-maroon text-maceng-maroon rounded font-medium text-sm hover:bg-maceng-maroon/5 transition-colors"
                         >
@@ -308,6 +311,21 @@ export default function SubmitExperiencePage() {
                     />
                 </div>
 
+                {/* Interview Acquisition */}
+                <div>
+                    <label className="block text-sm font-medium text-[#333] mb-1.5">
+                        How did you get the interview?
+                    </label>
+                    <input
+                        type="text"
+                        value={interviewAcquisition}
+                        onChange={(e) => setInterviewAcquisition(e.target.value)}
+                        placeholder="e.g. Career Fair, LinkedIn, Cold Apply, Referral"
+                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
+                    />
+                    <p className="text-xs text-[#888] mt-1">Optional. Helps others understand the application process.</p>
+                </div>
+
                 {/* Term */}
                 <div>
                     <label className="block text-sm font-medium text-[#333] mb-1.5">
@@ -418,7 +436,7 @@ export default function SubmitExperiencePage() {
                                 <textarea
                                     value={stage.questions.join('\n')}
                                     onChange={(e) => updateStage(index, 'questions', e.target.value.split('\n').filter(q => q.trim()))}
-                                    placeholder="Questions asked (one per line)"
+                                    placeholder="Questions asked"
                                     rows={2}
                                     className="w-full py-1.5 px-2.5 text-sm border border-[#ddd] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon resize-none"
                                 />

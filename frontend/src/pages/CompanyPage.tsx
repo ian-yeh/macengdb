@@ -97,11 +97,16 @@ export default function CompanyPage() {
                                             Difficulty: {experience.difficulty}/5
                                         </span>
                                         <span className={`px-2.5 py-1 rounded-full font-medium ${experience.offer_received
-                                                ? 'bg-green-50 text-green-700'
-                                                : 'bg-red-50 text-red-600'
+                                            ? 'bg-green-50 text-green-700'
+                                            : 'bg-red-50 text-red-600'
                                             }`}>
                                             {experience.offer_received ? '✓ Offer received' : '✗ No offer'}
                                         </span>
+                                        {experience.interview_acquisition && (
+                                            <span className="px-2.5 py-1 rounded-full bg-maceng-orange/10 text-maceng-orange font-medium">
+                                                How: {experience.interview_acquisition}
+                                            </span>
+                                        )}
                                     </div>
 
                                     {/* Interview Stages */}

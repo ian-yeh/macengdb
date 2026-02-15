@@ -15,6 +15,7 @@ export default function AdminPage() {
     const [authenticated, setAuthenticated] = useState(() => !!sessionStorage.getItem('adminKey'));
     const [authError, setAuthError] = useState('');
     const [feedback, setFeedback] = useState<{ key: string; message: string; type: 'success' | 'error' } | null>(null);
+    const [processing, setProcessing] = useState<Set<string>>(new Set());
 
     const { data: pendingExperiences = [], isLoading: expLoading } = useQuery({
         queryKey: ['admin', 'pending-experiences'],
@@ -56,52 +57,72 @@ export default function AdminPage() {
 
     // Experience actions
     const handleApproveExp = async (id: number) => {
+        const key = `exp-${id}`;
+        if (processing.has(key)) return;
+        setProcessing(prev => new Set(prev).add(key));
         try {
             await approveExperience(id, adminKey);
-            showFeedback(`exp-${id}`, 'Approved!', 'success');
+            showFeedback(key, 'Approved!', 'success');
             queryClient.invalidateQueries({ queryKey: ['admin'] });
             queryClient.invalidateQueries({ queryKey: ['companies'] });
             queryClient.invalidateQueries({ queryKey: ['experiences'] });
-        } catch { showFeedback(`exp-${id}`, 'Failed', 'error'); }
+        } catch { showFeedback(key, 'Failed', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
     };
 
     const handleRejectExp = async (id: number) => {
+        const key = `exp-${id}`;
+        if (processing.has(key)) return;
+        setProcessing(prev => new Set(prev).add(key));
         try {
             await rejectExperience(id, adminKey);
-            showFeedback(`exp-${id}`, 'Rejected', 'success');
+            showFeedback(key, 'Rejected', 'success');
             queryClient.invalidateQueries({ queryKey: ['admin'] });
-        } catch { showFeedback(`exp-${id}`, 'Failed', 'error'); }
+        } catch { showFeedback(key, 'Failed', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
     };
 
     const handleDeleteExp = async (id: number) => {
+        const key = `exp-${id}`;
+        if (processing.has(key)) return;
+        setProcessing(prev => new Set(prev).add(key));
         try {
             await deleteExperience(id, adminKey);
-            showFeedback(`exp-${id}`, 'Deleted', 'success');
+            showFeedback(key, 'Deleted', 'success');
             queryClient.invalidateQueries({ queryKey: ['admin'] });
             queryClient.invalidateQueries({ queryKey: ['companies'] });
-        } catch { showFeedback(`exp-${id}`, 'Failed', 'error'); }
+        } catch { showFeedback(key, 'Failed', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
     };
 
     const [requestIndustries, setRequestIndustries] = useState<Record<number, string>>({});
 
     const handleApproveReq = async (id: number) => {
+        const key = `req-${id}`;
+        if (processing.has(key)) return;
+        setProcessing(prev => new Set(prev).add(key));
         try {
             const industries = requestIndustries[id]
                 ? requestIndustries[id].split(',').map(s => s.trim()).filter(s => s !== '')
                 : [];
             await approveCompanyRequest(id, adminKey, industries);
-            showFeedback(`req-${id}`, 'Company created!', 'success');
+            showFeedback(key, 'Company created!', 'success');
             queryClient.invalidateQueries({ queryKey: ['admin'] });
             queryClient.invalidateQueries({ queryKey: ['companies'] });
-        } catch { showFeedback(`req-${id}`, 'Failed', 'error'); }
+        } catch { showFeedback(key, 'Failed', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
     };
 
     const handleRejectReq = async (id: number) => {
+        const key = `req-${id}`;
+        if (processing.has(key)) return;
+        setProcessing(prev => new Set(prev).add(key));
         try {
             await rejectCompanyRequest(id, adminKey);
-            showFeedback(`req-${id}`, 'Rejected', 'success');
+            showFeedback(key, 'Rejected', 'success');
             queryClient.invalidateQueries({ queryKey: ['admin'] });
-        } catch { showFeedback(`req-${id}`, 'Failed', 'error'); }
+        } catch { showFeedback(key, 'Failed', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
     };
 
     // Login gate
@@ -197,7 +218,8 @@ export default function AdminPage() {
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => handleRejectReq(req.id)}
-                                                className="px-3 py-1.5 text-[#888] text-xs font-medium hover:text-red-600 transition-colors"
+                                                disabled={processing.has(`req-${req.id}`)}
+                                                className="px-3 py-1.5 text-[#888] text-xs font-medium hover:text-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                             >
                                                 Reject
                                             </button>
@@ -221,9 +243,10 @@ export default function AdminPage() {
                                             )}
                                             <button
                                                 onClick={() => handleApproveReq(req.id)}
-                                                className="px-4 py-1.5 bg-maceng-maroon text-white text-xs rounded font-medium hover:bg-maceng-maroon/90 shadow-sm transition-all"
+                                                disabled={processing.has(`req-${req.id}`)}
+                                                className="px-4 py-1.5 bg-maceng-maroon text-white text-xs rounded font-medium hover:bg-maceng-maroon/90 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
-                                                Approve & Create
+                                                {processing.has(`req-${req.id}`) ? 'Processing...' : 'Approve & Create'}
                                             </button>
                                         </div>
                                     </div>
@@ -276,6 +299,11 @@ export default function AdminPage() {
                                         <span className={`px-2.5 py-1 rounded-full font-medium ${experience.offer_received ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
                                             {experience.offer_received ? '✓ Offer received' : '✗ No offer'}
                                         </span>
+                                        {experience.interview_acquisition && (
+                                            <span className="px-2.5 py-1 rounded-full bg-maceng-orange/10 text-maceng-orange font-medium">
+                                                How: {experience.interview_acquisition}
+                                            </span>
+                                        )}
                                     </div>
 
                                     {experience.stages && experience.stages.length > 0 && (
@@ -313,16 +341,25 @@ export default function AdminPage() {
                                     )}
 
                                     <div className="flex gap-3 pt-3 border-t border-[#f0f0f0]">
-                                        <button onClick={() => handleApproveExp(experience.id)}
-                                            className="px-4 py-2 bg-green-600 text-white text-sm rounded font-medium hover:bg-green-700 transition-colors">
-                                            ✓ Approve
+                                        <button
+                                            onClick={() => handleApproveExp(experience.id)}
+                                            disabled={processing.has(`exp-${experience.id}`)}
+                                            className="px-4 py-2 bg-green-600 text-white text-sm rounded font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {processing.has(`exp-${experience.id}`) ? 'Processing...' : '✓ Approve'}
                                         </button>
-                                        <button onClick={() => handleRejectExp(experience.id)}
-                                            className="px-4 py-2 bg-[#f0f0f0] text-[#666] text-sm rounded font-medium hover:bg-[#e0e0e0] transition-colors">
+                                        <button
+                                            onClick={() => handleRejectExp(experience.id)}
+                                            disabled={processing.has(`exp-${experience.id}`)}
+                                            className="px-4 py-2 bg-[#f0f0f0] text-[#666] text-sm rounded font-medium hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
                                             ✗ Reject
                                         </button>
-                                        <button onClick={() => handleDeleteExp(experience.id)}
-                                            className="px-4 py-2 text-red-500 text-sm font-medium hover:text-red-700 hover:bg-red-50 rounded transition-colors ml-auto">
+                                        <button
+                                            onClick={() => handleDeleteExp(experience.id)}
+                                            disabled={processing.has(`exp-${experience.id}`)}
+                                            className="px-4 py-2 text-red-500 text-sm font-medium hover:text-red-700 hover:bg-red-50 rounded transition-colors ml-auto disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
                                             Delete
                                         </button>
                                     </div>
