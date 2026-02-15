@@ -166,7 +166,7 @@ export default function SubmitExperiencePage() {
                         Thank you!
                     </h1>
                     <p className="text-[15px] text-[#555] mb-8">
-                        Your experience has been submitted successfully. It will help fellow McMaster Engineering students prepare for interviews.
+                        Your experience has been submitted successfully, and was sent to an admin for review. It will help fellow McMaster Engineering students prepare for interviews.
                     </p>
                     <div className="flex gap-4 justify-center">
                         <button
