@@ -1,4 +1,4 @@
-import { type Company, type Experience, type ExperienceSubmitData, type CompanyRequest } from './types';
+import { type Company, type Experience, type ExperienceSubmitData, type CompanyRequest, type DesignTeam, type DesignTeamReview, type DesignTeamReviewSubmitData } from './types';
 
 const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api`;
 
@@ -162,4 +162,47 @@ export async function rejectCompanyRequest(id: number, adminKey: string): Promis
   });
 
   if (!response.ok) throw new Error('Failed to reject company request');
+}
+
+// Design Teams API
+
+export async function fetchDesignTeams(category?: string): Promise<DesignTeam[]> {
+  const params = new URLSearchParams();
+  if (category && category !== 'All') params.append('category', category);
+
+  const url = `${API_BASE_URL}/design-teams${params.toString() ? `?${params.toString()}` : ''}`;
+  const response = await fetch(url);
+
+  if (!response.ok) throw new Error('Failed to fetch design teams');
+  return response.json();
+}
+
+export async function fetchDesignTeam(teamId: string): Promise<DesignTeam> {
+  const response = await fetch(`${API_BASE_URL}/design-teams/${teamId}`);
+
+  if (!response.ok) throw new Error('Failed to fetch design team');
+  return response.json();
+}
+
+export async function fetchDesignTeamReviews(teamId: string): Promise<DesignTeamReview[]> {
+  const response = await fetch(`${API_BASE_URL}/design-teams/${teamId}/reviews`);
+
+  if (!response.ok) throw new Error('Failed to fetch design team reviews');
+  return response.json();
+}
+
+export async function submitDesignTeamReview(data: DesignTeamReviewSubmitData): Promise<DesignTeamReview> {
+  const response = await fetch(`${API_BASE_URL}/design-teams/${data.design_team_id}/reviews`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    const message = errorData?.detail?.[0]?.msg || errorData?.detail || 'Failed to submit review';
+    throw new Error(message);
+  }
+
+  return response.json();
 }

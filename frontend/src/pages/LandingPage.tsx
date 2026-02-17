@@ -5,6 +5,7 @@ import { type Company } from '../api/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompanies, submitCompanyRequest } from '../api/api';
 import CompanyListSkeleton from '../components/CompanyListSkeleton';
+import TabNav from '../components/TabNav';
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -70,10 +71,15 @@ export default function LandingPage() {
     return (
         <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
             {/* Header */}
-            <header className="mb-12">
+            <header className="mb-2">
                 <h1 className="font-playfair text-4xl font-bold text-maceng-maroon mb-6 tracking-tight">
                     MacEngDB
                 </h1>
+            </header>
+
+            <TabNav />
+
+            <div className="mb-12">
                 <div className="space-y-4">
                     <p className="text-[16px] leading-relaxed text-[#333]">
                         Welcome to the interview database for engineering students at{' '}
@@ -108,7 +114,7 @@ export default function LandingPage() {
                         </button>
                     </p>
                 </div>
-            </header>
+            </div>
 
             {/* Company Request Modal */}
             {showRequestModal && (

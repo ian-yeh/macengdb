@@ -3,6 +3,8 @@ import LandingPage from './pages/LandingPage';
 import CompanyPage from './pages/CompanyPage';
 import SubmitExperiencePage from './pages/SubmitExperiencePage';
 import AdminPage from './pages/AdminPage';
+import DesignTeamsPage from './pages/DesignTeamsPage';
+import DesignTeamDetailPage from './pages/DesignTeamDetailPage';
 import './App.css';
 
 function App() {
@@ -13,6 +15,8 @@ function App() {
         <Route path="/company/:companyId" element={<CompanyPage />} />
         <Route path="/submit" element={<SubmitExperiencePage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/design-teams" element={<DesignTeamsPage />} />
+        <Route path="/design-teams/:teamId" element={<DesignTeamDetailPage />} />
       </Routes>
     </Router>
   );

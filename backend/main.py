@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.routers import company, experience, user, company_request
+from src.routers import company, experience, user, company_request, design_team
 from src.utils.limiter import limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
@@ -37,6 +37,7 @@ app.include_router(company.router, prefix="/api", tags=["companies"])
 app.include_router(experience.router, prefix="/api", tags=["experience"])
 app.include_router(user.router, prefix="/api/users", tags=["user"])
 app.include_router(company_request.router, prefix="/api", tags=["company-requests"])
+app.include_router(design_team.router, prefix="/api", tags=["design-teams"])
 
 
 @app.get("/")
