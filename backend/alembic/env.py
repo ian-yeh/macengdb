@@ -23,7 +23,13 @@ if config.config_file_name is not None:
 from src.utils.database import Base
 
 # Import all models so their tables are registered with Base.metadata
-from src.models import CompanyModel, ExperienceModel, UserModel, DesignTeamModel, DesignTeamReviewModel
+from src.models import (
+    CompanyModel,
+    ExperienceModel,
+    UserModel,
+    DesignTeamModel,
+    DesignTeamReviewModel,
+)
 
 target_metadata = Base.metadata
 

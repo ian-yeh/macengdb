@@ -15,9 +15,7 @@ class DesignTeamReviewModel(Base):
     __tablename__ = "design_team_reviews"
 
     id = Column(Integer, primary_key=True, index=True)
-    design_team_id = Column(
-        Integer, ForeignKey("design_teams.id"), nullable=False
-    )
+    design_team_id = Column(Integer, ForeignKey("design_teams.id"), nullable=False)
     submitter_email = Column(String(255), nullable=False)
     role = Column(String(255), nullable=False)
     term = Column(String(50), nullable=False)

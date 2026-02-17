@@ -10,18 +10,22 @@ def get_all_design_teams(
     db: Session,
     category: Optional[str] = None,
 ):
-    query = db.query(
-        DesignTeamModel,
-        func.count(DesignTeamReviewModel.id)
-        .filter(DesignTeamReviewModel.status == "approved")
-        .label("review_count"),
-        func.avg(DesignTeamReviewModel.rating)
-        .filter(DesignTeamReviewModel.status == "approved")
-        .label("avg_rating"),
-    ).outerjoin(
-        DesignTeamReviewModel,
-        DesignTeamModel.id == DesignTeamReviewModel.design_team_id,
-    ).group_by(DesignTeamModel.id)
+    query = (
+        db.query(
+            DesignTeamModel,
+            func.count(DesignTeamReviewModel.id)
+            .filter(DesignTeamReviewModel.status == "approved")
+            .label("review_count"),
+            func.avg(DesignTeamReviewModel.rating)
+            .filter(DesignTeamReviewModel.status == "approved")
+            .label("avg_rating"),
+        )
+        .outerjoin(
+            DesignTeamReviewModel,
+            DesignTeamModel.id == DesignTeamReviewModel.design_team_id,
+        )
+        .group_by(DesignTeamModel.id)
+    )
 
     if category:
         query = query.filter(DesignTeamModel.categories.any(category))

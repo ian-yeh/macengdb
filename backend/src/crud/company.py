@@ -40,19 +40,21 @@ def get_all_companies(
         # BUT we must be careful not to exclude the company if it has multiple experiences
         # and only one matches. Actually, if we filter on ExperienceModel fields here,
         # it might affect the count or exclude the company entirely.
-        
+
         # Correct approach: Filter the companies based on existence of such experiences
         if has_offer:
             query = query.filter(
                 CompanyModel.experiences.any(
-                    (ExperienceModel.offer_received == True) & (ExperienceModel.status == "approved")
+                    (ExperienceModel.offer_received == True)
+                    & (ExperienceModel.status == "approved")
                 )
             )
-        
+
         if position:
             query = query.filter(
                 CompanyModel.experiences.any(
-                    (ExperienceModel.position.ilike(f"%{position}%")) & (ExperienceModel.status == "approved")
+                    (ExperienceModel.position.ilike(f"%{position}%"))
+                    & (ExperienceModel.status == "approved")
                 )
             )
 
