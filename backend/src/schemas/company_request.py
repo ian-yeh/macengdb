@@ -8,6 +8,10 @@ class CompanyRequestCreate(BaseModel):
     requester_email: Optional[str] = None
 
 
+class CompanyRequestUpdate(BaseModel):
+    name: str
+
+
 class CompanyRequestResponse(BaseModel):
     id: int
     name: str
