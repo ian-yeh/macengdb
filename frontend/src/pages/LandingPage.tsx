@@ -119,7 +119,7 @@ export default function LandingPage() {
                                     to="/submit"
                                     className="text-maceng-orange font-bold underline decoration-maceng-orange/30 hover:decoration-maceng-orange"
                                 >
-                                    submit an experience
+                                    submit an interview experience
                                 </Link>
                                 ).
                             </p>
@@ -132,7 +132,13 @@ export default function LandingPage() {
                             </p>
                             <p className="text-[15px] leading-relaxed text-[#444] font-medium">
                                 If you're a <span className="text-maceng-maroon">McMaster</span> student, we welcome your contributions (
-                                <span className="text-maceng-orange font-bold">click a team below</span> to submit an experience).
+                                <Link
+                                    to="/submit-design-team"
+                                    className="text-maceng-orange font-bold underline decoration-maceng-orange/30 hover:decoration-maceng-orange"
+                                >
+                                    submit a design team experience
+                                </Link>
+                                ).
                             </p>
                         </>
                     )}
@@ -332,6 +338,15 @@ export default function LandingPage() {
             {/* Content Area */}
             {activeTab === 'companies' ? (
                 <>
+                    {/* Share Button */}
+                    <div className="flex justify-start mb-4">
+                        <Link
+                            to="/submit"
+                            className="px-4 py-2 bg-maceng-maroon text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors inline-flex items-center gap-1.5"
+                        >
+                            + Share an Interview Experience
+                        </Link>
+                    </div>
                     {/* Company List Content */}
                     {error ? (
                         <div className="text-center py-12 text-red-600 italic">
@@ -441,6 +456,15 @@ export default function LandingPage() {
                 </>
             ) : (
                 <>
+                    {/* Share Button */}
+                    <div className="flex justify-start mb-4">
+                        <Link
+                            to="/submit-design-team"
+                            className="px-4 py-2 bg-maceng-maroon text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors inline-flex items-center gap-1.5"
+                        >
+                            + Share a Design Team Experience
+                        </Link>
+                    </div>
                     {/* Design Teams Content */}
                     {teamsError ? (
                         <div className="text-center py-12 text-red-600 italic">
