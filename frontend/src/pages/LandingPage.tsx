@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import useDebounce from '../hooks/useDebounce';
 import { useNavigate, Link } from 'react-router-dom';
 import { type Company } from '../api/types';
@@ -66,33 +66,6 @@ export default function LandingPage() {
             setRequestStatus('error');
         }
     };
-
-    if (isLoading) {
-        return (
-            <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
-                <header className="mb-12">
-                    <h1 className="font-playfair text-4xl font-bold text-maceng-maroon mb-6 tracking-tight">MacEngDB</h1>
-                    <div className="space-y-4">
-                        <div className="skeleton w-full h-4" />
-                        <div className="skeleton w-3/4 h-4" />
-                    </div>
-                </header>
-                <div className="mb-10 flex gap-3">
-                    <div className="skeleton flex-1 h-12" />
-                    <div className="skeleton w-24 h-12" />
-                </div>
-                <CompanyListSkeleton />
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center text-[#666]">
-                <p className="italic">Failed to load companies. Please try again later.</p>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
@@ -316,98 +289,111 @@ export default function LandingPage() {
                 )}
             </div>
 
-            {/* Company List Table */}
-            <div className="mb-8 overflow-hidden">
-                <table className="w-full border-collapse">
-                    <thead>
-                        <tr className="border-b-2 border-maceng-maroon/20">
-                            <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
-                                Company
-                            </th>
-                            <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon font-semibold text-[16px] uppercase tracking-wider">
-                                Industry
-                            </th>
-                            <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
-                                Experiences
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#eee]">
-                        {paginatedCompanies.map((company: Company, index: number) => (
-                            <tr
-                                key={`${company.id}-${searchQuery}-${safePage}`}
-                                className="group hover:bg-[#fafafa] transition-all cursor-pointer animate-row-in"
-                                style={{ animationDelay: `${index * 30}ms` }}
-                                onClick={() => handleCompanyClick(company.id)}
-                            >
-                                <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
-                                    <div className="flex flex-col">
-                                        <span className="font-semibold text-[#333] group-hover:text-maceng-orange transition-colors">
-                                            {company.name}
-                                        </span>
-                                        <span className="md:hidden text-[#888] text-[11px] italic font-inter mt-0.5 line-clamp-1">
+            {/* Company List Content */}
+            {error ? (
+                <div className="text-center py-12 text-red-600 italic">
+                    Failed to load companies. Please try again later.
+                </div>
+            ) : isLoading ? (
+                <div className="mb-8">
+                    <CompanyListSkeleton />
+                </div>
+            ) : (
+                <>
+                    {/* Company List Table */}
+                    <div className="mb-8 overflow-hidden">
+                        <table className="w-full border-collapse">
+                            <thead>
+                                <tr className="border-b-2 border-maceng-maroon/20">
+                                    <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
+                                        Company
+                                    </th>
+                                    <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon font-semibold text-[16px] uppercase tracking-wider">
+                                        Industry
+                                    </th>
+                                    <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
+                                        Experiences
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#eee]">
+                                {paginatedCompanies.map((company: Company, index: number) => (
+                                    <tr
+                                        key={`${company.id}-${searchQuery}-${safePage}`}
+                                        className="group hover:bg-[#fafafa] transition-all cursor-pointer animate-row-in"
+                                        style={{ animationDelay: `${index * 30}ms` }}
+                                        onClick={() => handleCompanyClick(company.id)}
+                                    >
+                                        <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-[#333] group-hover:text-maceng-orange transition-colors">
+                                                    {company.name}
+                                                </span>
+                                                <span className="md:hidden text-[#888] text-[11px] italic font-inter mt-0.5 line-clamp-1">
+                                                    {company.industries.join(', ')}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="hidden md:table-cell py-3 pr-6 text-[#777] text-sm italic font-inter leading-tight">
                                             {company.industries.join(', ')}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td className="hidden md:table-cell py-3 pr-6 text-[#777] text-sm italic font-inter leading-tight">
-                                    {company.industries.join(', ')}
-                                </td>
-                                <td className="py-3 text-right md:text-center">
-                                    {company.experience_count > 0 ? (
-                                        <span className="font-bold text-maceng-maroon text-[15px]">
-                                            {company.experience_count}
-                                        </span>
-                                    ) : (
-                                        <span className="text-[#bbb]">—</span>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                                        </td>
+                                        <td className="py-3 text-right md:text-center">
+                                            {company.experience_count > 0 ? (
+                                                <span className="font-bold text-maceng-maroon text-[15px]">
+                                                    {company.experience_count}
+                                                </span>
+                                            ) : (
+                                                <span className="text-[#bbb]">—</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-            {filteredCompanies.length === 0 && (
-                <div className="text-center py-12 text-[#666] italic">
-                    No companies found matching your search.
-                </div>
-            )}
+                    {filteredCompanies.length === 0 && (
+                        <div className="text-center py-12 text-[#666] italic">
+                            No companies found matching your search.
+                        </div>
+                    )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-1.5 mt-4">
-                    <button
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        disabled={safePage === 1}
-                        className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                        <button
-                            key={page}
-                            onClick={() => setCurrentPage(page)}
-                            className={`w-10 h-10 flex items-center justify-center rounded-lg border text-sm font-semibold transition-all ${page === safePage
-                                ? 'bg-maceng-maroon text-white border-maceng-maroon shadow-md shadow-maceng-maroon/20'
-                                : 'border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd]'
-                                }`}
-                        >
-                            {page}
-                        </button>
-                    ))}
-                    <button
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        disabled={safePage === totalPages}
-                        className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-1.5 mt-4">
+                            <button
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                disabled={safePage === 1}
+                                className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                <button
+                                    key={page}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`w-10 h-10 flex items-center justify-center rounded-lg border text-sm font-semibold transition-all ${page === safePage
+                                        ? 'bg-maceng-maroon text-white border-maceng-maroon shadow-md shadow-maceng-maroon/20'
+                                        : 'border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd]'
+                                        }`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                disabled={safePage === totalPages}
+                                className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
+                </>
             )}
 
             {/* Footer */}
