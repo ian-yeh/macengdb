@@ -93,30 +93,49 @@ export default function LandingPage() {
                 <h1 className="font-playfair text-4xl font-bold text-maceng-maroon mb-6 tracking-tight">
                     MacEngDB
                 </h1>
+
+                {/* Tab Navigation */}
+                <TabNav activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); setSearchQuery(''); setCurrentPage(1); }} />
+
                 <div className="space-y-4">
-                    <p className="text-[16px] leading-relaxed text-[#333]">
-                        Welcome to the interview database for engineering students at{' '}
-                        <a
-                            href="https://www.eng.mcmaster.ca/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-maceng-orange font-medium underline decoration-maceng-orange/30 hover:decoration-maceng-orange transition-all"
-                        >
-                            McMaster University
-                        </a>{' '}
-                        in Hamilton, Ontario. We're on a mission to document co-op and internship
-                        interview experiences, helping MacEng students prepare smarter.
-                    </p>
-                    <p className="text-[15px] leading-relaxed text-[#444] font-medium">
-                        If you're a <span className="text-maceng-maroon">McMaster</span> student, we welcome your contributions (
-                        <Link
-                            to="/submit"
-                            className="text-maceng-orange underline decoration-maceng-orange/30 hover:decoration-maceng-orange"
-                        >
-                            submit an experience
-                        </Link>
-                        ).
-                    </p>
+                    {activeTab === 'companies' ? (
+                        <>
+                            <p className="text-[16px] leading-relaxed text-[#333]">
+                                Welcome to the interview database for engineering students at{' '}
+                                <a
+                                    href="https://www.eng.mcmaster.ca/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-maceng-orange font-medium underline decoration-maceng-orange/30 hover:decoration-maceng-orange transition-all"
+                                >
+                                    McMaster University
+                                </a>{' '}
+                                in Hamilton, Ontario. We're on a mission to document co-op and internship
+                                interview experiences, helping MacEng students prepare smarter.
+                            </p>
+                            <p className="text-[15px] leading-relaxed text-[#444] font-medium">
+                                If you're a <span className="text-maceng-maroon">McMaster</span> student, we welcome your contributions (
+                                <Link
+                                    to="/submit"
+                                    className="text-maceng-orange font-bold underline decoration-maceng-orange/30 hover:decoration-maceng-orange"
+                                >
+                                    submit an experience
+                                </Link>
+                                ).
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-[16px] leading-relaxed text-[#333]">
+                                Explore McMaster Engineering's design teams and student-run technical organizations.
+                                Read about real experiences from team members to find the right fit for you.
+                            </p>
+                            <p className="text-[15px] leading-relaxed text-[#444] font-medium">
+                                If you're a <span className="text-maceng-maroon">McMaster</span> student, we welcome your contributions (
+                                <span className="text-maceng-orange font-bold">click a team below</span> to submit an experience).
+                            </p>
+                        </>
+                    )}
                     <p className="text-[13px] leading-relaxed text-[#777]">
                         Don't see your company or design team?{' '}
                         <button
@@ -309,9 +328,6 @@ export default function LandingPage() {
                     </div>
                 )}
             </div>
-
-            {/* Tab Navigation */}
-            <TabNav activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); setSearchQuery(''); setCurrentPage(1); }} />
 
             {/* Content Area */}
             {activeTab === 'companies' ? (
