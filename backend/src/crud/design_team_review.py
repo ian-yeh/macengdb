@@ -37,7 +37,11 @@ def get_pending_reviews(db: Session) -> List[DesignTeamReviewModel]:
 
 def approve_review(db: Session, review_id: int) -> Optional[DesignTeamReviewModel]:
     """Approve a design team review."""
-    review = db.query(DesignTeamReviewModel).filter(DesignTeamReviewModel.id == review_id).first()
+    review = (
+        db.query(DesignTeamReviewModel)
+        .filter(DesignTeamReviewModel.id == review_id)
+        .first()
+    )
     if not review:
         return None
     review.status = "approved"
@@ -48,7 +52,11 @@ def approve_review(db: Session, review_id: int) -> Optional[DesignTeamReviewMode
 
 def reject_review(db: Session, review_id: int) -> Optional[DesignTeamReviewModel]:
     """Reject a design team review."""
-    review = db.query(DesignTeamReviewModel).filter(DesignTeamReviewModel.id == review_id).first()
+    review = (
+        db.query(DesignTeamReviewModel)
+        .filter(DesignTeamReviewModel.id == review_id)
+        .first()
+    )
     if not review:
         return None
     review.status = "rejected"
@@ -59,7 +67,11 @@ def reject_review(db: Session, review_id: int) -> Optional[DesignTeamReviewModel
 
 def delete_review(db: Session, review_id: int) -> bool:
     """Delete a design team review."""
-    review = db.query(DesignTeamReviewModel).filter(DesignTeamReviewModel.id == review_id).first()
+    review = (
+        db.query(DesignTeamReviewModel)
+        .filter(DesignTeamReviewModel.id == review_id)
+        .first()
+    )
     if not review:
         return False
     db.delete(review)

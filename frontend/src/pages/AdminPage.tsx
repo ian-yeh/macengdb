@@ -5,12 +5,13 @@ import {
     fetchPendingExperiences, approveExperience, rejectExperience, deleteExperience,
     fetchPendingCompanyRequests, approveCompanyRequest, rejectCompanyRequest, updateCompanyRequest,
     fetchPendingDesignTeamReviews, approveDesignTeamReview, rejectDesignTeamReview, deleteDesignTeamReview,
+    fetchPendingDesignTeamRequests, approveDesignTeamRequest, rejectDesignTeamRequest, updateDesignTeamRequest,
     adminCreateCompany
 } from '../api/api';
-import { type Experience, type CompanyRequest, type DesignTeamReview } from '../api/types';
+import { type Experience, type CompanyRequest, type DesignTeamReview, type DesignTeamRequest } from '../api/types';
 import Loader from '../components/Loader';
 
-type AdminTab = 'requests' | 'company-exp' | 'dt-exp' | 'create';
+type AdminTab = 'requests' | 'dt-requests' | 'company-exp' | 'dt-exp' | 'create';
 
 export default function AdminPage() {
     const queryClient = useQueryClient();
@@ -40,6 +41,13 @@ export default function AdminPage() {
     const { data: pendingDTReviews = [], isLoading: dtLoading } = useQuery({
         queryKey: ['admin', 'pending-dt-reviews'],
         queryFn: () => fetchPendingDesignTeamReviews(adminKey),
+        enabled: authenticated,
+        retry: false,
+    });
+
+    const { data: pendingDTRequests = [], isLoading: dtReqLoading } = useQuery({
+        queryKey: ['admin', 'pending-dt-requests'],
+        queryFn: () => fetchPendingDesignTeamRequests(adminKey),
         enabled: authenticated,
         retry: false,
     });
@@ -195,6 +203,49 @@ export default function AdminPage() {
         finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
     };
 
+    // --- Design Team Request actions ---
+    const [editingDTRequest, setEditingDTRequest] = useState<number | null>(null);
+    const [editedDTNames, setEditedDTNames] = useState<Record<number, string>>({});
+
+    const handleApproveDTReq = async (id: number) => {
+        const key = `dtreq-${id}`;
+        if (processing.has(key)) return;
+        setProcessing(prev => new Set(prev).add(key));
+        try {
+            await approveDesignTeamRequest(id, adminKey);
+            showFeedback(key, 'Design team created!', 'success');
+            queryClient.invalidateQueries({ queryKey: ['admin'] });
+            queryClient.invalidateQueries({ queryKey: ['design-teams'] });
+        } catch { showFeedback(key, 'Failed', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
+    };
+
+    const handleRejectDTReq = async (id: number) => {
+        const key = `dtreq-${id}`;
+        if (processing.has(key)) return;
+        setProcessing(prev => new Set(prev).add(key));
+        try {
+            await rejectDesignTeamRequest(id, adminKey);
+            showFeedback(key, 'Rejected', 'success');
+            queryClient.invalidateQueries({ queryKey: ['admin'] });
+        } catch { showFeedback(key, 'Failed', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
+    };
+
+    const handleUpdateDTReqName = async (id: number) => {
+        const key = `dtreq-${id}`;
+        const newName = editedDTNames[id]?.trim();
+        if (!newName || processing.has(key)) return;
+        setProcessing(prev => new Set(prev).add(key));
+        try {
+            await updateDesignTeamRequest(id, adminKey, newName);
+            showFeedback(key, 'Name updated!', 'success');
+            setEditingDTRequest(null);
+            queryClient.invalidateQueries({ queryKey: ['admin'] });
+        } catch { showFeedback(key, 'Failed to update', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
+    };
+
     // --- Manual Company Creation ---
     const [newCompanyName, setNewCompanyName] = useState('');
     const [newCompanyIndustries, setNewCompanyIndustries] = useState('');
@@ -253,16 +304,17 @@ export default function AdminPage() {
         );
     }
 
-    if (expLoading || reqLoading || dtLoading) return <Loader message="Loading admin panel..." />;
+    if (expLoading || reqLoading || dtLoading || dtReqLoading) return <Loader message="Loading admin panel..." />;
 
     const tabs: { id: AdminTab; label: string; count: number }[] = [
         { id: 'requests', label: 'Company Requests', count: pendingRequests.length },
+        { id: 'dt-requests', label: 'DT Requests', count: pendingDTRequests.length },
         { id: 'company-exp', label: 'Company Experiences', count: pendingExperiences.length },
-        { id: 'dt-exp', label: 'Design Team Experiences', count: pendingDTReviews.length },
+        { id: 'dt-exp', label: 'DT Experiences', count: pendingDTReviews.length },
         { id: 'create', label: '+ Add Company', count: 0 },
     ];
 
-    const totalPending = pendingExperiences.length + pendingRequests.length + pendingDTReviews.length;
+    const totalPending = pendingExperiences.length + pendingRequests.length + pendingDTReviews.length + pendingDTRequests.length;
 
     return (
         <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-6xl mx-auto">
@@ -399,6 +451,87 @@ export default function AdminPage() {
                                                             className="px-4 py-1.5 bg-maceng-maroon text-white text-xs rounded font-medium hover:bg-maceng-maroon/90 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                                         >
                                                             {processing.has(`req-${req.id}`) ? 'Processing...' : 'Approve & Create'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {/* ===== DT Requests Tab ===== */}
+                    {activeTab === 'dt-requests' && (
+                        <section>
+                            {pendingDTRequests.length === 0 ? (
+                                <p className="text-sm text-[#888] italic py-4">No pending design team requests.</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {pendingDTRequests.map((req: DesignTeamRequest) => {
+                                        const date = new Date(req.created_at).toLocaleDateString('en-US', {
+                                            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                                        });
+                                        return (
+                                            <div key={req.id} className="flex flex-col border border-[#e5e5e5] rounded-lg bg-white overflow-hidden animate-row-in">
+                                                <div className="flex items-center justify-between px-4 md:px-5 py-3">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            {editingDTRequest === req.id ? (
+                                                                <div className="flex items-center gap-2 flex-1">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={editedDTNames[req.id] ?? req.name}
+                                                                        onChange={(e) => setEditedDTNames({ ...editedDTNames, [req.id]: e.target.value })}
+                                                                        onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateDTReqName(req.id); if (e.key === 'Escape') setEditingDTRequest(null); }}
+                                                                        autoFocus
+                                                                        className="flex-1 bg-white border border-maceng-maroon/30 rounded px-2.5 py-1 text-[15px] font-semibold text-[#222] focus:outline-none focus:border-maceng-maroon"
+                                                                    />
+                                                                    <button onClick={() => handleUpdateDTReqName(req.id)} disabled={processing.has(`dtreq-${req.id}`)} className="text-xs font-medium text-green-600 hover:text-green-700 disabled:opacity-50 cursor-pointer">Save</button>
+                                                                    <button onClick={() => setEditingDTRequest(null)} className="text-xs text-[#888] hover:text-[#333] cursor-pointer">Cancel</button>
+                                                                </div>
+                                                            ) : (
+                                                                <>
+                                                                    <span className="font-semibold text-[#222] text-[15px]">{req.name}</span>
+                                                                    <button
+                                                                        onClick={() => { setEditingDTRequest(req.id); setEditedDTNames({ ...editedDTNames, [req.id]: req.name }); }}
+                                                                        className="text-[#bbb] hover:text-maceng-maroon transition-colors cursor-pointer"
+                                                                        title="Edit name"
+                                                                    >
+                                                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                            <span className="text-xs text-[#aaa]">{date}</span>
+                                                        </div>
+                                                        {req.requester_email && (
+                                                            <div className="text-[11px] text-maceng-orange font-medium mt-0.5">
+                                                                Requested by: {req.requester_email}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 ml-2">
+                                                        {feedback?.key === `dtreq-${req.id}` && (
+                                                            <span className={`text-xs ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                                                                {feedback.message}
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleApproveDTReq(req.id)}
+                                                            disabled={processing.has(`dtreq-${req.id}`)}
+                                                            className="px-3 py-1.5 bg-maceng-maroon text-white text-xs rounded font-medium hover:bg-maceng-maroon/90 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                                        >
+                                                            {processing.has(`dtreq-${req.id}`) ? 'Processing...' : 'Approve & Create'}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRejectDTReq(req.id)}
+                                                            disabled={processing.has(`dtreq-${req.id}`)}
+                                                            className="px-3 py-1.5 text-[#888] text-xs font-medium hover:text-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                                                        >
+                                                            Reject
                                                         </button>
                                                     </div>
                                                 </div>

@@ -30,9 +30,7 @@ def get_pending_requests(db: Session) -> List[DesignTeamRequestModel]:
     )
 
 
-def approve_request(
-    db: Session, request_id: int
-) -> Optional[DesignTeamModel]:
+def approve_request(db: Session, request_id: int) -> Optional[DesignTeamModel]:
     """Approve a request — creates the design team and marks request as approved"""
     req = (
         db.query(DesignTeamRequestModel)

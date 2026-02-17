@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
-from src.schemas.company_request import CompanyRequestCreate, CompanyRequestUpdate, CompanyRequestResponse
+from src.schemas.company_request import (
+    CompanyRequestCreate,
+    CompanyRequestUpdate,
+    CompanyRequestResponse,
+)
 from src.schemas.company import CompanyResponse, CompanyApprove
 import src.crud.company_request as crud
 from src.utils.database import get_db
@@ -85,4 +89,3 @@ async def reject_company_request(
     if not success:
         raise HTTPException(status_code=404, detail="Request not found")
     return {"detail": "Request rejected"}
-
