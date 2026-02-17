@@ -8,6 +8,12 @@ import Loader from '../components/Loader';
 export default function LandingPage() {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedIndustry, setSelectedIndustry] = useState('All');
+    const [minRating, setMinRating] = useState<number | undefined>(undefined);
+    const [hasOffer, setHasOffer] = useState<boolean | undefined>(undefined);
+    const [position, setPosition] = useState('');
+    const [showFilters, setShowFilters] = useState(false);
+
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 10;
     const [showRequestModal, setShowRequestModal] = useState(false);
@@ -16,12 +22,19 @@ export default function LandingPage() {
     const [requestStatus, setRequestStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
     const { data: companies = [], isLoading, error } = useQuery({
-        queryKey: ['companies'],
-        queryFn: () => fetchCompanies(),
+        queryKey: ['companies', selectedIndustry, minRating, hasOffer, position],
+        queryFn: () => fetchCompanies(
+            undefined, // search is handled by local filtering for now to keep it responsive, or we can use it here
+            selectedIndustry,
+            minRating,
+            hasOffer,
+            position || undefined
+        ),
     });
 
     const filteredCompanies = companies
         .filter((company: Company) => {
+            if (!searchQuery) return true;
             const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 company.industries.some(ind => ind.toLowerCase().includes(searchQuery.toLowerCase()));
             return matchesSearch;
@@ -172,23 +185,118 @@ export default function LandingPage() {
                 </div>
             )}
 
-            {/* Search */}
-            <div className="mb-10 relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <svg className="h-4 w-4 text-[#999] group-focus-within:text-maceng-orange transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+            {/* Search and Filters */}
+            <div className="mb-10 space-y-4">
+                <div className="flex gap-3">
+                    <div className="relative group flex-1">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <svg className="h-4 w-4 text-[#999] group-focus-within:text-maceng-orange transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search company or industry..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full py-3 pl-10 pr-4 text-sm border border-[#ddd] rounded-lg font-inter bg-white shadow-sm ring-maceng-orange/0 focus:ring-4 focus:border-maceng-maroon/40 focus:outline-none transition-all placeholder:text-[#aaa]"
+                        />
+                    </div>
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className={`px-4 py-2 border rounded-lg flex items-center gap-2 text-sm font-medium transition-all ${showFilters ? 'bg-maceng-maroon text-white border-maceng-maroon' : 'bg-white text-[#666] border-[#ddd] hover:border-maceng-maroon/40'}`}
+                    >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        Filters
+                    </button>
                 </div>
-                <input
-                    type="text"
-                    placeholder="Search company or industry..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setCurrentPage(1);
-                    }}
-                    className="w-full py-3 pl-10 pr-4 text-sm border border-[#ddd] rounded-lg font-inter bg-white shadow-sm ring-maceng-orange/0 focus:ring-4 focus:border-maceng-maroon/40 focus:outline-none transition-all placeholder:text-[#aaa]"
-                />
+
+                {showFilters && (
+                    <div className="p-5 bg-[#fafafa] border border-[#eee] rounded-xl flex flex-wrap gap-6 animate-fade-in shadow-sm">
+                        {/* Industry Filter */}
+                        <div className="flex flex-col gap-2 min-w-[150px]">
+                            <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60">Industry</label>
+                            <select
+                                value={selectedIndustry}
+                                onChange={(e) => { setSelectedIndustry(e.target.value); setCurrentPage(1); }}
+                                className="py-2 px-3 text-sm border border-[#ddd] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
+                            >
+                                <option value="All">All Industries</option>
+                                <option value="Software">Software</option>
+                                <option value="Hardware">Hardware</option>
+                                <option value="Civil">Civil</option>
+                                <option value="Chemical">Chemical</option>
+                                <option value="Electrical">Electrical</option>
+                                <option value="Mechanical">Mechanical</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Consulting">Consulting</option>
+                            </select>
+                        </div>
+
+                        {/* Rating Filter */}
+                        <div className="flex flex-col gap-2 min-w-[100px]">
+                            <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60">Min Rating</label>
+                            <select
+                                value={minRating || ''}
+                                onChange={(e) => { setMinRating(e.target.value ? Number(e.target.value) : undefined); setCurrentPage(1); }}
+                                className="py-2 px-3 text-sm border border-[#ddd] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
+                            >
+                                <option value="">Any</option>
+                                <option value="4">4+ Stars</option>
+                                <option value="3">3+ Stars</option>
+                                <option value="2">2+ Stars</option>
+                            </select>
+                        </div>
+
+                        {/* Offer Toggle */}
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60">Offer Status</label>
+                            <label className="flex items-center gap-2 cursor-pointer py-2 group">
+                                <input
+                                    type="checkbox"
+                                    checked={hasOffer === true}
+                                    onChange={(e) => { setHasOffer(e.target.checked ? true : undefined); setCurrentPage(1); }}
+                                    className="w-4 h-4 rounded border-[#ddd] text-maceng-maroon focus:ring-maceng-maroon transition-all"
+                                />
+                                <span className="text-sm text-[#444] group-hover:text-maceng-maroon transition-colors">Only with offers</span>
+                            </label>
+                        </div>
+
+                        {/* Position Search */}
+                        <div className="flex flex-col gap-2 flex-grow">
+                            <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60">Position</label>
+                            <input
+                                type="text"
+                                placeholder="Filter by role (e.g. Intern)"
+                                value={position}
+                                onChange={(e) => { setPosition(e.target.value); setCurrentPage(1); }}
+                                className="py-2 px-3 text-sm border border-[#ddd] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
+                            />
+                        </div>
+
+                        {/* Reset Button */}
+                        <div className="flex items-end self-stretch">
+                            <button
+                                onClick={() => {
+                                    setSelectedIndustry('All');
+                                    setMinRating(undefined);
+                                    setHasOffer(undefined);
+                                    setPosition('');
+                                    setSearchQuery('');
+                                    setCurrentPage(1);
+                                }}
+                                className="text-[12px] font-bold text-maceng-orange hover:text-maceng-maroon transition-colors mb-2"
+                            >
+                                Reset All
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Company List Table */}

@@ -3,10 +3,19 @@ import { type Company, type Experience, type ExperienceSubmitData, type CompanyR
 const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api`;
 
 // companies API
-export async function fetchCompanies(searchQuery?: string, industry?: string): Promise<Company[]> {
+export async function fetchCompanies(
+  searchQuery?: string,
+  industry?: string,
+  minRating?: number,
+  hasOffer?: boolean,
+  position?: string
+): Promise<Company[]> {
   const params = new URLSearchParams();
   if (searchQuery) params.append('search', searchQuery);
   if (industry && industry !== 'All') params.append('industry', industry);
+  if (minRating !== undefined) params.append('min_rating', minRating.toString());
+  if (hasOffer !== undefined) params.append('has_offer', hasOffer.toString());
+  if (position) params.append('position', position);
 
   const url = `${API_BASE_URL}/companies${params.toString() ? `?${params.toString()}` : ''}`;
   const response = await fetch(url);
