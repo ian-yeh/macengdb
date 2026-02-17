@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 from src.models.design_team import DesignTeamModel
 from src.models.design_team_review import DesignTeamReviewModel
 from src.schemas.design_team import DesignTeamCreate
@@ -16,7 +16,7 @@ def get_all_design_teams(
             func.count(DesignTeamReviewModel.id)
             .filter(DesignTeamReviewModel.status == "approved")
             .label("review_count"),
-            func.avg(DesignTeamReviewModel.rating)
+            func.avg(DesignTeamReviewModel.difficulty)
             .filter(DesignTeamReviewModel.status == "approved")
             .label("avg_rating"),
         )
@@ -30,7 +30,7 @@ def get_all_design_teams(
     if category:
         query = query.filter(DesignTeamModel.categories.any(category))
 
-    results = query.order_by(DesignTeamModel.name).all()
+    results = query.order_by(text("review_count DESC"), DesignTeamModel.name).all()
 
     teams = []
     for team, review_count, avg_rating in results:
@@ -47,7 +47,7 @@ def get_design_team(db: Session, team_id: int):
             func.count(DesignTeamReviewModel.id)
             .filter(DesignTeamReviewModel.status == "approved")
             .label("review_count"),
-            func.avg(DesignTeamReviewModel.rating)
+            func.avg(DesignTeamReviewModel.difficulty)
             .filter(DesignTeamReviewModel.status == "approved")
             .label("avg_rating"),
         )

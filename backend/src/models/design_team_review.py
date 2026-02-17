@@ -5,6 +5,7 @@ from sqlalchemy import (
     Text,
     DateTime,
     ForeignKey,
+    Boolean,
 )
 from sqlalchemy.orm import relationship
 from src.utils.database import Base
@@ -17,10 +18,11 @@ class DesignTeamReviewModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     design_team_id = Column(Integer, ForeignKey("design_teams.id"), nullable=False)
     submitter_email = Column(String(255), nullable=False)
-    role = Column(String(255), nullable=False)
+    position = Column(String(255), nullable=False)
     term = Column(String(50), nullable=False)
-    time_commitment = Column(String(100), nullable=True)  # e.g. "10 hrs/week"
-    rating = Column(Integer, nullable=False)  # 1-5 scale
+    accepted = Column(Boolean, default=True, nullable=False)
+    difficulty = Column(Integer, nullable=False)  # 1-5 scale
+    interview_acquisition = Column(String(500), nullable=True)
     description = Column(Text, nullable=True)
     tips = Column(Text, nullable=True)
     status = Column(
