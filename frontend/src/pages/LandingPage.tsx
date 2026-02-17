@@ -118,7 +118,7 @@ export default function LandingPage() {
                         ).
                     </p>
                     <p className="text-[13px] leading-relaxed text-[#777]">
-                        Don't see your company?{' '}
+                        Don't see your company or design team?{' '}
                         <button
                             onClick={() => { setShowRequestModal(true); setRequestStatus('idle'); setRequestName(''); }}
                             className="text-maceng-orange font-bold hover:text-maceng-maroon transition-colors cursor-pointer bg-transparent border-none p-0 inline-flex items-center gap-0.5 group"
@@ -447,7 +447,7 @@ export default function LandingPage() {
                                                 Category
                                             </th>
                                             <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
-                                                Reviews
+                                                Experiences
                                             </th>
                                         </tr>
                                     </thead>

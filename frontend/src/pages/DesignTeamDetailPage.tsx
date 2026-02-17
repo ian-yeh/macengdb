@@ -31,7 +31,7 @@ export default function DesignTeamDetailPage() {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center text-[#666]">
                 <p className="italic">Design team not found.</p>
-                <Link to="/design-teams" className="text-maceng-orange mt-4 underline">
+                <Link to="/" className="text-maceng-orange mt-4 underline">
                     ← Back to Design Teams
                 </Link>
             </div>
@@ -50,7 +50,7 @@ export default function DesignTeamDetailPage() {
         <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
             {/* Back Link */}
             <Link
-                to="/design-teams"
+                to="/"
                 className="text-maceng-orange text-[13px] font-medium hover:text-maceng-maroon transition-colors inline-flex items-center gap-1 mb-8"
             >
                 <span>←</span> Back to Design Teams
@@ -94,15 +94,15 @@ export default function DesignTeamDetailPage() {
                 </div>
             </header>
 
-            {/* Reviews */}
+            {/* Experiences */}
             <section>
                 <h2 className="font-playfair text-2xl font-semibold text-[#333] mb-8">
-                    Reviews ({reviews.length})
+                    Experiences ({reviews.length})
                 </h2>
 
                 {reviews.length === 0 ? (
                     <div className="text-center py-12 text-[#999] italic">
-                        No reviews yet. Be the first to share your experience!
+                        No experiences yet. Be the first to share yours!
                     </div>
                 ) : (
                     <div className="space-y-8">
