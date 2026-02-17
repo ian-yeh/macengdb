@@ -9,3 +9,4 @@ from .user import UserModel
 from .company_request import CompanyRequestModel
 from .design_team import DesignTeamModel
 from .design_team_review import DesignTeamReviewModel
+from .design_team_request import DesignTeamRequestModel

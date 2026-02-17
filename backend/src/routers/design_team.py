@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from src.utils.database import get_db
@@ -7,10 +7,17 @@ from src.schemas.design_team_review import (
     DesignTeamReviewResponse,
     DesignTeamReviewSubmit,
 )
+from src.schemas.design_team_request import (
+    DesignTeamRequestCreate,
+    DesignTeamRequestUpdate,
+    DesignTeamRequestResponse,
+)
 from src.schemas.company import CompanyCreate, CompanyResponse
 from src.crud import design_team as team_crud
 from src.crud import design_team_review as review_crud
+from src.crud import design_team_request as dt_request_crud
 from src.crud import company as company_crud
+from src.utils.limiter import limiter
 import os
 
 router = APIRouter(tags=["Design Teams"])
@@ -138,3 +145,76 @@ async def admin_create_company(
     new_company = company_crud.create_company(db, company)
     new_company.experience_count = 0
     return new_company
+
+
+# --- Design Team Request endpoints ---
+
+
+@router.post("/design-team-requests", response_model=DesignTeamRequestResponse)
+@limiter.limit("5/minute")
+async def submit_design_team_request(
+    request: Request,
+    payload: DesignTeamRequestCreate,
+    db: Session = Depends(get_db),
+):
+    """Submit a request for a new design team (no auth required)."""
+    return dt_request_crud.create_request(db, payload.name, payload.requester_email)
+
+
+@router.get(
+    "/admin/design-team-requests",
+    response_model=List[DesignTeamRequestResponse],
+)
+async def get_pending_design_team_requests(
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Get all pending design team requests."""
+    return dt_request_crud.get_pending_requests(db)
+
+
+@router.patch(
+    "/admin/design-team-requests/{request_id}",
+    response_model=DesignTeamRequestResponse,
+)
+async def update_design_team_request(
+    request_id: int,
+    payload: DesignTeamRequestUpdate,
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Update a design team request's name (e.g. to fix spelling)."""
+    updated = dt_request_crud.update_request_name(db, request_id, payload.name)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Request not found")
+    return updated
+
+
+@router.patch(
+    "/admin/design-team-requests/{request_id}/approve",
+    response_model=DesignTeamResponse,
+)
+async def approve_design_team_request(
+    request_id: int,
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Approve a design team request — creates the design team."""
+    team = dt_request_crud.approve_request(db, request_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Request not found")
+    team.review_count = 0
+    return team
+
+
+@router.delete("/admin/design-team-requests/{request_id}")
+async def reject_design_team_request(
+    request_id: int,
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Reject/delete a design team request."""
+    success = dt_request_crud.reject_request(db, request_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Request not found")
+    return {"detail": "Request rejected"}

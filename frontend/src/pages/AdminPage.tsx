@@ -265,7 +265,7 @@ export default function AdminPage() {
     const totalPending = pendingExperiences.length + pendingRequests.length + pendingDTReviews.length;
 
     return (
-        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-4xl mx-auto">
+        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-6xl mx-auto">
             <header className="mb-6">
                 <div className="flex justify-between items-center">
                     <Link to="/" className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange text-sm">
@@ -283,373 +283,385 @@ export default function AdminPage() {
                 </p>
             </header>
 
-            {/* Tab Navigation */}
-            <nav className="flex gap-0 border-b-2 border-[#e5e5e5] mb-6 overflow-x-auto">
-                {tabs.map(tab => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`
-                            whitespace-nowrap py-2.5 px-4 text-[12px] md:text-[13px] font-bold tracking-wide uppercase
-                            border-b-3 -mb-[2px] transition-all duration-200 bg-transparent cursor-pointer
-                            ${tab.id === activeTab
-                                ? 'border-maceng-maroon text-maceng-maroon'
-                                : 'border-transparent text-[#bbb] hover:text-[#888] hover:border-[#ddd]'
-                            }
-                        `}
-                    >
-                        {tab.label}
-                        {tab.count > 0 && (
-                            <span className="ml-1.5 text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded-full font-inter not-italic font-medium">
-                                {tab.count}
-                            </span>
-                        )}
-                    </button>
-                ))}
-            </nav>
+            <div className="flex flex-col md:flex-row gap-6">
+                {/* Vertical Sidebar Navigation */}
+                <nav className="w-full md:w-56 flex-shrink-0">
+                    <div className="flex flex-col gap-1 md:sticky md:top-8">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`
+                                    flex items-center justify-between gap-2
+                                    whitespace-nowrap md:whitespace-normal text-left
+                                    px-3 py-2.5 md:px-4 md:py-3 rounded-lg text-[13px] font-medium
+                                    transition-all duration-150 cursor-pointer
+                                    ${tab.id === activeTab
+                                        ? 'bg-maceng-maroon text-white shadow-sm'
+                                        : 'text-[#555] hover:bg-[#f5f5f5] hover:text-maceng-maroon'
+                                    }
+                                `}
+                            >
+                                <span>{tab.label}</span>
+                                {tab.count > 0 && (
+                                    <span className={`text-[11px] min-w-[20px] text-center px-1.5 py-0.5 rounded-full font-semibold ${tab.id === activeTab
+                                        ? 'bg-white/25 text-white'
+                                        : 'bg-yellow-100 text-yellow-700'
+                                        }`}>
+                                        {tab.count}
+                                    </span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </nav>
 
-            {/* ===== Company Requests Tab ===== */}
-            {activeTab === 'requests' && (
-                <section>
-                    {pendingRequests.length === 0 ? (
-                        <p className="text-sm text-[#888] italic py-4">No pending company requests.</p>
-                    ) : (
-                        <div className="space-y-3">
-                            {pendingRequests.map((req: CompanyRequest) => {
-                                const date = new Date(req.created_at).toLocaleDateString('en-US', {
-                                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                                });
-                                return (
-                                    <div key={req.id} className="flex flex-col border border-[#e5e5e5] rounded-lg bg-white overflow-hidden animate-row-in">
-                                        <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-[#f5f5f5]">
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    {editingRequest === req.id ? (
-                                                        <div className="flex items-center gap-2 flex-1">
-                                                            <input
-                                                                type="text"
-                                                                value={editedNames[req.id] ?? req.name}
-                                                                onChange={(e) => setEditedNames({ ...editedNames, [req.id]: e.target.value })}
-                                                                onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateReqName(req.id); if (e.key === 'Escape') setEditingRequest(null); }}
-                                                                autoFocus
-                                                                className="flex-1 bg-white border border-maceng-maroon/30 rounded px-2.5 py-1 text-[15px] font-semibold text-[#222] focus:outline-none focus:border-maceng-maroon"
-                                                            />
-                                                            <button onClick={() => handleUpdateReqName(req.id)} disabled={processing.has(`req-${req.id}`)} className="text-xs font-medium text-green-600 hover:text-green-700 disabled:opacity-50 cursor-pointer">Save</button>
-                                                            <button onClick={() => setEditingRequest(null)} className="text-xs text-[#888] hover:text-[#333] cursor-pointer">Cancel</button>
+                {/* Content Area */}
+                <div className="flex-1 min-w-0">
+                    {/* ===== Company Requests Tab ===== */}
+                    {activeTab === 'requests' && (
+                        <section>
+                            {pendingRequests.length === 0 ? (
+                                <p className="text-sm text-[#888] italic py-4">No pending company requests.</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {pendingRequests.map((req: CompanyRequest) => {
+                                        const date = new Date(req.created_at).toLocaleDateString('en-US', {
+                                            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                                        });
+                                        return (
+                                            <div key={req.id} className="flex flex-col border border-[#e5e5e5] rounded-lg bg-white overflow-hidden animate-row-in">
+                                                <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-[#f5f5f5]">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            {editingRequest === req.id ? (
+                                                                <div className="flex items-center gap-2 flex-1">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={editedNames[req.id] ?? req.name}
+                                                                        onChange={(e) => setEditedNames({ ...editedNames, [req.id]: e.target.value })}
+                                                                        onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateReqName(req.id); if (e.key === 'Escape') setEditingRequest(null); }}
+                                                                        autoFocus
+                                                                        className="flex-1 bg-white border border-maceng-maroon/30 rounded px-2.5 py-1 text-[15px] font-semibold text-[#222] focus:outline-none focus:border-maceng-maroon"
+                                                                    />
+                                                                    <button onClick={() => handleUpdateReqName(req.id)} disabled={processing.has(`req-${req.id}`)} className="text-xs font-medium text-green-600 hover:text-green-700 disabled:opacity-50 cursor-pointer">Save</button>
+                                                                    <button onClick={() => setEditingRequest(null)} className="text-xs text-[#888] hover:text-[#333] cursor-pointer">Cancel</button>
+                                                                </div>
+                                                            ) : (
+                                                                <>
+                                                                    <span className="font-semibold text-[#222] text-[15px]">{req.name}</span>
+                                                                    <button
+                                                                        onClick={() => { setEditingRequest(req.id); setEditedNames({ ...editedNames, [req.id]: req.name }); }}
+                                                                        className="text-[#bbb] hover:text-maceng-maroon transition-colors cursor-pointer"
+                                                                        title="Edit name"
+                                                                    >
+                                                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                            <span className="text-xs text-[#aaa]">{date}</span>
                                                         </div>
-                                                    ) : (
-                                                        <>
-                                                            <span className="font-semibold text-[#222] text-[15px]">{req.name}</span>
-                                                            <button
-                                                                onClick={() => { setEditingRequest(req.id); setEditedNames({ ...editedNames, [req.id]: req.name }); }}
-                                                                className="text-[#bbb] hover:text-maceng-maroon transition-colors cursor-pointer"
-                                                                title="Edit name"
-                                                            >
-                                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                                </svg>
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                    <span className="text-xs text-[#aaa]">{date}</span>
+                                                        {req.requester_email && (
+                                                            <div className="text-[11px] text-maceng-orange font-medium mt-0.5">
+                                                                Requested by: {req.requester_email}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleRejectReq(req.id)}
+                                                        disabled={processing.has(`req-${req.id}`)}
+                                                        className="px-3 py-1.5 text-[#888] text-xs font-medium hover:text-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer ml-2"
+                                                    >
+                                                        Reject
+                                                    </button>
                                                 </div>
-                                                {req.requester_email && (
-                                                    <div className="text-[11px] text-maceng-orange font-medium mt-0.5">
-                                                        Requested by: {req.requester_email}
+                                                <div className="bg-[#fafafa] px-4 md:px-5 py-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                                    <div className="flex-1">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Industries (comma separated: Tech, Finance...)"
+                                                            value={requestIndustries[req.id] || ''}
+                                                            onChange={(e) => setRequestIndustries({ ...requestIndustries, [req.id]: e.target.value })}
+                                                            className="w-full bg-white border border-[#ddd] rounded px-3 py-1.5 text-xs focus:outline-none focus:border-maceng-maroon"
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        {feedback?.key === `req-${req.id}` && (
+                                                            <span className={`text-xs ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                                                                {feedback.message}
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleApproveReq(req.id)}
+                                                            disabled={processing.has(`req-${req.id}`)}
+                                                            className="px-4 py-1.5 bg-maceng-maroon text-white text-xs rounded font-medium hover:bg-maceng-maroon/90 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                                        >
+                                                            {processing.has(`req-${req.id}`) ? 'Processing...' : 'Approve & Create'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {/* ===== Company Experiences Tab ===== */}
+                    {activeTab === 'company-exp' && (
+                        <section>
+                            {pendingExperiences.length === 0 ? (
+                                <p className="text-sm text-[#888] italic py-4">No pending company experience submissions.</p>
+                            ) : (
+                                <div className="space-y-6">
+                                    {pendingExperiences.map((experience: Experience) => {
+                                        const formattedDate = new Date(experience.created_at).toLocaleDateString('en-US', {
+                                            year: 'numeric', month: 'short', day: 'numeric',
+                                            hour: '2-digit', minute: '2-digit',
+                                        });
+
+                                        return (
+                                            <article key={experience.id} className="border border-[#e5e5e5] rounded-lg p-4 md:p-6 bg-white animate-row-in">
+                                                <div className="flex justify-between items-start mb-3 flex-wrap gap-2">
+                                                    <div>
+                                                        <h3 className="font-playfair text-lg text-[#222]">{experience.position}</h3>
+                                                        <p className="text-sm text-[#888]">Company ID: {experience.company_id} · {experience.term}</p>
+                                                    </div>
+                                                    <span className="text-xs bg-yellow-100 text-yellow-700 px-2.5 py-1 rounded-full font-medium">Pending</span>
+                                                </div>
+
+                                                <p className="text-xs text-[#999] mb-3">
+                                                    Submitted by <span className="font-medium text-[#555]">{experience.submitter_email}</span> on {formattedDate}
+                                                </p>
+
+                                                <div className="flex flex-wrap gap-2 mb-4 text-xs">
+                                                    <span className="px-2.5 py-1 rounded-full bg-maceng-maroon/10 text-maceng-maroon font-medium">
+                                                        Difficulty: {experience.difficulty}/5
+                                                    </span>
+                                                    <span className={`px-2.5 py-1 rounded-full font-medium ${experience.offer_received ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                                                        {experience.offer_received ? '✓ Offer received' : '✗ No offer'}
+                                                    </span>
+                                                    {experience.interview_acquisition && (
+                                                        <span className="px-2.5 py-1 rounded-full bg-maceng-orange/10 text-maceng-orange font-medium">
+                                                            How: {experience.interview_acquisition}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {experience.stages && experience.stages.length > 0 && (
+                                                    <div className="mb-4">
+                                                        <p className="text-[11px] uppercase tracking-widest text-[#999] font-semibold mb-2">Interview Stages</p>
+                                                        <div className="space-y-1.5">
+                                                            {experience.stages.map((stage, i) => (
+                                                                <div key={i} className="text-sm text-[#444] bg-[#fafafa] rounded px-3 py-2">
+                                                                    <span className="font-medium">{stage.name}</span>
+                                                                    {stage.duration && <span className="text-[#999] ml-1">({stage.duration})</span>}
+                                                                    {stage.questions.length > 0 && (
+                                                                        <ul className="mt-1 ml-4 space-y-0.5 text-[#555]">
+                                                                            {stage.questions.map((q, j) => (
+                                                                                <li key={j} className="before:content-['–'] before:mr-2 before:text-[#ccc]">{q}</li>
+                                                                            ))}
+                                                                        </ul>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                 )}
-                                            </div>
-                                            <button
-                                                onClick={() => handleRejectReq(req.id)}
-                                                disabled={processing.has(`req-${req.id}`)}
-                                                className="px-3 py-1.5 text-[#888] text-xs font-medium hover:text-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer ml-2"
-                                            >
-                                                Reject
-                                            </button>
-                                        </div>
-                                        <div className="bg-[#fafafa] px-4 md:px-5 py-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                                            <div className="flex-1">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Industries (comma separated: Tech, Finance...)"
-                                                    value={requestIndustries[req.id] || ''}
-                                                    onChange={(e) => setRequestIndustries({ ...requestIndustries, [req.id]: e.target.value })}
-                                                    className="w-full bg-white border border-[#ddd] rounded px-3 py-1.5 text-xs focus:outline-none focus:border-maceng-maroon"
-                                                />
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                {feedback?.key === `req-${req.id}` && (
-                                                    <span className={`text-xs ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                                                        {feedback.message}
-                                                    </span>
+
+                                                {experience.tips && (
+                                                    <div className="bg-[#fffbf5] border-l-3 border-maceng-orange/40 rounded-r px-4 py-3 mb-4">
+                                                        <p className="text-[11px] uppercase tracking-widest text-maceng-orange/70 font-semibold mb-1">Tips</p>
+                                                        <p className="text-sm text-[#444]">{experience.tips}</p>
+                                                    </div>
                                                 )}
-                                                <button
-                                                    onClick={() => handleApproveReq(req.id)}
-                                                    disabled={processing.has(`req-${req.id}`)}
-                                                    className="px-4 py-1.5 bg-maceng-maroon text-white text-xs rounded font-medium hover:bg-maceng-maroon/90 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                                                >
-                                                    {processing.has(`req-${req.id}`) ? 'Processing...' : 'Approve & Create'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </section>
-            )}
 
-            {/* ===== Company Experiences Tab ===== */}
-            {activeTab === 'company-exp' && (
-                <section>
-                    {pendingExperiences.length === 0 ? (
-                        <p className="text-sm text-[#888] italic py-4">No pending company experience submissions.</p>
-                    ) : (
-                        <div className="space-y-6">
-                            {pendingExperiences.map((experience: Experience) => {
-                                const formattedDate = new Date(experience.created_at).toLocaleDateString('en-US', {
-                                    year: 'numeric', month: 'short', day: 'numeric',
-                                    hour: '2-digit', minute: '2-digit',
-                                });
+                                                {feedback?.key === `exp-${experience.id}` && (
+                                                    <p className={`text-sm mb-3 ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                                                        {feedback.message}
+                                                    </p>
+                                                )}
 
-                                return (
-                                    <article key={experience.id} className="border border-[#e5e5e5] rounded-lg p-4 md:p-6 bg-white animate-row-in">
-                                        <div className="flex justify-between items-start mb-3 flex-wrap gap-2">
-                                            <div>
-                                                <h3 className="font-playfair text-lg text-[#222]">{experience.position}</h3>
-                                                <p className="text-sm text-[#888]">Company ID: {experience.company_id} · {experience.term}</p>
-                                            </div>
-                                            <span className="text-xs bg-yellow-100 text-yellow-700 px-2.5 py-1 rounded-full font-medium">Pending</span>
-                                        </div>
-
-                                        <p className="text-xs text-[#999] mb-3">
-                                            Submitted by <span className="font-medium text-[#555]">{experience.submitter_email}</span> on {formattedDate}
-                                        </p>
-
-                                        <div className="flex flex-wrap gap-2 mb-4 text-xs">
-                                            <span className="px-2.5 py-1 rounded-full bg-maceng-maroon/10 text-maceng-maroon font-medium">
-                                                Difficulty: {experience.difficulty}/5
-                                            </span>
-                                            <span className={`px-2.5 py-1 rounded-full font-medium ${experience.offer_received ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
-                                                {experience.offer_received ? '✓ Offer received' : '✗ No offer'}
-                                            </span>
-                                            {experience.interview_acquisition && (
-                                                <span className="px-2.5 py-1 rounded-full bg-maceng-orange/10 text-maceng-orange font-medium">
-                                                    How: {experience.interview_acquisition}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        {experience.stages && experience.stages.length > 0 && (
-                                            <div className="mb-4">
-                                                <p className="text-[11px] uppercase tracking-widest text-[#999] font-semibold mb-2">Interview Stages</p>
-                                                <div className="space-y-1.5">
-                                                    {experience.stages.map((stage, i) => (
-                                                        <div key={i} className="text-sm text-[#444] bg-[#fafafa] rounded px-3 py-2">
-                                                            <span className="font-medium">{stage.name}</span>
-                                                            {stage.duration && <span className="text-[#999] ml-1">({stage.duration})</span>}
-                                                            {stage.questions.length > 0 && (
-                                                                <ul className="mt-1 ml-4 space-y-0.5 text-[#555]">
-                                                                    {stage.questions.map((q, j) => (
-                                                                        <li key={j} className="before:content-['–'] before:mr-2 before:text-[#ccc]">{q}</li>
-                                                                    ))}
-                                                                </ul>
-                                                            )}
-                                                        </div>
-                                                    ))}
+                                                <div className="flex gap-2 sm:gap-3 pt-3 border-t border-[#f0f0f0]">
+                                                    <button
+                                                        onClick={() => handleApproveExp(experience.id)}
+                                                        disabled={processing.has(`exp-${experience.id}`)}
+                                                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-600 text-white text-xs sm:text-sm rounded font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                                    >
+                                                        {processing.has(`exp-${experience.id}`) ? '...' : '✓ Approve'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRejectExp(experience.id)}
+                                                        disabled={processing.has(`exp-${experience.id}`)}
+                                                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-[#f0f0f0] text-[#666] text-xs sm:text-sm rounded font-medium hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                                    >
+                                                        ✗ Reject
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteExp(experience.id)}
+                                                        disabled={processing.has(`exp-${experience.id}`)}
+                                                        className="px-3 sm:px-4 py-2 text-red-500 text-xs sm:text-sm font-medium hover:text-red-700 hover:bg-red-50 rounded transition-colors sm:ml-auto disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                                                    >
+                                                        Delete
+                                                    </button>
                                                 </div>
-                                            </div>
-                                        )}
-
-                                        {experience.tips && (
-                                            <div className="bg-[#fffbf5] border-l-3 border-maceng-orange/40 rounded-r px-4 py-3 mb-4">
-                                                <p className="text-[11px] uppercase tracking-widest text-maceng-orange/70 font-semibold mb-1">Tips</p>
-                                                <p className="text-sm text-[#444]">{experience.tips}</p>
-                                            </div>
-                                        )}
-
-                                        {feedback?.key === `exp-${experience.id}` && (
-                                            <p className={`text-sm mb-3 ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                                                {feedback.message}
-                                            </p>
-                                        )}
-
-                                        <div className="flex gap-3 pt-3 border-t border-[#f0f0f0] flex-wrap">
-                                            <button
-                                                onClick={() => handleApproveExp(experience.id)}
-                                                disabled={processing.has(`exp-${experience.id}`)}
-                                                className="px-4 py-2 bg-green-600 text-white text-sm rounded font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                                            >
-                                                {processing.has(`exp-${experience.id}`) ? 'Processing...' : '✓ Approve'}
-                                            </button>
-                                            <button
-                                                onClick={() => handleRejectExp(experience.id)}
-                                                disabled={processing.has(`exp-${experience.id}`)}
-                                                className="px-4 py-2 bg-[#f0f0f0] text-[#666] text-sm rounded font-medium hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                                            >
-                                                ✗ Reject
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteExp(experience.id)}
-                                                disabled={processing.has(`exp-${experience.id}`)}
-                                                className="px-4 py-2 text-red-500 text-sm font-medium hover:text-red-700 hover:bg-red-50 rounded transition-colors ml-auto disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </article>
-                                );
-                            })}
-                        </div>
-                    )}
-                </section>
-            )}
-
-            {/* ===== Design Team Experiences Tab ===== */}
-            {activeTab === 'dt-exp' && (
-                <section>
-                    {pendingDTReviews.length === 0 ? (
-                        <p className="text-sm text-[#888] italic py-4">No pending design team experience submissions.</p>
-                    ) : (
-                        <div className="space-y-6">
-                            {pendingDTReviews.map((review: DesignTeamReview) => {
-                                const formattedDate = new Date(review.created_at).toLocaleDateString('en-US', {
-                                    year: 'numeric', month: 'short', day: 'numeric',
-                                    hour: '2-digit', minute: '2-digit',
-                                });
-
-                                return (
-                                    <article key={review.id} className="border border-[#e5e5e5] rounded-lg p-4 md:p-6 bg-white animate-row-in">
-                                        <div className="flex justify-between items-start mb-3 flex-wrap gap-2">
-                                            <div>
-                                                <h3 className="font-playfair text-lg text-[#222]">{review.position}</h3>
-                                                <p className="text-sm text-[#888]">Team ID: {review.design_team_id} · {review.term}</p>
-                                            </div>
-                                            <span className="text-xs bg-yellow-100 text-yellow-700 px-2.5 py-1 rounded-full font-medium">Pending</span>
-                                        </div>
-
-                                        <p className="text-xs text-[#999] mb-3">
-                                            Submitted by <span className="font-medium text-[#555]">{review.submitter_email}</span> on {formattedDate}
-                                        </p>
-
-                                        <div className="flex flex-wrap gap-2 mb-4 text-xs">
-                                            <span className="px-2.5 py-1 rounded-full bg-maceng-maroon/10 text-maceng-maroon font-medium">
-                                                Difficulty: {review.difficulty}/5
-                                            </span>
-                                            <span className={`px-2.5 py-1 rounded-full font-medium ${review.accepted ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
-                                                {review.accepted ? '✓ Accepted' : '✗ Not accepted'}
-                                            </span>
-                                            {review.interview_acquisition && (
-                                                <span className="px-2.5 py-1 rounded-full bg-maceng-orange/10 text-maceng-orange font-medium">
-                                                    Found via: {review.interview_acquisition}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        {review.description && (
-                                            <div className="mb-4">
-                                                <p className="text-[11px] uppercase tracking-widest text-[#999] font-semibold mb-2">Application Process</p>
-                                                <p className="text-sm text-[#444] bg-[#fafafa] rounded px-3 py-2">{review.description}</p>
-                                            </div>
-                                        )}
-
-                                        {review.tips && (
-                                            <div className="bg-[#fffbf5] border-l-3 border-maceng-orange/40 rounded-r px-4 py-3 mb-4">
-                                                <p className="text-[11px] uppercase tracking-widest text-maceng-orange/70 font-semibold mb-1">Tips</p>
-                                                <p className="text-sm text-[#444]">{review.tips}</p>
-                                            </div>
-                                        )}
-
-                                        {feedback?.key === `dt-${review.id}` && (
-                                            <p className={`text-sm mb-3 ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                                                {feedback.message}
-                                            </p>
-                                        )}
-
-                                        <div className="flex gap-3 pt-3 border-t border-[#f0f0f0] flex-wrap">
-                                            <button
-                                                onClick={() => handleApproveDT(review.id)}
-                                                disabled={processing.has(`dt-${review.id}`)}
-                                                className="px-4 py-2 bg-green-600 text-white text-sm rounded font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                                            >
-                                                {processing.has(`dt-${review.id}`) ? 'Processing...' : '✓ Approve'}
-                                            </button>
-                                            <button
-                                                onClick={() => handleRejectDT(review.id)}
-                                                disabled={processing.has(`dt-${review.id}`)}
-                                                className="px-4 py-2 bg-[#f0f0f0] text-[#666] text-sm rounded font-medium hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                                            >
-                                                ✗ Reject
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteDT(review.id)}
-                                                disabled={processing.has(`dt-${review.id}`)}
-                                                className="px-4 py-2 text-red-500 text-sm font-medium hover:text-red-700 hover:bg-red-50 rounded transition-colors ml-auto disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </article>
-                                );
-                            })}
-                        </div>
-                    )}
-                </section>
-            )}
-
-            {/* ===== Add Company Tab ===== */}
-            {activeTab === 'create' && (
-                <section>
-                    <div className="max-w-lg">
-                        <h2 className="font-playfair text-lg text-maceng-maroon mb-1">Manually Add a Company</h2>
-                        <p className="text-xs text-[#888] mb-5">Create a company directly without going through a request.</p>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-[#333] mb-1.5">
-                                    Company Name <span className="text-maceng-orange">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={newCompanyName}
-                                    onChange={(e) => setNewCompanyName(e.target.value)}
-                                    placeholder="e.g. Google, AMD, Shopify"
-                                    className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-[#333] mb-1.5">
-                                    Industries
-                                </label>
-                                <input
-                                    type="text"
-                                    value={newCompanyIndustries}
-                                    onChange={(e) => setNewCompanyIndustries(e.target.value)}
-                                    placeholder="Comma separated: Software, Hardware, Finance..."
-                                    className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
-                                />
-                                <p className="text-xs text-[#888] mt-1">Optional. Separate multiple industries with commas.</p>
-                            </div>
-
-                            {createStatus === 'success' && (
-                                <p className="text-sm text-green-600 font-medium">✓ Company created successfully!</p>
+                                            </article>
+                                        );
+                                    })}
+                                </div>
                             )}
-                            {createStatus === 'error' && (
-                                <p className="text-sm text-red-600 font-medium">Failed to create company. Try again.</p>
-                            )}
+                        </section>
+                    )}
 
-                            <button
-                                onClick={handleCreateCompany}
-                                disabled={!newCompanyName.trim() || createStatus === 'creating'}
-                                className="px-6 py-2.5 bg-maceng-maroon text-white text-sm rounded font-medium hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                            >
-                                {createStatus === 'creating' ? 'Creating...' : 'Create Company'}
-                            </button>
-                        </div>
-                    </div>
-                </section>
-            )}
+                    {/* ===== Design Team Experiences Tab ===== */}
+                    {activeTab === 'dt-exp' && (
+                        <section>
+                            {pendingDTReviews.length === 0 ? (
+                                <p className="text-sm text-[#888] italic py-4">No pending design team experience submissions.</p>
+                            ) : (
+                                <div className="space-y-6">
+                                    {pendingDTReviews.map((review: DesignTeamReview) => {
+                                        const formattedDate = new Date(review.created_at).toLocaleDateString('en-US', {
+                                            year: 'numeric', month: 'short', day: 'numeric',
+                                            hour: '2-digit', minute: '2-digit',
+                                        });
+
+                                        return (
+                                            <article key={review.id} className="border border-[#e5e5e5] rounded-lg p-4 md:p-6 bg-white animate-row-in">
+                                                <div className="flex justify-between items-start mb-3 flex-wrap gap-2">
+                                                    <div>
+                                                        <h3 className="font-playfair text-lg text-[#222]">{review.position}</h3>
+                                                        <p className="text-sm text-[#888]">Team ID: {review.design_team_id} · {review.term}</p>
+                                                    </div>
+                                                    <span className="text-xs bg-yellow-100 text-yellow-700 px-2.5 py-1 rounded-full font-medium">Pending</span>
+                                                </div>
+
+                                                <p className="text-xs text-[#999] mb-3">
+                                                    Submitted by <span className="font-medium text-[#555]">{review.submitter_email}</span> on {formattedDate}
+                                                </p>
+
+                                                <div className="flex flex-wrap gap-2 mb-4 text-xs">
+                                                    <span className="px-2.5 py-1 rounded-full bg-maceng-maroon/10 text-maceng-maroon font-medium">
+                                                        Difficulty: {review.difficulty}/5
+                                                    </span>
+                                                    <span className={`px-2.5 py-1 rounded-full font-medium ${review.accepted ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                                                        {review.accepted ? '✓ Accepted' : '✗ Not accepted'}
+                                                    </span>
+                                                    {review.interview_acquisition && (
+                                                        <span className="px-2.5 py-1 rounded-full bg-maceng-orange/10 text-maceng-orange font-medium">
+                                                            Found via: {review.interview_acquisition}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {review.description && (
+                                                    <div className="mb-4">
+                                                        <p className="text-[11px] uppercase tracking-widest text-[#999] font-semibold mb-2">Application Process</p>
+                                                        <p className="text-sm text-[#444] bg-[#fafafa] rounded px-3 py-2">{review.description}</p>
+                                                    </div>
+                                                )}
+
+                                                {review.tips && (
+                                                    <div className="bg-[#fffbf5] border-l-3 border-maceng-orange/40 rounded-r px-4 py-3 mb-4">
+                                                        <p className="text-[11px] uppercase tracking-widest text-maceng-orange/70 font-semibold mb-1">Tips</p>
+                                                        <p className="text-sm text-[#444]">{review.tips}</p>
+                                                    </div>
+                                                )}
+
+                                                {feedback?.key === `dt-${review.id}` && (
+                                                    <p className={`text-sm mb-3 ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                                                        {feedback.message}
+                                                    </p>
+                                                )}
+
+                                                <div className="flex gap-2 sm:gap-3 pt-3 border-t border-[#f0f0f0]">
+                                                    <button
+                                                        onClick={() => handleApproveDT(review.id)}
+                                                        disabled={processing.has(`dt-${review.id}`)}
+                                                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-600 text-white text-xs sm:text-sm rounded font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                                    >
+                                                        {processing.has(`dt-${review.id}`) ? '...' : '✓ Approve'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRejectDT(review.id)}
+                                                        disabled={processing.has(`dt-${review.id}`)}
+                                                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-[#f0f0f0] text-[#666] text-xs sm:text-sm rounded font-medium hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                                    >
+                                                        ✗ Reject
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteDT(review.id)}
+                                                        disabled={processing.has(`dt-${review.id}`)}
+                                                        className="px-3 sm:px-4 py-2 text-red-500 text-xs sm:text-sm font-medium hover:text-red-700 hover:bg-red-50 rounded transition-colors sm:ml-auto disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </article>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {/* ===== Add Company Tab ===== */}
+                    {activeTab === 'create' && (
+                        <section>
+                            <div className="max-w-lg">
+                                <h2 className="font-playfair text-lg text-maceng-maroon mb-1">Manually Add a Company</h2>
+                                <p className="text-xs text-[#888] mb-5">Create a company directly without going through a request.</p>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-[#333] mb-1.5">
+                                            Company Name <span className="text-maceng-orange">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={newCompanyName}
+                                            onChange={(e) => setNewCompanyName(e.target.value)}
+                                            placeholder="e.g. Google, AMD, Shopify"
+                                            className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[#333] mb-1.5">
+                                            Industries
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={newCompanyIndustries}
+                                            onChange={(e) => setNewCompanyIndustries(e.target.value)}
+                                            placeholder="Comma separated: Software, Hardware, Finance..."
+                                            className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
+                                        />
+                                        <p className="text-xs text-[#888] mt-1">Optional. Separate multiple industries with commas.</p>
+                                    </div>
+
+                                    {createStatus === 'success' && (
+                                        <p className="text-sm text-green-600 font-medium">✓ Company created successfully!</p>
+                                    )}
+                                    {createStatus === 'error' && (
+                                        <p className="text-sm text-red-600 font-medium">Failed to create company. Try again.</p>
+                                    )}
+
+                                    <button
+                                        onClick={handleCreateCompany}
+                                        disabled={!newCompanyName.trim() || createStatus === 'creating'}
+                                        className="px-6 py-2.5 bg-maceng-maroon text-white text-sm rounded font-medium hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                    >
+                                        {createStatus === 'creating' ? 'Creating...' : 'Create Company'}
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

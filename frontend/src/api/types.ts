@@ -51,6 +51,14 @@ export interface CompanyRequest {
     created_at: string;
 }
 
+export interface DesignTeamRequest {
+    id: number;
+    name: string;
+    requester_email: string | null;
+    status: string;
+    created_at: string;
+}
+
 export interface DesignTeam {
     id: number;
     name: string;
