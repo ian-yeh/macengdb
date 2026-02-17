@@ -128,7 +128,7 @@ export default function LandingPage() {
                         <>
                             <p className="text-[16px] leading-relaxed text-[#333]">
                                 Explore McMaster Engineering's design teams and student-run technical organizations.
-                                Read about real experiences from team members to find the right fit for you.
+                                Read about real application experiences from students to help you prepare.
                             </p>
                             <p className="text-[15px] leading-relaxed text-[#444] font-medium">
                                 If you're a <span className="text-maceng-maroon">McMaster</span> student, we welcome your contributions (
@@ -136,7 +136,7 @@ export default function LandingPage() {
                                     to="/submit-design-team"
                                     className="text-maceng-orange font-bold underline decoration-maceng-orange/30 hover:decoration-maceng-orange"
                                 >
-                                    submit a design team experience
+                                    submit an application experience
                                 </Link>
                                 ).
                             </p>
@@ -462,7 +462,7 @@ export default function LandingPage() {
                             to="/submit-design-team"
                             className="px-4 py-2 bg-maceng-maroon text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors inline-flex items-center gap-1.5"
                         >
-                            + Share a Design Team Experience
+                            + Share an Application Experience
                         </Link>
                     </div>
                     {/* Design Teams Content */}

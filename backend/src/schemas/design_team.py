@@ -13,7 +13,7 @@ class DesignTeamBase(BaseModel):
 class DesignTeamResponse(DesignTeamBase):
     id: int
     review_count: int = 0
-    avg_rating: Optional[float] = None
+    avg_difficulty: Optional[float] = None
     created_at: datetime
     updated_at: datetime
 
