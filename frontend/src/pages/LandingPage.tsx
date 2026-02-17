@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import useDebounce from '../hooks/useDebounce';
 import { useNavigate, Link } from 'react-router-dom';
-import { type Company } from '../api/types';
+import { type Company, type DesignTeam } from '../api/types';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCompanies, submitCompanyRequest } from '../api/api';
+import { fetchCompanies, submitCompanyRequest, fetchDesignTeams } from '../api/api';
 import CompanyListSkeleton from '../components/CompanyListSkeleton';
 import TabNav from '../components/TabNav';
 
@@ -16,6 +16,7 @@ export default function LandingPage() {
     const [position, setPosition] = useState('');
     const debouncedPosition = useDebounce(position, 500);
     const [showFilters, setShowFilters] = useState(false);
+    const [activeTab, setActiveTab] = useState<'companies' | 'design-teams'>('companies');
 
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 10;
@@ -35,6 +36,11 @@ export default function LandingPage() {
         ),
     });
 
+    const { data: designTeams = [], isLoading: teamsLoading, error: teamsError } = useQuery({
+        queryKey: ['design-teams'],
+        queryFn: () => fetchDesignTeams(),
+    });
+
     const filteredCompanies = companies
         .filter((company: Company) => {
             if (!searchQuery) return true;
@@ -43,6 +49,16 @@ export default function LandingPage() {
             return matchesSearch;
         })
         .sort((a: Company, b: Company) => b.experience_count - a.experience_count || a.name.localeCompare(b.name));
+
+    const filteredTeams = designTeams.filter((team: DesignTeam) => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return (
+            team.name.toLowerCase().includes(q) ||
+            team.categories.some(c => c.toLowerCase().includes(q)) ||
+            (team.description && team.description.toLowerCase().includes(q))
+        );
+    });
 
     const totalPages = Math.max(1, Math.ceil(filteredCompanies.length / ITEMS_PER_PAGE));
     const safePage = Math.min(currentPage, totalPages);
@@ -55,14 +71,16 @@ export default function LandingPage() {
         navigate(`/company/${companyId}`);
     };
 
+    const handleTeamClick = (teamId: number) => {
+        navigate(`/design-teams/${teamId}`);
+    };
+
     const handleRequestSubmit = async () => {
         if (!requestName.trim()) return;
         setRequestStatus('submitting');
         try {
-            await submitCompanyRequest(requestName.trim(), requestEmail.trim() || undefined);
+            await submitCompanyRequest(requestName, requestEmail || undefined);
             setRequestStatus('success');
-            setRequestName('');
-            setRequestEmail('');
         } catch {
             setRequestStatus('error');
         }
@@ -71,15 +89,10 @@ export default function LandingPage() {
     return (
         <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
             {/* Header */}
-            <header className="mb-2">
+            <header className="mb-12">
                 <h1 className="font-playfair text-4xl font-bold text-maceng-maroon mb-6 tracking-tight">
                     MacEngDB
                 </h1>
-            </header>
-
-            <TabNav />
-
-            <div className="mb-12">
                 <div className="space-y-4">
                     <p className="text-[16px] leading-relaxed text-[#333]">
                         Welcome to the interview database for engineering students at{' '}
@@ -114,7 +127,7 @@ export default function LandingPage() {
                         </button>
                     </p>
                 </div>
-            </div>
+            </header>
 
             {/* Company Request Modal */}
             {showRequestModal && (
@@ -182,7 +195,7 @@ export default function LandingPage() {
             )}
 
             {/* Search and Filters */}
-            <div className="mb-10 space-y-4">
+            <div className="mb-6 space-y-4">
                 <div className="flex gap-3">
                     <div className="relative group flex-1">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -192,7 +205,7 @@ export default function LandingPage() {
                         </div>
                         <input
                             type="text"
-                            placeholder="Search company or industry..."
+                            placeholder={activeTab === 'companies' ? "Search company or industry..." : "Search team or category..."}
                             value={searchQuery}
                             onChange={(e) => {
                                 setSearchQuery(e.target.value);
@@ -201,18 +214,20 @@ export default function LandingPage() {
                             className="w-full py-3 pl-10 pr-4 text-sm border border-[#ddd] rounded-lg font-inter bg-white shadow-sm ring-maceng-orange/0 focus:ring-4 focus:border-maceng-maroon/40 focus:outline-none transition-all placeholder:text-[#aaa]"
                         />
                     </div>
-                    <button
-                        onClick={() => setShowFilters(!showFilters)}
-                        className={`px-4 py-2 border rounded-lg flex items-center gap-2 text-sm font-medium transition-all ${showFilters ? 'bg-maceng-maroon text-white border-maceng-maroon' : 'bg-white text-[#666] border-[#ddd] hover:border-maceng-maroon/40'}`}
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                        </svg>
-                        Filters
-                    </button>
+                    {activeTab === 'companies' && (
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className={`px-4 py-2 border rounded-lg flex items-center gap-2 text-sm font-medium transition-all ${showFilters ? 'bg-maceng-maroon text-white border-maceng-maroon' : 'bg-white text-[#666] border-[#ddd] hover:border-maceng-maroon/40'}`}
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                            Filters
+                        </button>
+                    )}
                 </div>
 
-                {showFilters && (
+                {activeTab === 'companies' && showFilters && (
                     <div className="p-5 bg-[#fafafa] border border-[#eee] rounded-xl flex flex-wrap gap-6 animate-fade-in shadow-sm">
                         {/* Industry Filter */}
                         <div className="flex flex-col gap-2 min-w-[150px]">
@@ -295,109 +310,189 @@ export default function LandingPage() {
                 )}
             </div>
 
-            {/* Company List Content */}
-            {error ? (
-                <div className="text-center py-12 text-red-600 italic">
-                    Failed to load companies. Please try again later.
-                </div>
-            ) : isLoading ? (
-                <div className="mb-8">
-                    <CompanyListSkeleton />
-                </div>
+            {/* Tab Navigation */}
+            <TabNav activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); setSearchQuery(''); setCurrentPage(1); }} />
+
+            {/* Content Area */}
+            {activeTab === 'companies' ? (
+                <>
+                    {/* Company List Content */}
+                    {error ? (
+                        <div className="text-center py-12 text-red-600 italic">
+                            Failed to load companies. Please try again later.
+                        </div>
+                    ) : isLoading ? (
+                        <div className="mb-8">
+                            <CompanyListSkeleton />
+                        </div>
+                    ) : (
+                        <>
+                            {/* Company List Table */}
+                            <div className="mb-8 overflow-hidden">
+                                <table className="w-full border-collapse">
+                                    <thead>
+                                        <tr className="border-b-2 border-maceng-maroon/20">
+                                            <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
+                                                Company
+                                            </th>
+                                            <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon font-semibold text-[16px] uppercase tracking-wider">
+                                                Industry
+                                            </th>
+                                            <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
+                                                Experiences
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-[#eee]">
+                                        {paginatedCompanies.map((company: Company, index: number) => (
+                                            <tr
+                                                key={`${company.id}-${searchQuery}-${safePage}`}
+                                                className="group hover:bg-[#fafafa] transition-all cursor-pointer animate-row-in"
+                                                style={{ animationDelay: `${index * 30}ms` }}
+                                                onClick={() => handleCompanyClick(company.id)}
+                                            >
+                                                <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-semibold text-[#333] group-hover:text-maceng-orange transition-colors">
+                                                            {company.name}
+                                                        </span>
+                                                        <span className="md:hidden text-[#888] text-[11px] italic font-inter mt-0.5 line-clamp-1">
+                                                            {company.industries.join(', ')}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="hidden md:table-cell py-3 pr-6 text-[#777] text-sm italic font-inter leading-tight">
+                                                    {company.industries.join(', ')}
+                                                </td>
+                                                <td className="py-3 text-right md:text-center">
+                                                    {company.experience_count > 0 ? (
+                                                        <span className="font-bold text-maceng-maroon text-[15px]">
+                                                            {company.experience_count}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[#bbb]">—</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {filteredCompanies.length === 0 && (
+                                <div className="text-center py-12 text-[#666] italic">
+                                    No companies found matching your search.
+                                </div>
+                            )}
+
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="flex items-center justify-center gap-1.5 mt-4">
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={safePage === 1}
+                                        className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                                        </svg>
+                                    </button>
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`w-10 h-10 flex items-center justify-center rounded-lg border text-sm font-semibold transition-all ${page === safePage
+                                                ? 'bg-maceng-maroon text-white border-maceng-maroon shadow-md shadow-maceng-maroon/20'
+                                                : 'border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd]'
+                                                }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={safePage === totalPages}
+                                        className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </>
             ) : (
                 <>
-                    {/* Company List Table */}
-                    <div className="mb-8 overflow-hidden">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr className="border-b-2 border-maceng-maroon/20">
-                                    <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
-                                        Company
-                                    </th>
-                                    <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon font-semibold text-[16px] uppercase tracking-wider">
-                                        Industry
-                                    </th>
-                                    <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
-                                        Experiences
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[#eee]">
-                                {paginatedCompanies.map((company: Company, index: number) => (
-                                    <tr
-                                        key={`${company.id}-${searchQuery}-${safePage}`}
-                                        className="group hover:bg-[#fafafa] transition-all cursor-pointer animate-row-in"
-                                        style={{ animationDelay: `${index * 30}ms` }}
-                                        onClick={() => handleCompanyClick(company.id)}
-                                    >
-                                        <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
-                                            <div className="flex flex-col">
-                                                <span className="font-semibold text-[#333] group-hover:text-maceng-orange transition-colors">
-                                                    {company.name}
-                                                </span>
-                                                <span className="md:hidden text-[#888] text-[11px] italic font-inter mt-0.5 line-clamp-1">
-                                                    {company.industries.join(', ')}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="hidden md:table-cell py-3 pr-6 text-[#777] text-sm italic font-inter leading-tight">
-                                            {company.industries.join(', ')}
-                                        </td>
-                                        <td className="py-3 text-right md:text-center">
-                                            {company.experience_count > 0 ? (
-                                                <span className="font-bold text-maceng-maroon text-[15px]">
-                                                    {company.experience_count}
-                                                </span>
-                                            ) : (
-                                                <span className="text-[#bbb]">—</span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {filteredCompanies.length === 0 && (
-                        <div className="text-center py-12 text-[#666] italic">
-                            No companies found matching your search.
+                    {/* Design Teams Content */}
+                    {teamsError ? (
+                        <div className="text-center py-12 text-red-600 italic">
+                            Failed to load design teams. Please try again later.
                         </div>
-                    )}
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-1.5 mt-4">
-                            <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={safePage === 1}
-                                className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
-                            >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`w-10 h-10 flex items-center justify-center rounded-lg border text-sm font-semibold transition-all ${page === safePage
-                                        ? 'bg-maceng-maroon text-white border-maceng-maroon shadow-md shadow-maceng-maroon/20'
-                                        : 'border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd]'
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={safePage === totalPages}
-                                className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
-                            >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
+                    ) : teamsLoading ? (
+                        <div className="mb-8">
+                            <CompanyListSkeleton />
                         </div>
+                    ) : (
+                        <>
+                            <div className="mb-8 overflow-hidden">
+                                <table className="w-full border-collapse">
+                                    <thead>
+                                        <tr className="border-b-2 border-maceng-maroon/20">
+                                            <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
+                                                Team
+                                            </th>
+                                            <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon font-semibold text-[16px] uppercase tracking-wider">
+                                                Category
+                                            </th>
+                                            <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
+                                                Reviews
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-[#eee]">
+                                        {filteredTeams.map((team: DesignTeam, index: number) => (
+                                            <tr
+                                                key={team.id}
+                                                className="group hover:bg-[#fafafa] transition-all cursor-pointer animate-row-in"
+                                                style={{ animationDelay: `${index * 30}ms` }}
+                                                onClick={() => handleTeamClick(team.id)}
+                                            >
+                                                <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-semibold text-[#333] group-hover:text-maceng-orange transition-colors">
+                                                            {team.name}
+                                                        </span>
+                                                        <span className="md:hidden text-[#888] text-[11px] italic font-inter mt-0.5 line-clamp-1">
+                                                            {team.categories.join(', ')}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="hidden md:table-cell py-3 pr-6 text-[#777] text-sm italic font-inter leading-tight">
+                                                    {team.categories.join(', ')}
+                                                </td>
+                                                <td className="py-3 text-right md:text-center">
+                                                    {team.review_count > 0 ? (
+                                                        <span className="font-bold text-maceng-maroon text-[15px]">
+                                                            {team.review_count}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[#bbb]">—</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {filteredTeams.length === 0 && (
+                                <div className="text-center py-12 text-[#666] italic">
+                                    No design teams found matching your search.
+                                </div>
+                            )}
+                        </>
                     )}
                 </>
             )}
