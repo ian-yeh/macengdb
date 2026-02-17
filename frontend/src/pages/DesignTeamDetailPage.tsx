@@ -97,7 +97,7 @@ export default function DesignTeamDetailPage() {
 
     if (isLoading || reviewsLoading) {
         return (
-            <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
+            <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-4xl mx-auto">
                 <CompanyDetailSkeleton />
             </div>
         );
@@ -163,7 +163,7 @@ export default function DesignTeamDetailPage() {
 
             {/* Header */}
             <header className="mb-8">
-                <h1 className="font-playfair text-3xl md:text-4xl font-bold text-maceng-maroon mb-3 tracking-tight">
+                <h1 className="font-playfair text-2xl md:text-3xl lg:text-4xl font-bold text-maceng-maroon mb-3 tracking-tight">
                     {team.name}
                 </h1>
                 {team.description && (
@@ -171,7 +171,7 @@ export default function DesignTeamDetailPage() {
                         {team.description}
                     </p>
                 )}
-                <div className="flex flex-wrap gap-3 items-center border-b border-[#e5e5e5] pb-6">
+                <div className="flex flex-wrap gap-2 md:gap-3 items-center border-b border-[#e5e5e5] pb-6">
                     {team.categories.map((cat: string) => (
                         <span
                             key={cat}
@@ -201,13 +201,13 @@ export default function DesignTeamDetailPage() {
             {/* Application Experiences */}
             <section>
                 <div className="flex items-center justify-between mb-8">
-                    <h2 className="font-playfair text-2xl font-semibold text-[#333]">
+                    <h2 className="font-playfair text-xl md:text-2xl font-semibold text-[#333]">
                         Application Experiences ({reviews.length})
                     </h2>
                     {!showForm && (
                         <button
                             onClick={() => setShowForm(true)}
-                            className="px-4 py-2 bg-maceng-maroon text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors cursor-pointer"
+                            className="px-3 py-1.5 md:px-4 md:py-2 bg-maceng-maroon text-white text-xs md:text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors cursor-pointer"
                         >
                             + Share Application Experience
                         </button>
@@ -216,7 +216,7 @@ export default function DesignTeamDetailPage() {
 
                 {/* Submission Form */}
                 {showForm && (
-                    <div className="mb-10 p-6 bg-[#fafafa] border border-[#eee] rounded-xl animate-fade-in">
+                    <div className="mb-10 p-4 md:p-6 bg-[#fafafa] border border-[#eee] rounded-xl animate-fade-in">
                         <h3 className="font-playfair text-lg text-maceng-maroon mb-1">Share Your Application Experience</h3>
                         <p className="text-xs text-[#888] mb-5">Help others prepare to apply. Your submission will be reviewed before publishing.</p>
 

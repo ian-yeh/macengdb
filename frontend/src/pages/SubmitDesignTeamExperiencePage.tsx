@@ -141,7 +141,7 @@ export default function SubmitDesignTeamExperiencePage() {
 
     if (success) {
         return (
-            <div className="min-h-screen py-12 px-8 max-w-2xl mx-auto">
+            <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto">
                 <div className="text-center py-16">
                     <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mb-4">
                         Thank you!
@@ -181,7 +181,7 @@ export default function SubmitDesignTeamExperiencePage() {
     }
 
     return (
-        <div className="min-h-screen py-12 px-8 max-w-2xl mx-auto">
+        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto">
             {/* Header */}
             <header className="mb-8">
                 <Link
@@ -191,7 +191,7 @@ export default function SubmitDesignTeamExperiencePage() {
                     ← Back to home
                 </Link>
 
-                <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mt-6 mb-2">
+                <h1 className="font-playfair text-2xl md:text-3xl font-semibold text-maceng-maroon mt-6 mb-2">
                     Submit an Application Experience
                 </h1>
                 <p className="text-[15px] text-[#555]">
