@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import useDebounce from '../hooks/useDebounce';
 import { useNavigate, Link } from 'react-router-dom';
 import { type Company } from '../api/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompanies, submitCompanyRequest } from '../api/api';
-import Loader from '../components/Loader';
+import CompanyListSkeleton from '../components/CompanyListSkeleton';
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function LandingPage() {
     const [minRating, setMinRating] = useState<number | undefined>(undefined);
     const [hasOffer, setHasOffer] = useState<boolean | undefined>(undefined);
     const [position, setPosition] = useState('');
+    const debouncedPosition = useDebounce(position, 500);
     const [showFilters, setShowFilters] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -22,13 +24,13 @@ export default function LandingPage() {
     const [requestStatus, setRequestStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
     const { data: companies = [], isLoading, error } = useQuery({
-        queryKey: ['companies', selectedIndustry, minRating, hasOffer, position],
+        queryKey: ['companies', selectedIndustry, minRating, hasOffer, debouncedPosition],
         queryFn: () => fetchCompanies(
-            undefined, // search is handled by local filtering for now to keep it responsive, or we can use it here
+            undefined, // search is handled by local filtering
             selectedIndustry,
             minRating,
             hasOffer,
-            position || undefined
+            debouncedPosition || undefined
         ),
     });
 
@@ -66,7 +68,22 @@ export default function LandingPage() {
     };
 
     if (isLoading) {
-        return <Loader message="Loading companies..." />;
+        return (
+            <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
+                <header className="mb-12">
+                    <h1 className="font-playfair text-4xl font-bold text-maceng-maroon mb-6 tracking-tight">MacEngDB</h1>
+                    <div className="space-y-4">
+                        <div className="skeleton w-full h-4" />
+                        <div className="skeleton w-3/4 h-4" />
+                    </div>
+                </header>
+                <div className="mb-10 flex gap-3">
+                    <div className="skeleton flex-1 h-12" />
+                    <div className="skeleton w-24 h-12" />
+                </div>
+                <CompanyListSkeleton />
+            </div>
+        );
     }
 
     if (error) {
