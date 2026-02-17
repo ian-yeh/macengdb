@@ -3,16 +3,16 @@ from datetime import datetime
 from typing import Optional
 
 
-class CompanyRequestCreate(BaseModel):
+class DesignTeamRequestCreate(BaseModel):
     name: str
     requester_email: Optional[str] = None
 
 
-class CompanyRequestUpdate(BaseModel):
+class DesignTeamRequestUpdate(BaseModel):
     name: str
 
 
-class CompanyRequestResponse(BaseModel):
+class DesignTeamRequestResponse(BaseModel):
     id: int
     name: str
     requester_email: Optional[str] = None

@@ -51,6 +51,23 @@ def approve_request(
     return company
 
 
+def update_request_name(
+    db: Session, request_id: int, new_name: str
+) -> Optional[CompanyRequestModel]:
+    """Update the name of a pending company request"""
+    req = (
+        db.query(CompanyRequestModel)
+        .filter(CompanyRequestModel.id == request_id)
+        .first()
+    )
+    if not req:
+        return None
+    req.name = new_name.strip()
+    db.commit()
+    db.refresh(req)
+    return req
+
+
 def reject_request(db: Session, request_id: int) -> bool:
     """Reject a company request"""
     req = (

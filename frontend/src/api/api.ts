@@ -1,4 +1,4 @@
-import { type Company, type Experience, type ExperienceSubmitData, type CompanyRequest, type DesignTeam, type DesignTeamReview, type DesignTeamReviewSubmitData } from './types';
+import { type Company, type Experience, type ExperienceSubmitData, type CompanyRequest, type DesignTeam, type DesignTeamReview, type DesignTeamReviewSubmitData, type DesignTeamRequest } from './types';
 
 const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api`;
 
@@ -164,6 +164,20 @@ export async function rejectCompanyRequest(id: number, adminKey: string): Promis
   if (!response.ok) throw new Error('Failed to reject company request');
 }
 
+export async function updateCompanyRequest(id: number, adminKey: string, name: string): Promise<CompanyRequest> {
+  const response = await fetch(`${API_BASE_URL}/admin/company-requests/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'X-Admin-Key': adminKey,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) throw new Error('Failed to update company request');
+  return response.json();
+}
+
 // Design Teams API
 
 export async function fetchDesignTeams(category?: string): Promise<DesignTeam[]> {
@@ -204,5 +218,114 @@ export async function submitDesignTeamReview(data: DesignTeamReviewSubmitData): 
     throw new Error(message);
   }
 
+  return response.json();
+}
+
+// Admin - Design Team Reviews
+
+export async function fetchPendingDesignTeamReviews(adminKey: string): Promise<DesignTeamReview[]> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-team-reviews`, {
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to fetch pending design team reviews');
+  return response.json();
+}
+
+export async function approveDesignTeamReview(id: number, adminKey: string): Promise<DesignTeamReview> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-team-reviews/${id}/approve`, {
+    method: 'PATCH',
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to approve design team review');
+  return response.json();
+}
+
+export async function rejectDesignTeamReview(id: number, adminKey: string): Promise<DesignTeamReview> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-team-reviews/${id}/reject`, {
+    method: 'PATCH',
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to reject design team review');
+  return response.json();
+}
+
+export async function deleteDesignTeamReview(id: number, adminKey: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-team-reviews/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to delete design team review');
+}
+
+// Admin - Manual Company Creation
+
+export async function adminCreateCompany(adminKey: string, name: string, industries: string[]): Promise<Company> {
+  const response = await fetch(`${API_BASE_URL}/admin/companies`, {
+    method: 'POST',
+    headers: {
+      'X-Admin-Key': adminKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name, industries }),
+  });
+
+  if (!response.ok) throw new Error('Failed to create company');
+  return response.json();
+}
+
+// Design Team Request API functions
+
+export async function submitDesignTeamRequest(name: string, email?: string): Promise<DesignTeamRequest> {
+  const response = await fetch(`${API_BASE_URL}/design-team-requests`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, requester_email: email || null }),
+  });
+  if (!response.ok) throw new Error('Failed to submit design team request');
+  return response.json();
+}
+
+export async function fetchPendingDesignTeamRequests(adminKey: string): Promise<DesignTeamRequest[]> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-team-requests`, {
+    headers: { 'X-Admin-Key': adminKey },
+  });
+  if (!response.ok) throw new Error('Failed to fetch design team requests');
+  return response.json();
+}
+
+export async function approveDesignTeamRequest(id: number, adminKey: string): Promise<DesignTeam> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-team-requests/${id}/approve`, {
+    method: 'PATCH',
+    headers: {
+      'X-Admin-Key': adminKey,
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!response.ok) throw new Error('Failed to approve design team request');
+  return response.json();
+}
+
+export async function rejectDesignTeamRequest(id: number, adminKey: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-team-requests/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Key': adminKey },
+  });
+  if (!response.ok) throw new Error('Failed to reject design team request');
+}
+
+export async function updateDesignTeamRequest(id: number, adminKey: string, name: string): Promise<DesignTeamRequest> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-team-requests/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'X-Admin-Key': adminKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok) throw new Error('Failed to update design team request');
   return response.json();
 }

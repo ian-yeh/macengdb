@@ -10,6 +10,14 @@ const TERM_OPTIONS = [
     'Fall 2025', 'Winter 2026', 'Spring 2026', 'Summer 2026',
 ];
 
+const DIFFICULTY_LABELS: Record<number, string> = {
+    1: 'Very Easy',
+    2: 'Easy',
+    3: 'Moderate',
+    4: 'Hard',
+    5: 'Very Hard',
+};
+
 export default function SubmitDesignTeamExperiencePage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -20,12 +28,13 @@ export default function SubmitDesignTeamExperiencePage() {
     const [selectedTeam, setSelectedTeam] = useState<DesignTeam | null>(null);
     const [teamSuggestions, setTeamSuggestions] = useState<DesignTeam[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const [role, setRole] = useState('');
+    const [position, setPosition] = useState('');
     const [term, setTerm] = useState('');
-    const [timeCommitment, setTimeCommitment] = useState('');
-    const [rating, setRating] = useState(0);
+    const [accepted, setAccepted] = useState(false);
+    const [difficulty, setDifficulty] = useState(0);
     const [description, setDescription] = useState('');
     const [tips, setTips] = useState('');
+    const [interviewAcquisition, setInterviewAcquisition] = useState('');
 
     // UI state
     const [submitting, setSubmitting] = useState(false);
@@ -92,8 +101,8 @@ export default function SubmitDesignTeamExperiencePage() {
             return;
         }
 
-        if (!role.trim()) {
-            setError('Please enter your role on the team');
+        if (!position.trim()) {
+            setError('Please enter the position you applied for');
             return;
         }
 
@@ -102,8 +111,8 @@ export default function SubmitDesignTeamExperiencePage() {
             return;
         }
 
-        if (rating === 0) {
-            setError('Please select a rating');
+        if (difficulty === 0) {
+            setError('Please select the application difficulty');
             return;
         }
 
@@ -112,12 +121,13 @@ export default function SubmitDesignTeamExperiencePage() {
             await submitDesignTeamReview({
                 design_team_id: selectedTeam.id,
                 submitter_email: email.trim().toLowerCase(),
-                role: role.trim(),
+                position: position.trim(),
                 term,
-                time_commitment: timeCommitment.trim() || undefined,
-                rating,
+                accepted,
+                difficulty,
                 description: description.trim() || undefined,
                 tips: tips.trim() || undefined,
+                interview_acquisition: interviewAcquisition.trim() || undefined,
             });
             queryClient.invalidateQueries({ queryKey: ['design-teams'] });
             queryClient.invalidateQueries({ queryKey: ['design-team-reviews'] });
@@ -131,13 +141,13 @@ export default function SubmitDesignTeamExperiencePage() {
 
     if (success) {
         return (
-            <div className="min-h-screen py-12 px-8 max-w-2xl mx-auto">
+            <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto">
                 <div className="text-center py-16">
                     <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mb-4">
                         Thank you!
                     </h1>
                     <p className="text-[15px] text-[#555] mb-8">
-                        Your experience has been submitted successfully and sent to an admin for review. It will help fellow McMaster Engineering students learn about design teams.
+                        Your application experience has been submitted successfully and sent to an admin for review. It will help fellow McMaster Engineering students prepare to join design teams.
                     </p>
                     <div className="flex gap-4 justify-center">
                         <button
@@ -152,12 +162,13 @@ export default function SubmitDesignTeamExperiencePage() {
                                 setEmail('');
                                 setSelectedTeam(null);
                                 setTeamQuery('');
-                                setRole('');
+                                setPosition('');
                                 setTerm('');
-                                setTimeCommitment('');
-                                setRating(0);
+                                setAccepted(false);
+                                setDifficulty(0);
                                 setDescription('');
                                 setTips('');
+                                setInterviewAcquisition('');
                             }}
                             className="px-6 py-2.5 border border-maceng-maroon text-maceng-maroon rounded font-medium text-sm hover:bg-maceng-maroon/5 transition-colors cursor-pointer"
                         >
@@ -170,7 +181,7 @@ export default function SubmitDesignTeamExperiencePage() {
     }
 
     return (
-        <div className="min-h-screen py-12 px-8 max-w-2xl mx-auto">
+        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto">
             {/* Header */}
             <header className="mb-8">
                 <Link
@@ -180,11 +191,11 @@ export default function SubmitDesignTeamExperiencePage() {
                     ← Back to home
                 </Link>
 
-                <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mt-6 mb-2">
-                    Submit a Design Team Experience
+                <h1 className="font-playfair text-2xl md:text-3xl font-semibold text-maceng-maroon mt-6 mb-2">
+                    Submit an Application Experience
                 </h1>
                 <p className="text-[15px] text-[#555]">
-                    Share your experience on a McMaster design team to help fellow students find the right fit.
+                    Share your experience applying to a McMaster design team to help fellow students prepare.
                 </p>
             </header>
 
@@ -254,15 +265,15 @@ export default function SubmitDesignTeamExperiencePage() {
                     )}
                 </div>
 
-                {/* Role */}
+                {/* Position */}
                 <div>
                     <label className="block text-sm font-medium text-[#333] mb-1.5">
-                        Your Role <span className="text-maceng-orange">*</span>
+                        Position Applied For <span className="text-maceng-orange">*</span>
                     </label>
                     <input
                         type="text"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
+                        value={position}
+                        onChange={(e) => setPosition(e.target.value)}
                         placeholder="e.g. Mechanical Lead, Software Developer, Electrical Member"
                         className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
                         required
@@ -287,54 +298,69 @@ export default function SubmitDesignTeamExperiencePage() {
                     </select>
                 </div>
 
-                {/* Time Commitment */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] mb-1.5">
-                        Time Commitment
+                {/* Accepted */}
+                <div className="flex items-center gap-3">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={accepted}
+                            onChange={(e) => setAccepted(e.target.checked)}
+                            className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-[#ddd] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-maceng-maroon"></div>
                     </label>
-                    <input
-                        type="text"
-                        value={timeCommitment}
-                        onChange={(e) => setTimeCommitment(e.target.value)}
-                        placeholder="e.g. 10 hrs/week, 5-15 hrs/week"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
-                    />
-                    <p className="text-xs text-[#888] mt-1">Optional. Helps others understand the expected workload.</p>
+                    <span className="text-sm font-medium text-[#333]">Received an acceptance</span>
                 </div>
 
-                {/* Rating */}
+                {/* Difficulty */}
                 <div>
                     <label className="block text-sm font-medium text-[#333] mb-1.5">
-                        Overall Rating <span className="text-maceng-orange">*</span>
+                        Application Difficulty <span className="text-maceng-orange">*</span>
                     </label>
-                    <div className="flex gap-1 items-center">
+                    <div className="flex gap-1.5 items-center">
                         {[1, 2, 3, 4, 5].map((level) => (
                             <button
                                 key={level}
                                 type="button"
-                                onClick={() => setRating(level)}
-                                className={`text-2xl transition-colors cursor-pointer bg-transparent border-none p-1 ${level <= rating ? 'text-maceng-orange' : 'text-[#ddd] hover:text-maceng-orange/50'}`}
-                            >
-                                ★
-                            </button>
+                                onClick={() => setDifficulty(level)}
+                                className={`w-7 h-7 rounded-full transition-colors cursor-pointer border-2 ${level <= difficulty
+                                    ? 'bg-maceng-orange border-maceng-orange'
+                                    : 'bg-white border-[#ddd] hover:border-maceng-orange/50'
+                                    }`}
+                            />
                         ))}
-                        {rating > 0 && (
+                        {difficulty > 0 && (
                             <span className="text-xs text-[#888] ml-2">
-                                {rating <= 2 ? 'Needs improvement' : rating === 3 ? 'Average' : rating === 4 ? 'Great' : 'Excellent'}
+                                {DIFFICULTY_LABELS[difficulty]}
                             </span>
                         )}
                     </div>
                 </div>
 
+                {/* How You Found Out */}
+                <div>
+                    <label className="block text-sm font-medium text-[#333] mb-1.5">
+                        How Did You Find Out About Recruiting?
+                    </label>
+                    <input
+                        type="text"
+                        value={interviewAcquisition}
+                        onChange={(e) => setInterviewAcquisition(e.target.value)}
+                        placeholder="e.g. Club fair, friend, Instagram, Discord"
+                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
+                    />
+                    <p className="text-xs text-[#888] mt-1">Optional. Helps others know where to look for openings.</p>
+                </div>
+
                 {/* Description */}
                 <div>
                     <label className="block text-sm font-medium text-[#333] mb-1.5">
-                        Describe Your Experience
+                        Describe the Application Process
                     </label>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="What was it like being on this team? What did you work on? What did you learn?"
+                        placeholder="What was the application process like? Were there interviews, technical challenges, or portfolio reviews?"
                         rows={4}
                         className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon resize-none"
                     />
@@ -343,12 +369,12 @@ export default function SubmitDesignTeamExperiencePage() {
                 {/* Tips */}
                 <div>
                     <label className="block text-sm font-medium text-[#333] mb-1.5">
-                        Tips & Advice
+                        Tips for Future Applicants
                     </label>
                     <textarea
                         value={tips}
                         onChange={(e) => setTips(e.target.value)}
-                        placeholder="Any advice for someone joining this team? (optional)"
+                        placeholder="Any advice for someone applying to this team? (optional)"
                         rows={3}
                         className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon resize-none"
                     />
@@ -367,7 +393,7 @@ export default function SubmitDesignTeamExperiencePage() {
                     disabled={submitting}
                     className="w-full py-3 bg-maceng-maroon text-white rounded font-medium text-sm hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
-                    {submitting ? 'Submitting...' : 'Submit Experience'}
+                    {submitting ? 'Submitting...' : 'Submit Application Experience'}
                 </button>
             </form>
 

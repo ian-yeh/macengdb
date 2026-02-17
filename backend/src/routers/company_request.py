@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
-from src.schemas.company_request import CompanyRequestCreate, CompanyRequestResponse
+from src.schemas.company_request import (
+    CompanyRequestCreate,
+    CompanyRequestUpdate,
+    CompanyRequestResponse,
+)
 from src.schemas.company import CompanyResponse, CompanyApprove
 import src.crud.company_request as crud
 from src.utils.database import get_db
@@ -37,6 +41,22 @@ async def get_pending_company_requests(
 ):
     """Get all pending company requests."""
     return crud.get_pending_requests(db)
+
+
+@router.patch(
+    "/admin/company-requests/{request_id}", response_model=CompanyRequestResponse
+)
+async def update_company_request(
+    request_id: int,
+    payload: CompanyRequestUpdate,
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Update a company request's name (e.g. to fix spelling)."""
+    updated = crud.update_request_name(db, request_id, payload.name)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Request not found")
+    return updated
 
 
 @router.patch(

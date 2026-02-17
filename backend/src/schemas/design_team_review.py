@@ -4,18 +4,19 @@ from datetime import datetime
 
 
 class DesignTeamReviewBase(BaseModel):
-    role: str
+    position: str
     term: str
-    time_commitment: Optional[str] = None
-    rating: int  # 1-5
+    accepted: bool = False
+    difficulty: int  # 1-5
     description: Optional[str] = None
     tips: Optional[str] = None
+    interview_acquisition: Optional[str] = None
 
-    @field_validator("rating")
+    @field_validator("difficulty")
     @classmethod
-    def validate_rating(cls, v: int) -> int:
+    def validate_difficulty(cls, v: int) -> int:
         if v < 1 or v > 5:
-            raise ValueError("Rating must be between 1 and 5")
+            raise ValueError("Difficulty must be between 1 and 5")
         return v
 
 
@@ -32,7 +33,7 @@ class DesignTeamReviewResponse(DesignTeamReviewBase):
 
 
 class DesignTeamReviewSubmit(DesignTeamReviewBase):
-    """Schema for submitting a design team review."""
+    """Schema for submitting a design team application experience."""
 
     design_team_id: int
     submitter_email: str

@@ -16,9 +16,9 @@ def get_all_design_teams(
             func.count(DesignTeamReviewModel.id)
             .filter(DesignTeamReviewModel.status == "approved")
             .label("review_count"),
-            func.avg(DesignTeamReviewModel.rating)
+            func.avg(DesignTeamReviewModel.difficulty)
             .filter(DesignTeamReviewModel.status == "approved")
-            .label("avg_rating"),
+            .label("avg_difficulty"),
         )
         .outerjoin(
             DesignTeamReviewModel,
@@ -33,9 +33,9 @@ def get_all_design_teams(
     results = query.order_by(DesignTeamModel.name).all()
 
     teams = []
-    for team, review_count, avg_rating in results:
+    for team, review_count, avg_difficulty in results:
         team.review_count = review_count
-        team.avg_rating = round(avg_rating, 1) if avg_rating else None
+        team.avg_difficulty = round(avg_difficulty, 1) if avg_difficulty else None
         teams.append(team)
     return teams
 
@@ -47,9 +47,9 @@ def get_design_team(db: Session, team_id: int):
             func.count(DesignTeamReviewModel.id)
             .filter(DesignTeamReviewModel.status == "approved")
             .label("review_count"),
-            func.avg(DesignTeamReviewModel.rating)
+            func.avg(DesignTeamReviewModel.difficulty)
             .filter(DesignTeamReviewModel.status == "approved")
-            .label("avg_rating"),
+            .label("avg_difficulty"),
         )
         .outerjoin(
             DesignTeamReviewModel,
@@ -60,9 +60,9 @@ def get_design_team(db: Session, team_id: int):
         .first()
     )
     if result:
-        team, review_count, avg_rating = result
+        team, review_count, avg_difficulty = result
         team.review_count = review_count
-        team.avg_rating = round(avg_rating, 1) if avg_rating else None
+        team.avg_difficulty = round(avg_difficulty, 1) if avg_difficulty else None
         return team
     return None
 
@@ -73,5 +73,5 @@ def create_design_team(db: Session, team: DesignTeamCreate):
     db.commit()
     db.refresh(db_team)
     db_team.review_count = 0
-    db_team.avg_rating = None
+    db_team.avg_difficulty = None
     return db_team

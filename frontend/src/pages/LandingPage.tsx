@@ -87,10 +87,10 @@ export default function LandingPage() {
     };
 
     return (
-        <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
+        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-4xl mx-auto">
             {/* Header */}
             <header className="mb-12">
-                <h1 className="font-playfair text-4xl font-bold text-maceng-maroon mb-6 tracking-tight">
+                <h1 className="font-playfair text-3xl md:text-4xl font-bold text-maceng-maroon mb-6 tracking-tight">
                     MacEngDB
                 </h1>
 
@@ -100,7 +100,7 @@ export default function LandingPage() {
                 <div className="space-y-4">
                     {activeTab === 'companies' ? (
                         <>
-                            <p className="text-[16px] leading-relaxed text-[#333]">
+                            <p className="text-[14px] md:text-[16px] leading-relaxed text-[#333]">
                                 Welcome to the interview database for engineering students at{' '}
                                 <a
                                     href="https://www.eng.mcmaster.ca/"
@@ -126,9 +126,9 @@ export default function LandingPage() {
                         </>
                     ) : (
                         <>
-                            <p className="text-[16px] leading-relaxed text-[#333]">
+                            <p className="text-[14px] md:text-[16px] leading-relaxed text-[#333]">
                                 Explore McMaster Engineering's design teams and student-run technical organizations.
-                                Read about real experiences from team members to find the right fit for you.
+                                Read about real application experiences from students to help you prepare.
                             </p>
                             <p className="text-[15px] leading-relaxed text-[#444] font-medium">
                                 If you're a <span className="text-maceng-maroon">McMaster</span> student, we welcome your contributions (
@@ -136,7 +136,7 @@ export default function LandingPage() {
                                     to="/submit-design-team"
                                     className="text-maceng-orange font-bold underline decoration-maceng-orange/30 hover:decoration-maceng-orange"
                                 >
-                                    submit a design team experience
+                                    submit an application experience
                                 </Link>
                                 ).
                             </p>
@@ -253,7 +253,7 @@ export default function LandingPage() {
                 </div>
 
                 {activeTab === 'companies' && showFilters && (
-                    <div className="p-5 bg-[#fafafa] border border-[#eee] rounded-xl flex flex-wrap gap-6 animate-fade-in shadow-sm">
+                    <div className="p-4 md:p-5 bg-[#fafafa] border border-[#eee] rounded-xl flex flex-col sm:flex-row flex-wrap gap-4 md:gap-6 animate-fade-in shadow-sm">
                         {/* Industry Filter */}
                         <div className="flex flex-col gap-2 min-w-[150px]">
                             <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60">Industry</label>
@@ -418,11 +418,11 @@ export default function LandingPage() {
 
                             {/* Pagination */}
                             {totalPages > 1 && (
-                                <div className="flex items-center justify-center gap-1.5 mt-4">
+                                <div className="flex items-center justify-center gap-1 md:gap-1.5 mt-4 flex-wrap">
                                     <button
                                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                         disabled={safePage === 1}
-                                        className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -432,7 +432,7 @@ export default function LandingPage() {
                                         <button
                                             key={page}
                                             onClick={() => setCurrentPage(page)}
-                                            className={`w-10 h-10 flex items-center justify-center rounded-lg border text-sm font-semibold transition-all ${page === safePage
+                                            className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border text-xs md:text-sm font-semibold transition-all ${page === safePage
                                                 ? 'bg-maceng-maroon text-white border-maceng-maroon shadow-md shadow-maceng-maroon/20'
                                                 : 'border-[#eee] text-[#777] hover:bg-[#fafafa] hover:border-[#ddd]'
                                                 }`}
@@ -462,7 +462,7 @@ export default function LandingPage() {
                             to="/submit-design-team"
                             className="px-4 py-2 bg-maceng-maroon text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors inline-flex items-center gap-1.5"
                         >
-                            + Share a Design Team Experience
+                            + Share an Application Experience
                         </Link>
                     </div>
                     {/* Design Teams Content */}

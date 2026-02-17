@@ -51,6 +51,14 @@ export interface CompanyRequest {
     created_at: string;
 }
 
+export interface DesignTeamRequest {
+    id: number;
+    name: string;
+    requester_email: string | null;
+    status: string;
+    created_at: string;
+}
+
 export interface DesignTeam {
     id: number;
     name: string;
@@ -58,7 +66,7 @@ export interface DesignTeam {
     categories: string[];
     website_url: string | null;
     review_count: number;
-    avg_rating: number | null;
+    avg_difficulty: number | null;
     created_at: string;
     updated_at: string;
 }
@@ -67,12 +75,13 @@ export interface DesignTeamReview {
     id: number;
     design_team_id: number;
     submitter_email: string;
-    role: string;
+    position: string;
     term: string;
-    time_commitment: string | null;
-    rating: number;
+    accepted: boolean;
+    difficulty: number;
     description: string | null;
     tips: string | null;
+    interview_acquisition: string | null;
     status: string;
     created_at: string;
     updated_at: string;
@@ -81,10 +90,11 @@ export interface DesignTeamReview {
 export interface DesignTeamReviewSubmitData {
     design_team_id: number;
     submitter_email: string;
-    role: string;
+    position: string;
     term: string;
-    time_commitment?: string;
-    rating: number;
+    accepted: boolean;
+    difficulty: number;
     description?: string;
     tips?: string;
+    interview_acquisition?: string;
 }
