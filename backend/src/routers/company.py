@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from src.schemas import CompanyResponse, CompanyCreate
 import src.crud.company as crud
 from src.utils.database import get_db
@@ -9,15 +9,27 @@ router = APIRouter()
 
 
 @router.get("/companies", response_model=List[CompanyResponse])
-async def get_companies(db: Session = Depends(get_db)):
+async def get_companies(
+    industry: Optional[str] = None,
+    min_rating: Optional[float] = None,
+    has_offer: Optional[bool] = None,
+    position: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
     """
-    Get all companies.
+    Get all companies with optional filters.
     Used by the Landing Page.
 
     Returns:
         List[CompanySchema]: List of companies
     """
-    return crud.get_all_companies(db)
+    return crud.get_all_companies(
+        db,
+        industry=industry,
+        min_rating=min_rating,
+        has_offer=has_offer,
+        position=position,
+    )
 
 
 @router.get("/companies/search", response_model=List[CompanyResponse])

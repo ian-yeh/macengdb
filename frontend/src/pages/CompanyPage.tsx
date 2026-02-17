@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompany, fetchCompanyExperiences } from '../api/api';
 import { type Experience as ExperienceType } from '../api/types';
-import Loader from '../components/Loader';
+import CompanyDetailSkeleton from '../components/CompanyDetailSkeleton';
 
 export default function CompanyPage() {
     const { companyId } = useParams<{ companyId: string }>();
@@ -20,7 +20,11 @@ export default function CompanyPage() {
     });
 
     if (isLoading || experiencesLoading) {
-        return <Loader message="Loading company details..." />;
+        return (
+            <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
+                <CompanyDetailSkeleton />
+            </div>
+        );
     }
 
     if (error || !company || experiencesError) {
