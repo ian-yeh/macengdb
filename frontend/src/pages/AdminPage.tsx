@@ -206,13 +206,17 @@ export default function AdminPage() {
     // --- Design Team Request actions ---
     const [editingDTRequest, setEditingDTRequest] = useState<number | null>(null);
     const [editedDTNames, setEditedDTNames] = useState<Record<number, string>>({});
+    const [dtRequestCategories, setDtRequestCategories] = useState<Record<number, string>>({});
 
     const handleApproveDTReq = async (id: number) => {
         const key = `dtreq-${id}`;
         if (processing.has(key)) return;
         setProcessing(prev => new Set(prev).add(key));
         try {
-            await approveDesignTeamRequest(id, adminKey);
+            const categories = dtRequestCategories[id]
+                ? dtRequestCategories[id].split(',').map(s => s.trim()).filter(s => s !== '')
+                : [];
+            await approveDesignTeamRequest(id, adminKey, categories);
             showFeedback(key, 'Design team created!', 'success');
             queryClient.invalidateQueries({ queryKey: ['admin'] });
             queryClient.invalidateQueries({ queryKey: ['design-teams'] });
@@ -475,7 +479,7 @@ export default function AdminPage() {
                                         });
                                         return (
                                             <div key={req.id} className="flex flex-col border border-[#e5e5e5] rounded-lg bg-white overflow-hidden animate-row-in">
-                                                <div className="flex items-center justify-between px-4 md:px-5 py-3">
+                                                <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-[#f5f5f5]">
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2 flex-wrap">
                                                             {editingDTRequest === req.id ? (
@@ -513,7 +517,25 @@ export default function AdminPage() {
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-2 ml-2">
+                                                    <button
+                                                        onClick={() => handleRejectDTReq(req.id)}
+                                                        disabled={processing.has(`dtreq-${req.id}`)}
+                                                        className="px-3 py-1.5 text-[#888] text-xs font-medium hover:text-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer ml-2"
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </div>
+                                                <div className="bg-[#fafafa] px-4 md:px-5 py-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                                    <div className="flex-1">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Categories (comma separated: Robotics, Software...)"
+                                                            value={dtRequestCategories[req.id] || ''}
+                                                            onChange={(e) => setDtRequestCategories({ ...dtRequestCategories, [req.id]: e.target.value })}
+                                                            className="w-full bg-white border border-[#ddd] rounded px-3 py-1.5 text-xs focus:outline-none focus:border-maceng-maroon"
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
                                                         {feedback?.key === `dtreq-${req.id}` && (
                                                             <span className={`text-xs ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
                                                                 {feedback.message}
@@ -522,16 +544,9 @@ export default function AdminPage() {
                                                         <button
                                                             onClick={() => handleApproveDTReq(req.id)}
                                                             disabled={processing.has(`dtreq-${req.id}`)}
-                                                            className="px-3 py-1.5 bg-maceng-maroon text-white text-xs rounded font-medium hover:bg-maceng-maroon/90 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                                            className="px-4 py-1.5 bg-maceng-maroon text-white text-xs rounded font-medium hover:bg-maceng-maroon/90 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                                         >
                                                             {processing.has(`dtreq-${req.id}`) ? 'Processing...' : 'Approve & Create'}
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleRejectDTReq(req.id)}
-                                                            disabled={processing.has(`dtreq-${req.id}`)}
-                                                            className="px-3 py-1.5 text-[#888] text-xs font-medium hover:text-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                                                        >
-                                                            Reject
                                                         </button>
                                                     </div>
                                                 </div>

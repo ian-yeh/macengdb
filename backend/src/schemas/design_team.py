@@ -23,3 +23,7 @@ class DesignTeamResponse(DesignTeamBase):
 
 class DesignTeamCreate(DesignTeamBase):
     pass
+
+
+class DesignTeamApprove(BaseModel):
+    categories: List[str] = []

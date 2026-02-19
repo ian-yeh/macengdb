@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { fetchDesignTeams, submitDesignTeamReview } from '../api/api';
 import { type DesignTeam } from '../api/types';
+import DesignTeamRequestModal from '../components/DesignTeamRequestModal';
 
 const TERM_OPTIONS = [
     'Fall 2023', 'Winter 2024', 'Spring 2024', 'Summer 2024',
@@ -41,6 +42,7 @@ export default function SubmitDesignTeamExperiencePage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const suggestionsRef = useRef<HTMLDivElement>(null);
+    const [showRequestModal, setShowRequestModal] = useState(false);
 
     // Team search
     useEffect(() => {
@@ -263,6 +265,18 @@ export default function SubmitDesignTeamExperiencePage() {
                             ))}
                         </div>
                     )}
+                    {/* Design Team request trigger */}
+                    {!selectedTeam && (
+                        <div className="mt-2">
+                            <button
+                                type="button"
+                                onClick={() => setShowRequestModal(true)}
+                                className="text-xs text-maceng-orange hover:text-maceng-maroon transition-colors cursor-pointer"
+                            >
+                                Can't find your design team? Request it →
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Position */}
@@ -396,6 +410,12 @@ export default function SubmitDesignTeamExperiencePage() {
                     {submitting ? 'Submitting...' : 'Submit Application Experience'}
                 </button>
             </form>
+
+            {/* Request Modal */}
+            <DesignTeamRequestModal
+                isOpen={showRequestModal}
+                onClose={() => setShowRequestModal(false)}
+            />
 
             {/* Footer */}
             <footer className="mt-16 pt-8 border-t border-[#e5e5e5] text-[13px] text-[#666]">

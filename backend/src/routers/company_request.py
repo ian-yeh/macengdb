@@ -24,7 +24,7 @@ def verify_admin_key(x_admin_key: str = Header(...)):
 
 
 @router.post("/company-requests", response_model=CompanyRequestResponse)
-@limiter.limit("5/minute")
+@limiter.limit("3/minute")
 async def submit_company_request(
     request: Request, payload: CompanyRequestCreate, db: Session = Depends(get_db)
 ):
