@@ -112,7 +112,7 @@ export default function CompanyPage() {
                                     {experience.interview_acquisition && (
                                         <div className="mb-5 flex items-center gap-2.5 animate-row-in" style={{ animationDelay: `${300 + index * 60}ms` }}>
                                             <div className="flex items-center gap-2 px-3 py-1.5 bg-maceng-orange/5 border border-maceng-orange/20 rounded-lg group">
-                                                <span className="text-[10px] uppercase tracking-wider font-bold text-maceng-orange/60">Found via</span>
+                                                <span className="text-[10px] uppercase tracking-wider font-bold text-maceng-orange/60">Applied via</span>
                                                 <span className="text-[13px] text-maceng-orange font-semibold">{experience.interview_acquisition}</span>
                                             </div>
                                         </div>
@@ -149,7 +149,7 @@ export default function CompanyPage() {
                                     {experience.tips && (
                                         <div className="bg-[#fffbf5] border-l-3 border-maceng-orange/40 rounded-r px-4 py-3 mb-3">
                                             <p className="text-[11px] uppercase tracking-widest text-maceng-orange/70 font-semibold mb-1">Tips</p>
-                                            <p className="text-sm text-[#444] leading-relaxed">{experience.tips}</p>
+                                            <p className="text-sm text-[#444] leading-relaxed whitespace-pre-wrap">{experience.tips}</p>
                                         </div>
                                     )}
 

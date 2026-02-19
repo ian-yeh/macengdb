@@ -376,7 +376,7 @@ export default function SubmitDesignTeamExperiencePage() {
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="What was the application process like? Were there interviews, technical challenges, or portfolio reviews?"
                         rows={4}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon resize-none"
+                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon min-h-[120px]"
                     />
                 </div>
 
@@ -390,7 +390,7 @@ export default function SubmitDesignTeamExperiencePage() {
                         onChange={(e) => setTips(e.target.value)}
                         placeholder="Any advice for someone applying to this team? (optional)"
                         rows={3}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon resize-none"
+                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon min-h-[80px]"
                     />
                 </div>
 

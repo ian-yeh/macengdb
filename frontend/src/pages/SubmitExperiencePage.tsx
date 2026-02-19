@@ -427,7 +427,7 @@ export default function SubmitExperiencePage() {
                                     onChange={(e) => updateStage(index, 'questions', e.target.value.split('\n').filter(q => q.trim()))}
                                     placeholder="Questions asked"
                                     rows={2}
-                                    className="w-full py-1.5 px-2.5 text-sm border border-[#ddd] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon resize-none"
+                                    className="w-full py-1.5 px-2.5 text-sm border border-[#ddd] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon min-h-[80px]"
                                 />
                             </div>
                         ))}
@@ -444,7 +444,7 @@ export default function SubmitExperiencePage() {
                         onChange={(e) => setTips(e.target.value)}
                         placeholder="Any advice for future candidates? (optional)"
                         rows={3}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon resize-none"
+                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon min-h-[100px]"
                     />
                 </div>
 

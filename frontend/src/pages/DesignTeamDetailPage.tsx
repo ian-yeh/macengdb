@@ -319,7 +319,7 @@ export default function DesignTeamDetailPage() {
                                         placeholder="What was the application process like? Were there interviews, technical challenges, or portfolio reviews?"
                                         value={formData.description}
                                         onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                                        className={`${inputClass} resize-none`}
+                                        className={`${inputClass} min-h-[120px]`}
                                     />
                                 </div>
 
@@ -332,7 +332,7 @@ export default function DesignTeamDetailPage() {
                                         placeholder="Any advice for someone applying to this team?"
                                         value={formData.tips}
                                         onChange={(e) => setFormData(prev => ({ ...prev, tips: e.target.value }))}
-                                        className={`${inputClass} resize-none`}
+                                        className={`${inputClass} min-h-[80px]`}
                                     />
                                 </div>
 
@@ -395,21 +395,21 @@ export default function DesignTeamDetailPage() {
                                 {review.interview_acquisition && (
                                     <div className="mb-4 flex items-center gap-2.5">
                                         <div className="flex items-center gap-2 px-2.5 py-1 bg-maceng-orange/5 border border-maceng-orange/20 rounded-lg">
-                                            <span className="text-[10px] uppercase font-bold text-maceng-orange/60 tracking-wider">Acquisition</span>
+                                            <span className="text-[10px] uppercase font-bold text-maceng-orange/60 tracking-wider">Applied via</span>
                                             <span className="text-[12px] text-maceng-orange font-semibold">{review.interview_acquisition}</span>
                                         </div>
                                     </div>
                                 )}
 
                                 {review.description && (
-                                    <p className="text-[15px] text-[#444] leading-relaxed mb-3">
+                                    <p className="text-[15px] text-[#444] leading-relaxed mb-3 whitespace-pre-wrap">
                                         {review.description}
                                     </p>
                                 )}
 
                                 {review.tips && (
                                     <div className="bg-maceng-orange/5 border-l-3 border-maceng-orange px-4 py-3 rounded-r-lg">
-                                        <p className="text-[13px] text-[#555] font-medium">
+                                        <p className="text-[13px] text-[#555] font-medium whitespace-pre-wrap">
                                             <span className="text-maceng-orange font-bold">Tip:</span>{' '}
                                             {review.tips}
                                         </p>
