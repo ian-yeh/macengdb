@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { searchCompanies, submitExperience, submitCompanyRequest } from '../api/api';
+import { searchCompanies, submitExperience } from '../api/api';
 import { type Company, type InterviewStage, type ExperienceSubmitData } from '../api/types';
+import CompanyRequestModal from '../components/CompanyRequestModal';
 
 const TERM_OPTIONS = [
     'Winter 2021', 'Spring 2021', 'Summer 2021', 'Fall 2021',
@@ -37,9 +38,6 @@ export default function SubmitExperiencePage() {
     const [success, setSuccess] = useState(false);
     const suggestionsRef = useRef<HTMLDivElement>(null);
     const [showRequestModal, setShowRequestModal] = useState(false);
-    const [requestName, setRequestName] = useState('');
-    const [requestEmail, setRequestEmail] = useState('');
-    const [requestStatus, setRequestStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
     // Company search
     useEffect(() => {
@@ -98,18 +96,6 @@ export default function SubmitExperiencePage() {
         setStages(stages.filter((_, i) => i !== index));
     };
 
-    const handleRequestSubmit = async () => {
-        if (!requestName.trim()) return;
-        setRequestStatus('submitting');
-        try {
-            await submitCompanyRequest(requestName.trim(), requestEmail.trim() || undefined);
-            setRequestStatus('success');
-            setRequestName('');
-            setRequestEmail('');
-        } catch {
-            setRequestStatus('error');
-        }
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -290,7 +276,7 @@ export default function SubmitExperiencePage() {
                         <div className="mt-2">
                             <button
                                 type="button"
-                                onClick={() => { setShowRequestModal(true); setRequestStatus('idle'); setRequestName(''); }}
+                                onClick={() => setShowRequestModal(true)}
                                 className="text-xs text-maceng-orange hover:text-maceng-maroon transition-colors"
                             >
                                 Can't find your company? Request it →
@@ -441,7 +427,7 @@ export default function SubmitExperiencePage() {
                                     onChange={(e) => updateStage(index, 'questions', e.target.value.split('\n').filter(q => q.trim()))}
                                     placeholder="Questions asked"
                                     rows={2}
-                                    className="w-full py-1.5 px-2.5 text-sm border border-[#ddd] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon resize-none"
+                                    className="w-full py-1.5 px-2.5 text-sm border border-[#ddd] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon min-h-[80px]"
                                 />
                             </div>
                         ))}
@@ -458,7 +444,7 @@ export default function SubmitExperiencePage() {
                         onChange={(e) => setTips(e.target.value)}
                         placeholder="Any advice for future candidates? (optional)"
                         rows={3}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon resize-none"
+                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon min-h-[100px]"
                     />
                 </div>
 
@@ -479,70 +465,11 @@ export default function SubmitExperiencePage() {
                 </button>
             </form>
 
-            {/* Company Request Modal */}
-            {showRequestModal && (
-                <div
-                    className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
-                    onClick={() => setShowRequestModal(false)}
-                >
-                    <div
-                        className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <h3 className="font-playfair text-lg text-maceng-maroon mb-1">Request a Company</h3>
-                        <p className="text-xs text-[#888] mb-4">An admin will review and add it shortly.</p>
-
-                        {requestStatus === 'success' ? (
-                            <div className="text-center py-4">
-                                <p className="text-green-600 font-medium text-sm">✓ Request submitted!</p>
-                                <button
-                                    onClick={() => setShowRequestModal(false)}
-                                    className="mt-3 text-xs text-[#888] hover:text-[#333]"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                <input
-                                    type="text"
-                                    value={requestName}
-                                    onChange={(e) => setRequestName(e.target.value)}
-                                    placeholder="Company name"
-                                    autoFocus
-                                    className="w-full py-2.5 px-3.5 text-sm border border-[#ddd] rounded-lg font-inter bg-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all mb-3"
-                                />
-                                <input
-                                    type="email"
-                                    value={requestEmail}
-                                    onChange={(e) => setRequestEmail(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && requestName.trim() && handleRequestSubmit()}
-                                    placeholder="Your email (optional)"
-                                    className="w-full py-2.5 px-3.5 text-sm border border-[#ddd] rounded-lg font-inter bg-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all mb-4"
-                                />
-                                {requestStatus === 'error' && (
-                                    <p className="text-xs text-red-600 mb-2">Failed to submit. Try again.</p>
-                                )}
-                                <div className="flex gap-2 justify-end">
-                                    <button
-                                        onClick={() => setShowRequestModal(false)}
-                                        className="px-3 py-1.5 text-sm text-[#666] hover:text-[#333] transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleRequestSubmit}
-                                        disabled={!requestName.trim() || requestStatus === 'submitting'}
-                                        className="px-4 py-1.5 bg-maceng-maroon text-white text-sm rounded font-medium hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50"
-                                    >
-                                        {requestStatus === 'submitting' ? 'Sending...' : 'Submit'}
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
+            {/* Request Modal */}
+            <CompanyRequestModal
+                isOpen={showRequestModal}
+                onClose={() => setShowRequestModal(false)}
+            />
 
             {/* Footer */}
             <footer className="mt-16 pt-8 border-t border-[#e5e5e5] text-[13px] text-[#666]">

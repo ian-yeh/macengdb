@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text, desc
 from src.models.design_team import DesignTeamModel
 from src.models.design_team_review import DesignTeamReviewModel
 from src.schemas.design_team import DesignTeamCreate
@@ -30,7 +30,8 @@ def get_all_design_teams(
     if category:
         query = query.filter(DesignTeamModel.categories.any(category))
 
-    results = query.order_by(DesignTeamModel.name).all()
+    # Sort by review count descending, then by name ascending
+    results = query.order_by(text("review_count DESC"), DesignTeamModel.name).all()
 
     teams = []
     for team, review_count, avg_difficulty in results:

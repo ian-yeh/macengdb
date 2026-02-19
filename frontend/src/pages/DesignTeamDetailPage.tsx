@@ -107,7 +107,7 @@ export default function DesignTeamDetailPage() {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center text-[#666]">
                 <p className="italic">Design team not found.</p>
-                <Link to="/" className="text-maceng-orange mt-4 underline">
+                <Link to="/?tab=design-teams" className="text-maceng-orange mt-4 underline decoration-maceng-orange/50 hover:decoration-maceng-orange text-sm">
                     ← Back to Design Teams
                 </Link>
             </div>
@@ -154,24 +154,26 @@ export default function DesignTeamDetailPage() {
     return (
         <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
             {/* Back Link */}
-            <Link
-                to="/"
-                className="text-maceng-orange text-[13px] font-medium hover:text-maceng-maroon transition-colors inline-flex items-center gap-1 mb-8"
-            >
-                <span>←</span> Back to Design Teams
-            </Link>
+            <div className="animate-row-in">
+                <Link
+                    to="/?tab=design-teams"
+                    className="text-maceng-orange text-[13px] font-medium underline decoration-maceng-orange/50 hover:decoration-maceng-orange transition-colors inline-flex items-center gap-1 mb-8"
+                >
+                    <span>←</span> Back to Design Teams
+                </Link>
+            </div>
 
             {/* Header */}
             <header className="mb-8">
-                <h1 className="font-playfair text-2xl md:text-3xl lg:text-4xl font-bold text-maceng-maroon mb-3 tracking-tight">
+                <h1 className="font-playfair text-2xl md:text-3xl lg:text-4xl font-bold text-maceng-maroon mb-3 tracking-tight animate-row-in" style={{ animationDelay: '50ms' }}>
                     {team.name}
                 </h1>
                 {team.description && (
-                    <p className="text-[15px] text-[#555] leading-relaxed mb-4">
+                    <p className="text-[15px] text-[#555] leading-relaxed mb-4 animate-row-in" style={{ animationDelay: '100ms' }}>
                         {team.description}
                     </p>
                 )}
-                <div className="flex flex-wrap gap-2 md:gap-3 items-center border-b border-[#e5e5e5] pb-6">
+                <div className="flex flex-wrap gap-2 md:gap-3 items-center border-b border-[#e5e5e5] pb-6 animate-row-in" style={{ animationDelay: '150ms' }}>
                     {team.categories.map((cat: string) => (
                         <span
                             key={cat}
@@ -200,7 +202,7 @@ export default function DesignTeamDetailPage() {
 
             {/* Application Experiences */}
             <section>
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-8 animate-row-in" style={{ animationDelay: '200ms' }}>
                     <h2 className="font-playfair text-xl md:text-2xl font-semibold text-[#333]">
                         Application Experiences ({reviews.length})
                     </h2>
@@ -317,7 +319,7 @@ export default function DesignTeamDetailPage() {
                                         placeholder="What was the application process like? Were there interviews, technical challenges, or portfolio reviews?"
                                         value={formData.description}
                                         onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                                        className={`${inputClass} resize-none`}
+                                        className={`${inputClass} min-h-[120px]`}
                                     />
                                 </div>
 
@@ -330,7 +332,7 @@ export default function DesignTeamDetailPage() {
                                         placeholder="Any advice for someone applying to this team?"
                                         value={formData.tips}
                                         onChange={(e) => setFormData(prev => ({ ...prev, tips: e.target.value }))}
-                                        className={`${inputClass} resize-none`}
+                                        className={`${inputClass} min-h-[80px]`}
                                     />
                                 </div>
 
@@ -365,8 +367,8 @@ export default function DesignTeamDetailPage() {
                     </div>
                 ) : (
                     <div className="space-y-8">
-                        {reviews.map((review: DesignTeamReview) => (
-                            <div key={review.id} className="border-b border-[#e5e5e5] pb-8">
+                        {reviews.map((review: DesignTeamReview, index: number) => (
+                            <div key={review.id} className="border-b border-[#e5e5e5] pb-8 animate-row-in" style={{ animationDelay: `${250 + index * 60}ms` }}>
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
@@ -380,9 +382,8 @@ export default function DesignTeamDetailPage() {
                                                 {review.accepted ? 'Accepted' : 'Not Accepted'}
                                             </span>
                                         </div>
-                                        <p className="text-[13px] text-[#888] italic font-inter">
+                                        <p className="text-[13px] text-[#888] italic font-inter text-nowrap">
                                             {review.term}
-                                            {review.interview_acquisition && ` · Found via: ${review.interview_acquisition}`}
                                         </p>
                                     </div>
                                     <div className="mt-1 sm:mt-0">
@@ -390,15 +391,25 @@ export default function DesignTeamDetailPage() {
                                     </div>
                                 </div>
 
+                                {/* Interview Acquisition / Source - Highlighted */}
+                                {review.interview_acquisition && (
+                                    <div className="mb-4 flex items-center gap-2.5">
+                                        <div className="flex items-center gap-2 px-2.5 py-1 bg-maceng-orange/5 border border-maceng-orange/20 rounded-lg">
+                                            <span className="text-[10px] uppercase font-bold text-maceng-orange/60 tracking-wider">Applied via</span>
+                                            <span className="text-[12px] text-maceng-orange font-semibold">{review.interview_acquisition}</span>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {review.description && (
-                                    <p className="text-[15px] text-[#444] leading-relaxed mb-3">
+                                    <p className="text-[15px] text-[#444] leading-relaxed mb-3 whitespace-pre-wrap">
                                         {review.description}
                                     </p>
                                 )}
 
                                 {review.tips && (
                                     <div className="bg-maceng-orange/5 border-l-3 border-maceng-orange px-4 py-3 rounded-r-lg">
-                                        <p className="text-[13px] text-[#555] font-medium">
+                                        <p className="text-[13px] text-[#555] font-medium whitespace-pre-wrap">
                                             <span className="text-maceng-orange font-bold">Tip:</span>{' '}
                                             {review.tips}
                                         </p>

@@ -2,7 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from src.utils.database import get_db
-from src.schemas.design_team import DesignTeamResponse, DesignTeamCreate
+from src.schemas.design_team import (
+    DesignTeamResponse,
+    DesignTeamCreate,
+    DesignTeamApprove,
+)
 from src.schemas.design_team_review import (
     DesignTeamReviewResponse,
     DesignTeamReviewSubmit,
@@ -151,7 +155,7 @@ async def admin_create_company(
 
 
 @router.post("/design-team-requests", response_model=DesignTeamRequestResponse)
-@limiter.limit("5/minute")
+@limiter.limit("3/minute")
 async def submit_design_team_request(
     request: Request,
     payload: DesignTeamRequestCreate,
@@ -196,11 +200,13 @@ async def update_design_team_request(
 )
 async def approve_design_team_request(
     request_id: int,
+    approval_data: Optional[DesignTeamApprove] = None,
     db: Session = Depends(get_db),
     _admin_key: str = Depends(verify_admin_key),
 ):
     """Approve a design team request — creates the design team."""
-    team = dt_request_crud.approve_request(db, request_id)
+    categories = approval_data.categories if approval_data else []
+    team = dt_request_crud.approve_request(db, request_id, categories)
     if not team:
         raise HTTPException(status_code=404, detail="Request not found")
     team.review_count = 0
@@ -218,3 +224,14 @@ async def reject_design_team_request(
     if not success:
         raise HTTPException(status_code=404, detail="Request not found")
     return {"detail": "Request rejected"}
+
+
+@router.post("/admin/design-team-requests/bulk-reject")
+async def bulk_reject_design_team_requests(
+    payload: List[int],
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Reject multiple design team requests."""
+    count = dt_request_crud.bulk_reject_requests(db, payload)
+    return {"detail": f"Rejected {count} requests"}

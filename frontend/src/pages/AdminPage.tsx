@@ -6,7 +6,7 @@ import {
     fetchPendingCompanyRequests, approveCompanyRequest, rejectCompanyRequest, updateCompanyRequest,
     fetchPendingDesignTeamReviews, approveDesignTeamReview, rejectDesignTeamReview, deleteDesignTeamReview,
     fetchPendingDesignTeamRequests, approveDesignTeamRequest, rejectDesignTeamRequest, updateDesignTeamRequest,
-    adminCreateCompany
+    adminCreateCompany, bulkDeleteCompanyRequests, bulkDeleteDesignTeamRequests
 } from '../api/api';
 import { type Experience, type CompanyRequest, type DesignTeamReview, type DesignTeamRequest } from '../api/types';
 import Loader from '../components/Loader';
@@ -22,6 +22,8 @@ export default function AdminPage() {
     const [feedback, setFeedback] = useState<{ key: string; message: string; type: 'success' | 'error' } | null>(null);
     const [processing, setProcessing] = useState<Set<string>>(new Set());
     const [activeTab, setActiveTab] = useState<AdminTab>('requests');
+    const [selectedCompanyReqIds, setSelectedCompanyReqIds] = useState<Set<number>>(new Set());
+    const [selectedDTReqIds, setSelectedDTReqIds] = useState<Set<number>>(new Set());
 
     // Queries
     const { data: pendingExperiences = [], isLoading: expLoading } = useQuery({
@@ -164,6 +166,27 @@ export default function AdminPage() {
         finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
     };
 
+    const handleBulkRejectReq = async () => {
+        if (selectedCompanyReqIds.size === 0 || processing.has('bulk-req')) return;
+        setProcessing(prev => new Set(prev).add('bulk-req'));
+        try {
+            await bulkDeleteCompanyRequests(Array.from(selectedCompanyReqIds), adminKey);
+            showFeedback('bulk-req', `Rejected ${selectedCompanyReqIds.size} requests`, 'success');
+            setSelectedCompanyReqIds(new Set());
+            queryClient.invalidateQueries({ queryKey: ['admin'] });
+        } catch { showFeedback('bulk-req', 'Failed to bulk reject', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete('bulk-req'); return n; }); }
+    };
+
+    const toggleRequestSelection = (id: number) => {
+        setSelectedCompanyReqIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
+
     // --- Design Team Review actions ---
     const handleApproveDT = async (id: number) => {
         const key = `dt-${id}`;
@@ -206,13 +229,17 @@ export default function AdminPage() {
     // --- Design Team Request actions ---
     const [editingDTRequest, setEditingDTRequest] = useState<number | null>(null);
     const [editedDTNames, setEditedDTNames] = useState<Record<number, string>>({});
+    const [dtRequestCategories, setDtRequestCategories] = useState<Record<number, string>>({});
 
     const handleApproveDTReq = async (id: number) => {
         const key = `dtreq-${id}`;
         if (processing.has(key)) return;
         setProcessing(prev => new Set(prev).add(key));
         try {
-            await approveDesignTeamRequest(id, adminKey);
+            const categories = dtRequestCategories[id]
+                ? dtRequestCategories[id].split(',').map(s => s.trim()).filter(s => s !== '')
+                : [];
+            await approveDesignTeamRequest(id, adminKey, categories);
             showFeedback(key, 'Design team created!', 'success');
             queryClient.invalidateQueries({ queryKey: ['admin'] });
             queryClient.invalidateQueries({ queryKey: ['design-teams'] });
@@ -244,6 +271,27 @@ export default function AdminPage() {
             queryClient.invalidateQueries({ queryKey: ['admin'] });
         } catch { showFeedback(key, 'Failed to update', 'error'); }
         finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
+    };
+
+    const handleBulkRejectDTReq = async () => {
+        if (selectedDTReqIds.size === 0 || processing.has('bulk-dtreq')) return;
+        setProcessing(prev => new Set(prev).add('bulk-dtreq'));
+        try {
+            await bulkDeleteDesignTeamRequests(Array.from(selectedDTReqIds), adminKey);
+            showFeedback('bulk-dtreq', `Rejected ${selectedDTReqIds.size} requests`, 'success');
+            setSelectedDTReqIds(new Set());
+            queryClient.invalidateQueries({ queryKey: ['admin'] });
+        } catch { showFeedback('bulk-dtreq', 'Failed to bulk reject', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete('bulk-dtreq'); return n; }); }
+    };
+
+    const toggleDTRequestSelection = (id: number) => {
+        setSelectedDTReqIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
     };
 
     // --- Manual Company Creation ---
@@ -377,6 +425,31 @@ export default function AdminPage() {
                                 <p className="text-sm text-[#888] italic py-4">No pending company requests.</p>
                             ) : (
                                 <div className="space-y-3">
+                                    <div className="flex items-center justify-between bg-[#f8f8f8] p-3 rounded-lg border border-[#eee]">
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    if (selectedCompanyReqIds.size === pendingRequests.length) setSelectedCompanyReqIds(new Set());
+                                                    else setSelectedCompanyReqIds(new Set(pendingRequests.map((r: CompanyRequest) => r.id)));
+                                                }}
+                                                className="text-xs font-medium text-maceng-maroon hover:underline cursor-pointer"
+                                            >
+                                                {selectedCompanyReqIds.size === pendingRequests.length ? 'Deselect All' : 'Select All'}
+                                            </button>
+                                            <span className="text-[11px] text-[#666]">
+                                                {selectedCompanyReqIds.size} selected
+                                            </span>
+                                        </div>
+                                        {selectedCompanyReqIds.size > 0 && (
+                                            <button
+                                                onClick={handleBulkRejectReq}
+                                                disabled={processing.has('bulk-req')}
+                                                className="px-3 py-1 bg-red-600 text-white text-[11px] font-semibold rounded hover:bg-red-700 disabled:opacity-50 transition-colors cursor-pointer"
+                                            >
+                                                Reject {selectedCompanyReqIds.size} Selected
+                                            </button>
+                                        )}
+                                    </div>
                                     {pendingRequests.map((req: CompanyRequest) => {
                                         const date = new Date(req.created_at).toLocaleDateString('en-US', {
                                             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -384,6 +457,14 @@ export default function AdminPage() {
                                         return (
                                             <div key={req.id} className="flex flex-col border border-[#e5e5e5] rounded-lg bg-white overflow-hidden animate-row-in">
                                                 <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-[#f5f5f5]">
+                                                    <div className="flex items-center self-start mt-1 mr-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedCompanyReqIds.has(req.id)}
+                                                            onChange={() => toggleRequestSelection(req.id)}
+                                                            className="w-4 h-4 rounded border-[#ccc] text-maceng-maroon focus:ring-maceng-maroon cursor-pointer"
+                                                        />
+                                                    </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2 flex-wrap">
                                                             {editingRequest === req.id ? (
@@ -469,13 +550,46 @@ export default function AdminPage() {
                                 <p className="text-sm text-[#888] italic py-4">No pending design team requests.</p>
                             ) : (
                                 <div className="space-y-3">
+                                    <div className="flex items-center justify-between bg-[#f8f8f8] p-3 rounded-lg border border-[#eee]">
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    if (selectedDTReqIds.size === pendingDTRequests.length) setSelectedDTReqIds(new Set());
+                                                    else setSelectedDTReqIds(new Set(pendingDTRequests.map((r: DesignTeamRequest) => r.id)));
+                                                }}
+                                                className="text-xs font-medium text-maceng-maroon hover:underline cursor-pointer"
+                                            >
+                                                {selectedDTReqIds.size === pendingDTRequests.length ? 'Deselect All' : 'Select All'}
+                                            </button>
+                                            <span className="text-[11px] text-[#666]">
+                                                {selectedDTReqIds.size} selected
+                                            </span>
+                                        </div>
+                                        {selectedDTReqIds.size > 0 && (
+                                            <button
+                                                onClick={handleBulkRejectDTReq}
+                                                disabled={processing.has('bulk-dtreq')}
+                                                className="px-3 py-1 bg-red-600 text-white text-[11px] font-semibold rounded hover:bg-red-700 disabled:opacity-50 transition-colors cursor-pointer"
+                                            >
+                                                Reject {selectedDTReqIds.size} Selected
+                                            </button>
+                                        )}
+                                    </div>
                                     {pendingDTRequests.map((req: DesignTeamRequest) => {
                                         const date = new Date(req.created_at).toLocaleDateString('en-US', {
                                             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                                         });
                                         return (
                                             <div key={req.id} className="flex flex-col border border-[#e5e5e5] rounded-lg bg-white overflow-hidden animate-row-in">
-                                                <div className="flex items-center justify-between px-4 md:px-5 py-3">
+                                                <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-[#f5f5f5]">
+                                                    <div className="flex items-center self-start mt-1 mr-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedDTReqIds.has(req.id)}
+                                                            onChange={() => toggleDTRequestSelection(req.id)}
+                                                            className="w-4 h-4 rounded border-[#ccc] text-maceng-maroon focus:ring-maceng-maroon cursor-pointer"
+                                                        />
+                                                    </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2 flex-wrap">
                                                             {editingDTRequest === req.id ? (
@@ -513,7 +627,25 @@ export default function AdminPage() {
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-2 ml-2">
+                                                    <button
+                                                        onClick={() => handleRejectDTReq(req.id)}
+                                                        disabled={processing.has(`dtreq-${req.id}`)}
+                                                        className="px-3 py-1.5 text-[#888] text-xs font-medium hover:text-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer ml-2"
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </div>
+                                                <div className="bg-[#fafafa] px-4 md:px-5 py-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                                    <div className="flex-1">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Categories (comma separated: Robotics, Software...)"
+                                                            value={dtRequestCategories[req.id] || ''}
+                                                            onChange={(e) => setDtRequestCategories({ ...dtRequestCategories, [req.id]: e.target.value })}
+                                                            className="w-full bg-white border border-[#ddd] rounded px-3 py-1.5 text-xs focus:outline-none focus:border-maceng-maroon"
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
                                                         {feedback?.key === `dtreq-${req.id}` && (
                                                             <span className={`text-xs ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
                                                                 {feedback.message}
@@ -522,16 +654,9 @@ export default function AdminPage() {
                                                         <button
                                                             onClick={() => handleApproveDTReq(req.id)}
                                                             disabled={processing.has(`dtreq-${req.id}`)}
-                                                            className="px-3 py-1.5 bg-maceng-maroon text-white text-xs rounded font-medium hover:bg-maceng-maroon/90 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                                            className="px-4 py-1.5 bg-maceng-maroon text-white text-xs rounded font-medium hover:bg-maceng-maroon/90 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                                         >
                                                             {processing.has(`dtreq-${req.id}`) ? 'Processing...' : 'Approve & Create'}
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleRejectDTReq(req.id)}
-                                                            disabled={processing.has(`dtreq-${req.id}`)}
-                                                            className="px-3 py-1.5 text-[#888] text-xs font-medium hover:text-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                                                        >
-                                                            Reject
                                                         </button>
                                                     </div>
                                                 </div>

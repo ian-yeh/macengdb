@@ -30,7 +30,9 @@ def get_pending_requests(db: Session) -> List[DesignTeamRequestModel]:
     )
 
 
-def approve_request(db: Session, request_id: int) -> Optional[DesignTeamModel]:
+def approve_request(
+    db: Session, request_id: int, categories: List[str] = []
+) -> Optional[DesignTeamModel]:
     """Approve a request — creates the design team and marks request as approved"""
     req = (
         db.query(DesignTeamRequestModel)
@@ -41,7 +43,7 @@ def approve_request(db: Session, request_id: int) -> Optional[DesignTeamModel]:
         return None
 
     # Create the design team
-    team = DesignTeamModel(name=req.name, categories=[])
+    team = DesignTeamModel(name=req.name, categories=categories)
     db.add(team)
     req.status = "approved"
     db.commit()
@@ -78,3 +80,14 @@ def reject_request(db: Session, request_id: int) -> bool:
     req.status = "rejected"
     db.commit()
     return True
+
+
+def bulk_reject_requests(db: Session, request_ids: List[int]) -> int:
+    """Reject multiple design team requests"""
+    count = (
+        db.query(DesignTeamRequestModel)
+        .filter(DesignTeamRequestModel.id.in_(request_ids))
+        .update({DesignTeamRequestModel.status: "rejected"}, synchronize_session=False)
+    )
+    db.commit()
+    return count

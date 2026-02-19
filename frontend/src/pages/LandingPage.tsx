@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import useDebounce from '../hooks/useDebounce';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { type Company, type DesignTeam } from '../api/types';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCompanies, submitCompanyRequest, fetchDesignTeams } from '../api/api';
+import { fetchCompanies, fetchDesignTeams } from '../api/api';
 import CompanyListSkeleton from '../components/CompanyListSkeleton';
 import TabNav from '../components/TabNav';
+import CompanyRequestModal from '../components/CompanyRequestModal';
+import DesignTeamRequestModal from '../components/DesignTeamRequestModal';
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -16,14 +18,14 @@ export default function LandingPage() {
     const [position, setPosition] = useState('');
     const debouncedPosition = useDebounce(position, 500);
     const [showFilters, setShowFilters] = useState(false);
-    const [activeTab, setActiveTab] = useState<'companies' | 'design-teams'>('companies');
+    const [searchParams] = useSearchParams();
+    const initialTab = searchParams.get('tab') === 'design-teams' ? 'design-teams' : 'companies';
+    const [activeTab, setActiveTab] = useState<'companies' | 'design-teams'>(initialTab);
 
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 10;
-    const [showRequestModal, setShowRequestModal] = useState(false);
-    const [requestName, setRequestName] = useState('');
-    const [requestEmail, setRequestEmail] = useState('');
-    const [requestStatus, setRequestStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+    const [showCompanyRequestModal, setShowCompanyRequestModal] = useState(false);
+    const [showDesignTeamRequestModal, setShowDesignTeamRequestModal] = useState(false);
 
     const { data: companies = [], isLoading, error } = useQuery({
         queryKey: ['companies', selectedIndustry, minRating, hasOffer, debouncedPosition],
@@ -75,16 +77,6 @@ export default function LandingPage() {
         navigate(`/design-teams/${teamId}`);
     };
 
-    const handleRequestSubmit = async () => {
-        if (!requestName.trim()) return;
-        setRequestStatus('submitting');
-        try {
-            await submitCompanyRequest(requestName, requestEmail || undefined);
-            setRequestStatus('success');
-        } catch {
-            setRequestStatus('error');
-        }
-    };
 
     return (
         <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-4xl mx-auto">
@@ -145,7 +137,10 @@ export default function LandingPage() {
                     <p className="text-[13px] leading-relaxed text-[#777]">
                         Don't see your company or design team?{' '}
                         <button
-                            onClick={() => { setShowRequestModal(true); setRequestStatus('idle'); setRequestName(''); }}
+                            onClick={() => {
+                                if (activeTab === 'companies') setShowCompanyRequestModal(true);
+                                else setShowDesignTeamRequestModal(true);
+                            }}
                             className="text-maceng-orange font-bold hover:text-maceng-maroon transition-colors cursor-pointer bg-transparent border-none p-0 inline-flex items-center gap-0.5 group"
                         >
                             Request it <span className="text-[10px] group-hover:translate-x-0.5 transition-transform">→</span>
@@ -154,70 +149,15 @@ export default function LandingPage() {
                 </div>
             </header>
 
-            {/* Company Request Modal */}
-            {showRequestModal && (
-                <div
-                    className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
-                    onClick={() => setShowRequestModal(false)}
-                >
-                    <div
-                        className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <h3 className="font-playfair text-lg text-maceng-maroon mb-1">Request a Company</h3>
-                        <p className="text-xs text-[#888] mb-4">An admin will review and add it shortly.</p>
-
-                        {requestStatus === 'success' ? (
-                            <div className="text-center py-4">
-                                <p className="text-green-600 font-medium text-sm">✓ Request submitted!</p>
-                                <button
-                                    onClick={() => setShowRequestModal(false)}
-                                    className="mt-3 text-xs text-[#888] hover:text-[#333]"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                <input
-                                    type="text"
-                                    value={requestName}
-                                    onChange={(e) => setRequestName(e.target.value)}
-                                    placeholder="Company name"
-                                    autoFocus
-                                    className="w-full py-2.5 px-3.5 text-sm border border-[#ddd] rounded-lg font-inter bg-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all mb-3"
-                                />
-                                <input
-                                    type="email"
-                                    value={requestEmail}
-                                    onChange={(e) => setRequestEmail(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && requestName.trim() && handleRequestSubmit()}
-                                    placeholder="Your email (optional)"
-                                    className="w-full py-2.5 px-3.5 text-sm border border-[#ddd] rounded-lg font-inter bg-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all mb-4"
-                                />
-                                {requestStatus === 'error' && (
-                                    <p className="text-xs text-red-600 mb-2">Failed to submit. Try again.</p>
-                                )}
-                                <div className="flex gap-2 justify-end">
-                                    <button
-                                        onClick={() => setShowRequestModal(false)}
-                                        className="px-3 py-1.5 text-sm text-[#666] hover:text-[#333] transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleRequestSubmit}
-                                        disabled={!requestName.trim() || requestStatus === 'submitting'}
-                                        className="px-4 py-1.5 bg-maceng-maroon text-white text-sm rounded font-medium hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50"
-                                    >
-                                        {requestStatus === 'submitting' ? 'Sending...' : 'Submit'}
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
+            {/* Request Modals */}
+            <CompanyRequestModal
+                isOpen={showCompanyRequestModal}
+                onClose={() => setShowCompanyRequestModal(false)}
+            />
+            <DesignTeamRequestModal
+                isOpen={showDesignTeamRequestModal}
+                onClose={() => setShowDesignTeamRequestModal(false)}
+            />
 
             {/* Search and Filters */}
             <div className="mb-6 space-y-4">

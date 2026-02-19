@@ -297,13 +297,14 @@ export async function fetchPendingDesignTeamRequests(adminKey: string): Promise<
   return response.json();
 }
 
-export async function approveDesignTeamRequest(id: number, adminKey: string): Promise<DesignTeam> {
+export async function approveDesignTeamRequest(id: number, adminKey: string, categories: string[] = []): Promise<DesignTeam> {
   const response = await fetch(`${API_BASE_URL}/admin/design-team-requests/${id}/approve`, {
     method: 'PATCH',
     headers: {
       'X-Admin-Key': adminKey,
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify({ categories }),
   });
   if (!response.ok) throw new Error('Failed to approve design team request');
   return response.json();
@@ -328,4 +329,28 @@ export async function updateDesignTeamRequest(id: number, adminKey: string, name
   });
   if (!response.ok) throw new Error('Failed to update design team request');
   return response.json();
+}
+
+export async function bulkDeleteCompanyRequests(ids: number[], adminKey: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/admin/company-requests/bulk-reject`, {
+    method: 'POST',
+    headers: {
+      'X-Admin-Key': adminKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(ids),
+  });
+  if (!response.ok) throw new Error('Failed to bulk delete company requests');
+}
+
+export async function bulkDeleteDesignTeamRequests(ids: number[], adminKey: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-team-requests/bulk-reject`, {
+    method: 'POST',
+    headers: {
+      'X-Admin-Key': adminKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(ids),
+  });
+  if (!response.ok) throw new Error('Failed to bulk delete design team requests');
 }
