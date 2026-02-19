@@ -89,3 +89,14 @@ async def reject_company_request(
     if not success:
         raise HTTPException(status_code=404, detail="Request not found")
     return {"detail": "Request rejected"}
+
+
+@router.post("/admin/company-requests/bulk-reject")
+async def bulk_reject_company_requests(
+    payload: List[int],
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Reject multiple company requests."""
+    count = crud.bulk_reject_requests(db, payload)
+    return {"detail": f"Rejected {count} requests"}

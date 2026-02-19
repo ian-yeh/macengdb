@@ -80,3 +80,14 @@ def reject_request(db: Session, request_id: int) -> bool:
     req.status = "rejected"
     db.commit()
     return True
+
+
+def bulk_reject_requests(db: Session, request_ids: List[int]) -> int:
+    """Reject multiple design team requests"""
+    count = (
+        db.query(DesignTeamRequestModel)
+        .filter(DesignTeamRequestModel.id.in_(request_ids))
+        .update({DesignTeamRequestModel.status: "rejected"}, synchronize_session=False)
+    )
+    db.commit()
+    return count

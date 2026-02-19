@@ -6,7 +6,7 @@ import {
     fetchPendingCompanyRequests, approveCompanyRequest, rejectCompanyRequest, updateCompanyRequest,
     fetchPendingDesignTeamReviews, approveDesignTeamReview, rejectDesignTeamReview, deleteDesignTeamReview,
     fetchPendingDesignTeamRequests, approveDesignTeamRequest, rejectDesignTeamRequest, updateDesignTeamRequest,
-    adminCreateCompany
+    adminCreateCompany, bulkDeleteCompanyRequests, bulkDeleteDesignTeamRequests
 } from '../api/api';
 import { type Experience, type CompanyRequest, type DesignTeamReview, type DesignTeamRequest } from '../api/types';
 import Loader from '../components/Loader';
@@ -22,6 +22,8 @@ export default function AdminPage() {
     const [feedback, setFeedback] = useState<{ key: string; message: string; type: 'success' | 'error' } | null>(null);
     const [processing, setProcessing] = useState<Set<string>>(new Set());
     const [activeTab, setActiveTab] = useState<AdminTab>('requests');
+    const [selectedCompanyReqIds, setSelectedCompanyReqIds] = useState<Set<number>>(new Set());
+    const [selectedDTReqIds, setSelectedDTReqIds] = useState<Set<number>>(new Set());
 
     // Queries
     const { data: pendingExperiences = [], isLoading: expLoading } = useQuery({
@@ -164,6 +166,27 @@ export default function AdminPage() {
         finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
     };
 
+    const handleBulkRejectReq = async () => {
+        if (selectedCompanyReqIds.size === 0 || processing.has('bulk-req')) return;
+        setProcessing(prev => new Set(prev).add('bulk-req'));
+        try {
+            await bulkDeleteCompanyRequests(Array.from(selectedCompanyReqIds), adminKey);
+            showFeedback('bulk-req', `Rejected ${selectedCompanyReqIds.size} requests`, 'success');
+            setSelectedCompanyReqIds(new Set());
+            queryClient.invalidateQueries({ queryKey: ['admin'] });
+        } catch { showFeedback('bulk-req', 'Failed to bulk reject', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete('bulk-req'); return n; }); }
+    };
+
+    const toggleRequestSelection = (id: number) => {
+        setSelectedCompanyReqIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
+
     // --- Design Team Review actions ---
     const handleApproveDT = async (id: number) => {
         const key = `dt-${id}`;
@@ -248,6 +271,27 @@ export default function AdminPage() {
             queryClient.invalidateQueries({ queryKey: ['admin'] });
         } catch { showFeedback(key, 'Failed to update', 'error'); }
         finally { setProcessing(prev => { const n = new Set(prev); n.delete(key); return n; }); }
+    };
+
+    const handleBulkRejectDTReq = async () => {
+        if (selectedDTReqIds.size === 0 || processing.has('bulk-dtreq')) return;
+        setProcessing(prev => new Set(prev).add('bulk-dtreq'));
+        try {
+            await bulkDeleteDesignTeamRequests(Array.from(selectedDTReqIds), adminKey);
+            showFeedback('bulk-dtreq', `Rejected ${selectedDTReqIds.size} requests`, 'success');
+            setSelectedDTReqIds(new Set());
+            queryClient.invalidateQueries({ queryKey: ['admin'] });
+        } catch { showFeedback('bulk-dtreq', 'Failed to bulk reject', 'error'); }
+        finally { setProcessing(prev => { const n = new Set(prev); n.delete('bulk-dtreq'); return n; }); }
+    };
+
+    const toggleDTRequestSelection = (id: number) => {
+        setSelectedDTReqIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
     };
 
     // --- Manual Company Creation ---
@@ -381,6 +425,31 @@ export default function AdminPage() {
                                 <p className="text-sm text-[#888] italic py-4">No pending company requests.</p>
                             ) : (
                                 <div className="space-y-3">
+                                    <div className="flex items-center justify-between bg-[#f8f8f8] p-3 rounded-lg border border-[#eee]">
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    if (selectedCompanyReqIds.size === pendingRequests.length) setSelectedCompanyReqIds(new Set());
+                                                    else setSelectedCompanyReqIds(new Set(pendingRequests.map((r: CompanyRequest) => r.id)));
+                                                }}
+                                                className="text-xs font-medium text-maceng-maroon hover:underline cursor-pointer"
+                                            >
+                                                {selectedCompanyReqIds.size === pendingRequests.length ? 'Deselect All' : 'Select All'}
+                                            </button>
+                                            <span className="text-[11px] text-[#666]">
+                                                {selectedCompanyReqIds.size} selected
+                                            </span>
+                                        </div>
+                                        {selectedCompanyReqIds.size > 0 && (
+                                            <button
+                                                onClick={handleBulkRejectReq}
+                                                disabled={processing.has('bulk-req')}
+                                                className="px-3 py-1 bg-red-600 text-white text-[11px] font-semibold rounded hover:bg-red-700 disabled:opacity-50 transition-colors cursor-pointer"
+                                            >
+                                                Reject {selectedCompanyReqIds.size} Selected
+                                            </button>
+                                        )}
+                                    </div>
                                     {pendingRequests.map((req: CompanyRequest) => {
                                         const date = new Date(req.created_at).toLocaleDateString('en-US', {
                                             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -388,6 +457,14 @@ export default function AdminPage() {
                                         return (
                                             <div key={req.id} className="flex flex-col border border-[#e5e5e5] rounded-lg bg-white overflow-hidden animate-row-in">
                                                 <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-[#f5f5f5]">
+                                                    <div className="flex items-center self-start mt-1 mr-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedCompanyReqIds.has(req.id)}
+                                                            onChange={() => toggleRequestSelection(req.id)}
+                                                            className="w-4 h-4 rounded border-[#ccc] text-maceng-maroon focus:ring-maceng-maroon cursor-pointer"
+                                                        />
+                                                    </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2 flex-wrap">
                                                             {editingRequest === req.id ? (
@@ -473,6 +550,31 @@ export default function AdminPage() {
                                 <p className="text-sm text-[#888] italic py-4">No pending design team requests.</p>
                             ) : (
                                 <div className="space-y-3">
+                                    <div className="flex items-center justify-between bg-[#f8f8f8] p-3 rounded-lg border border-[#eee]">
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    if (selectedDTReqIds.size === pendingDTRequests.length) setSelectedDTReqIds(new Set());
+                                                    else setSelectedDTReqIds(new Set(pendingDTRequests.map((r: DesignTeamRequest) => r.id)));
+                                                }}
+                                                className="text-xs font-medium text-maceng-maroon hover:underline cursor-pointer"
+                                            >
+                                                {selectedDTReqIds.size === pendingDTRequests.length ? 'Deselect All' : 'Select All'}
+                                            </button>
+                                            <span className="text-[11px] text-[#666]">
+                                                {selectedDTReqIds.size} selected
+                                            </span>
+                                        </div>
+                                        {selectedDTReqIds.size > 0 && (
+                                            <button
+                                                onClick={handleBulkRejectDTReq}
+                                                disabled={processing.has('bulk-dtreq')}
+                                                className="px-3 py-1 bg-red-600 text-white text-[11px] font-semibold rounded hover:bg-red-700 disabled:opacity-50 transition-colors cursor-pointer"
+                                            >
+                                                Reject {selectedDTReqIds.size} Selected
+                                            </button>
+                                        )}
+                                    </div>
                                     {pendingDTRequests.map((req: DesignTeamRequest) => {
                                         const date = new Date(req.created_at).toLocaleDateString('en-US', {
                                             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -480,6 +582,14 @@ export default function AdminPage() {
                                         return (
                                             <div key={req.id} className="flex flex-col border border-[#e5e5e5] rounded-lg bg-white overflow-hidden animate-row-in">
                                                 <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-[#f5f5f5]">
+                                                    <div className="flex items-center self-start mt-1 mr-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedDTReqIds.has(req.id)}
+                                                            onChange={() => toggleDTRequestSelection(req.id)}
+                                                            className="w-4 h-4 rounded border-[#ccc] text-maceng-maroon focus:ring-maceng-maroon cursor-pointer"
+                                                        />
+                                                    </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2 flex-wrap">
                                                             {editingDTRequest === req.id ? (
