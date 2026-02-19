@@ -106,12 +106,17 @@ export default function CompanyPage() {
                                             }`}>
                                             {experience.offer_received ? '✓ Offer received' : '✗ No offer'}
                                         </span>
-                                        {experience.interview_acquisition && (
-                                            <span className="px-2.5 py-1 rounded-full bg-maceng-orange/10 text-maceng-orange font-medium">
-                                                How: {experience.interview_acquisition}
-                                            </span>
-                                        )}
                                     </div>
+
+                                    {/* Interview Acquisition / Source - Highlighted */}
+                                    {experience.interview_acquisition && (
+                                        <div className="mb-5 flex items-center gap-2.5 animate-row-in" style={{ animationDelay: `${300 + index * 60}ms` }}>
+                                            <div className="flex items-center gap-2 px-3 py-1.5 bg-maceng-orange/5 border border-maceng-orange/20 rounded-lg group">
+                                                <span className="text-[10px] uppercase tracking-wider font-bold text-maceng-orange/60">Found via</span>
+                                                <span className="text-[13px] text-maceng-orange font-semibold">{experience.interview_acquisition}</span>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Interview Stages */}
                                     {experience.stages && experience.stages.length > 0 && (

@@ -382,15 +382,24 @@ export default function DesignTeamDetailPage() {
                                                 {review.accepted ? 'Accepted' : 'Not Accepted'}
                                             </span>
                                         </div>
-                                        <p className="text-[13px] text-[#888] italic font-inter">
+                                        <p className="text-[13px] text-[#888] italic font-inter text-nowrap">
                                             {review.term}
-                                            {review.interview_acquisition && ` · Found via: ${review.interview_acquisition}`}
                                         </p>
                                     </div>
                                     <div className="mt-1 sm:mt-0">
                                         {renderDifficultyDots(review.difficulty)}
                                     </div>
                                 </div>
+
+                                {/* Interview Acquisition / Source - Highlighted */}
+                                {review.interview_acquisition && (
+                                    <div className="mb-4 flex items-center gap-2.5">
+                                        <div className="flex items-center gap-2 px-2.5 py-1 bg-maceng-orange/5 border border-maceng-orange/20 rounded-lg">
+                                            <span className="text-[10px] uppercase font-bold text-maceng-orange/60 tracking-wider">Acquisition</span>
+                                            <span className="text-[12px] text-maceng-orange font-semibold">{review.interview_acquisition}</span>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {review.description && (
                                     <p className="text-[15px] text-[#444] leading-relaxed mb-3">
