@@ -3,9 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchCompany, fetchCompanyExperiences } from '../api/api';
 import { type Experience as ExperienceType } from '../api/types';
 import CompanyDetailSkeleton from '../components/CompanyDetailSkeleton';
+import { useEffect } from 'react';
+import { usePostHog } from '@posthog/react';
 
 export default function CompanyPage() {
     const { companyId } = useParams<{ companyId: string }>();
+    const posthog = usePostHog();
 
     const { data: company, isLoading, error } = useQuery({
         queryKey: ['company', companyId],
@@ -18,6 +21,15 @@ export default function CompanyPage() {
         queryFn: () => fetchCompanyExperiences(companyId!),
         enabled: !!companyId,
     });
+
+    useEffect(() => {
+        if (company) {
+            posthog.capture('company_viewed', {
+                company_id: company.id,
+                company_name: company.name
+            });
+        }
+    }, [company, posthog]);
 
     if (isLoading || experiencesLoading) {
         return (
@@ -45,6 +57,7 @@ export default function CompanyPage() {
                 <div className="animate-row-in">
                     <Link
                         to="/"
+                        onClick={() => posthog.capture('back_to_companies_clicked')}
                         className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange text-sm"
                     >
                         ← Back to companies
@@ -75,7 +88,11 @@ export default function CompanyPage() {
                 {experiences.length === 0 ? (
                     <p className="text-[#666] italic py-8 animate-row-in" style={{ animationDelay: '250ms' }}>
                         No experiences shared yet. Be the first to{' '}
-                        <Link to="/submit" className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange">
+                        <Link
+                            to="/submit"
+                            onClick={() => posthog.capture('submit_experience_from_empty_clicked', { company_name: company.name })}
+                            className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange"
+                        >
                             submit an experience
                         </Link>.
                     </p>

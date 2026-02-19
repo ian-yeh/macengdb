@@ -4,6 +4,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchDesignTeam, fetchDesignTeamReviews, submitDesignTeamReview } from '../api/api';
 import { type DesignTeamReview } from '../api/types';
 import CompanyDetailSkeleton from '../components/CompanyDetailSkeleton';
+import { useEffect } from 'react';
+import { usePostHog } from '@posthog/react';
 
 const TERM_OPTIONS = [
     'Fall 2023', 'Winter 2024', 'Spring 2024', 'Summer 2024',
@@ -22,6 +24,7 @@ const DIFFICULTY_LABELS: Record<number, string> = {
 export default function DesignTeamDetailPage() {
     const { teamId } = useParams<{ teamId: string }>();
     const queryClient = useQueryClient();
+    const posthog = usePostHog();
 
     const { data: team, isLoading, error } = useQuery({
         queryKey: ['design-team', teamId],
@@ -34,6 +37,15 @@ export default function DesignTeamDetailPage() {
         queryFn: () => fetchDesignTeamReviews(teamId!),
         enabled: !!teamId,
     });
+
+    useEffect(() => {
+        if (team) {
+            posthog.capture('design_team_viewed', {
+                team_id: team.id,
+                team_name: team.name
+            });
+        }
+    }, [team, posthog]);
 
     // Form state
     const [showForm, setShowForm] = useState(false);
@@ -70,6 +82,12 @@ export default function DesignTeamDetailPage() {
                 interview_acquisition: formData.interview_acquisition || undefined,
             });
 
+            posthog.capture('design_team_experience_submit_success', {
+                design_team_id: teamId,
+                team_name: team?.name,
+                position: formData.position
+            });
+
             setSubmitStatus('success');
             setFormData({
                 submitter_email: '',
@@ -91,7 +109,13 @@ export default function DesignTeamDetailPage() {
             }, 2000);
         } catch (err) {
             setSubmitStatus('error');
-            setSubmitError(err instanceof Error ? err.message : 'Failed to submit');
+            const errorMessage = err instanceof Error ? err.message : 'Failed to submit';
+            setSubmitError(errorMessage);
+            posthog.capture('design_team_experience_submit_failed', {
+                design_team_id: teamId,
+                team_name: team?.name,
+                error: errorMessage
+            });
         }
     };
 
@@ -208,7 +232,13 @@ export default function DesignTeamDetailPage() {
                     </h2>
                     {!showForm && (
                         <button
-                            onClick={() => setShowForm(true)}
+                            onClick={() => {
+                                setShowForm(true);
+                                posthog.capture('experience_submit_started', {
+                                    type: 'design_team',
+                                    team_name: team.name
+                                });
+                            }}
                             className="px-3 py-1.5 md:px-4 md:py-2 bg-maceng-maroon text-white text-xs md:text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors cursor-pointer"
                         >
                             + Share Application Experience
