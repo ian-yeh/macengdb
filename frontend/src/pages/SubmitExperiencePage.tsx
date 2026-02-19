@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { searchCompanies, submitExperience } from '../api/api';
 import { type Company, type InterviewStage, type ExperienceSubmitData } from '../api/types';
 import CompanyRequestModal from '../components/CompanyRequestModal';
+import { usePostHog } from '@posthog/react';
 
 const TERM_OPTIONS = [
     'Winter 2021', 'Spring 2021', 'Summer 2021', 'Fall 2021',
@@ -17,6 +18,7 @@ const TERM_OPTIONS = [
 export default function SubmitExperiencePage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const posthog = usePostHog();
 
     // Form state
     const [email, setEmail] = useState('');
@@ -140,8 +142,17 @@ export default function SubmitExperiencePage() {
             queryClient.invalidateQueries({ queryKey: ['companies'] });
             queryClient.invalidateQueries({ queryKey: ['experiences'] });
             setSuccess(true);
+            posthog.capture('interview_experience_submit_success', {
+                company_name: selectedCompany.name,
+                position: data.position
+            });
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Something went wrong');
+            const errorMessage = err instanceof Error ? err.message : 'Something went wrong';
+            setError(errorMessage);
+            posthog.capture('interview_experience_submit_failed', {
+                company_name: selectedCompany?.name,
+                error: errorMessage
+            });
         } finally {
             setSubmitting(false);
         }
