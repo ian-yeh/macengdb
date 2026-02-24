@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { fetchDesignTeams, submitDesignTeamReview } from '../api/api';
 import { type DesignTeam } from '../api/types';
 import DesignTeamRequestModal from '../components/DesignTeamRequestModal';
+import { usePostHog } from '@posthog/react';
 
 const TERM_OPTIONS = [
     'Fall 2023', 'Winter 2024', 'Spring 2024', 'Summer 2024',
@@ -22,6 +23,7 @@ const DIFFICULTY_LABELS: Record<number, string> = {
 export default function SubmitDesignTeamExperiencePage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const posthog = usePostHog();
 
     // Form state
     const [email, setEmail] = useState('');
@@ -134,8 +136,17 @@ export default function SubmitDesignTeamExperiencePage() {
             queryClient.invalidateQueries({ queryKey: ['design-teams'] });
             queryClient.invalidateQueries({ queryKey: ['design-team-reviews'] });
             setSuccess(true);
+            posthog.capture('design_team_experience_submit_success', {
+                team_name: selectedTeam.name,
+                position: position.trim()
+            });
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Something went wrong');
+            const errorMessage = err instanceof Error ? err.message : 'Something went wrong';
+            setError(errorMessage);
+            posthog.capture('design_team_experience_submit_failed', {
+                team_name: selectedTeam?.name,
+                error: errorMessage
+            });
         } finally {
             setSubmitting(false);
         }

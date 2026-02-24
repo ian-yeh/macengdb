@@ -8,6 +8,8 @@ import CompanyListSkeleton from '../components/CompanyListSkeleton';
 import TabNav from '../components/TabNav';
 import CompanyRequestModal from '../components/CompanyRequestModal';
 import DesignTeamRequestModal from '../components/DesignTeamRequestModal';
+import { usePostHog } from '@posthog/react';
+import { useEffect } from 'react';
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -26,6 +28,27 @@ export default function LandingPage() {
     const ITEMS_PER_PAGE = 10;
     const [showCompanyRequestModal, setShowCompanyRequestModal] = useState(false);
     const [showDesignTeamRequestModal, setShowDesignTeamRequestModal] = useState(false);
+    const posthog = usePostHog();
+
+    const debouncedSearchQuery = useDebounce(searchQuery, 1000);
+
+    useEffect(() => {
+        if (debouncedSearchQuery) {
+            posthog.capture('search_performed', {
+                query: debouncedSearchQuery,
+                tab: activeTab
+            });
+        }
+    }, [debouncedSearchQuery, activeTab, posthog]);
+
+    useEffect(() => {
+        if (debouncedPosition) {
+            posthog.capture('filter_changed', {
+                type: 'position_search',
+                value: debouncedPosition
+            });
+        }
+    }, [debouncedPosition, posthog]);
 
     const { data: companies = [], isLoading, error } = useQuery({
         queryKey: ['companies', selectedIndustry, minRating, hasOffer, debouncedPosition],
@@ -70,10 +93,20 @@ export default function LandingPage() {
     );
 
     const handleCompanyClick = (companyId: number) => {
+        const company = companies.find(c => c.id === companyId);
+        posthog.capture('company_clicked', {
+            company_id: companyId,
+            company_name: company?.name
+        });
         navigate(`/company/${companyId}`);
     };
 
     const handleTeamClick = (teamId: number) => {
+        const team = designTeams.find(t => t.id === teamId);
+        posthog.capture('design_team_clicked', {
+            team_id: teamId,
+            team_name: team?.name
+        });
         navigate(`/design-teams/${teamId}`);
     };
 
@@ -87,7 +120,12 @@ export default function LandingPage() {
                 </h1>
 
                 {/* Tab Navigation */}
-                <TabNav activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); setSearchQuery(''); setCurrentPage(1); }} />
+                <TabNav activeTab={activeTab} onTabChange={(tab) => {
+                    setActiveTab(tab);
+                    setSearchQuery('');
+                    setCurrentPage(1);
+                    posthog.capture('tab_changed', { tab });
+                }} />
 
                 <div className="space-y-4">
                     {activeTab === 'companies' ? (
@@ -138,8 +176,14 @@ export default function LandingPage() {
                         Don't see your company or design team?{' '}
                         <button
                             onClick={() => {
-                                if (activeTab === 'companies') setShowCompanyRequestModal(true);
-                                else setShowDesignTeamRequestModal(true);
+                                if (activeTab === 'companies') {
+                                    setShowCompanyRequestModal(true);
+                                    posthog.capture('request_modal_opened', { type: 'company' });
+                                }
+                                else {
+                                    setShowDesignTeamRequestModal(true);
+                                    posthog.capture('request_modal_opened', { type: 'design_team' });
+                                }
                             }}
                             className="text-maceng-orange font-bold hover:text-maceng-maroon dark:hover:text-maceng-orange/80 transition-colors cursor-pointer bg-transparent border-none p-0 inline-flex items-center gap-0.5 group"
                         >
@@ -181,8 +225,11 @@ export default function LandingPage() {
                     </div>
                     {activeTab === 'companies' && (
                         <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className={`px-4 py-2 border rounded-lg flex items-center gap-2 text-sm font-medium transition-all ${showFilters ? 'bg-maceng-maroon text-white border-maceng-maroon' : 'bg-white dark:bg-[#111111] text-[#666] dark:text-[#e5e5e5] border-[#ddd] dark:border-[#444] hover:border-maceng-maroon/40'}`}
+                            onClick={() => {
+                                setShowFilters(!showFilters);
+                                if (!showFilters) posthog.capture('filters_opened');
+                            }}
+                            className={`px-4 py-2 border rounded-lg flex items-center gap-2 text-sm font-medium transition-all ${showFilters ? 'bg-maceng-maroon text-white border-maceng-maroon' : 'bg-white text-[#666] border-[#ddd] hover:border-maceng-maroon/40'}`}
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -199,8 +246,12 @@ export default function LandingPage() {
                             <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60">Industry</label>
                             <select
                                 value={selectedIndustry}
-                                onChange={(e) => { setSelectedIndustry(e.target.value); setCurrentPage(1); }}
-                                className="py-2 px-3 text-sm border border-[#ddd] dark:border-[#444] rounded-lg bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
+                                onChange={(e) => {
+                                    setSelectedIndustry(e.target.value);
+                                    setCurrentPage(1);
+                                    posthog.capture('filter_changed', { type: 'industry', value: e.target.value });
+                                }}
+                                className="py-2 px-3 text-sm border border-[#ddd] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
                             >
                                 <option value="All">All Industries</option>
                                 <option value="Software">Software</option>
@@ -219,8 +270,13 @@ export default function LandingPage() {
                             <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60">Min Rating</label>
                             <select
                                 value={minRating || ''}
-                                onChange={(e) => { setMinRating(e.target.value ? Number(e.target.value) : undefined); setCurrentPage(1); }}
-                                className="py-2 px-3 text-sm border border-[#ddd] dark:border-[#444] rounded-lg bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
+                                onChange={(e) => {
+                                    const val = e.target.value ? Number(e.target.value) : undefined;
+                                    setMinRating(val);
+                                    setCurrentPage(1);
+                                    posthog.capture('filter_changed', { type: 'min_rating', value: val });
+                                }}
+                                className="py-2 px-3 text-sm border border-[#ddd] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
                             >
                                 <option value="">Any</option>
                                 <option value="4">4+ Stars</option>
@@ -236,8 +292,12 @@ export default function LandingPage() {
                                 <input
                                     type="checkbox"
                                     checked={hasOffer === true}
-                                    onChange={(e) => { setHasOffer(e.target.checked ? true : undefined); setCurrentPage(1); }}
-                                    className="w-4 h-4 rounded border-[#ddd] dark:border-[#444] bg-white dark:bg-[#202020] text-maceng-maroon focus:ring-maceng-maroon transition-all"
+                                    onChange={(e) => {
+                                        setHasOffer(e.target.checked ? true : undefined);
+                                        setCurrentPage(1);
+                                        posthog.capture('filter_changed', { type: 'has_offer', value: e.target.checked });
+                                    }}
+                                    className="w-4 h-4 rounded border-[#ddd] text-maceng-maroon focus:ring-maceng-maroon transition-all"
                                 />
                                 <span className="text-sm text-[#444] dark:text-[#bbb] group-hover:text-maceng-maroon dark:group-hover:text-maceng-orange transition-colors">Only with offers</span>
                             </label>
@@ -265,6 +325,7 @@ export default function LandingPage() {
                                     setPosition('');
                                     setSearchQuery('');
                                     setCurrentPage(1);
+                                    posthog.capture('filters_reset');
                                 }}
                                 className="text-[12px] font-bold text-maceng-orange hover:text-maceng-maroon transition-colors mb-2"
                             >
