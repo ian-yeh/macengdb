@@ -677,7 +677,9 @@ export default function AdminPage() {
                                                 <div className="flex justify-between items-start mb-3 flex-wrap gap-2">
                                                     <div>
                                                         <h3 className="font-playfair text-lg text-[#222] dark:text-white">{experience.position}</h3>
-                                                        <p className="text-sm text-[#888] dark:text-[#a0a0a0]">Company ID: {experience.company_id} · {experience.term}</p>
+                                                        <p className="text-sm text-[#888] dark:text-[#a0a0a0]">
+                                                            {experience.company_id ? `Company ID: ${experience.company_id}` : `New Company: ${experience.new_company_name}`} · {experience.term}
+                                                        </p>
                                                     </div>
                                                     <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2.5 py-1 rounded-full font-medium">Pending</span>
                                                 </div>
