@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -12,8 +13,8 @@ export default {
         'mono': ['"IBM Plex Mono"', 'Consolas', 'monospace'],
       },
       colors: {
-        'maceng-maroon': '#7A2518',
-        'maceng-orange': '#C25E1B',
+        'maceng-maroon': 'rgb(var(--maceng-maroon) / <alpha-value>)',
+        'maceng-orange': 'rgb(var(--maceng-orange) / <alpha-value>)',
       },
     },
   },

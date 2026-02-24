@@ -104,39 +104,28 @@ export default function SignUpPage() {
     };
 
     return (
-        <div className="min-h-screen py-12 px-8 max-w-md mx-auto">
-            {/* Header */}
-            <header className="mb-10">
-                <Link
-                    to="/"
-                    className="font-playfair text-2xl font-semibold no-underline"
-                >
-                    <span className="text-maceng-maroon">MacEng</span>
-                    <span className="text-[#666]">DB</span>
-                </Link>
-            </header>
-
+        <div className="min-h-screen py-6 px-8 max-w-md mx-auto">
             {/* Sign Up Form */}
             <main>
-                <h1 className="font-playfair text-2xl text-maceng-maroon mb-2">
+                <h1 className="font-playfair text-2xl text-maceng-maroon dark:text-maceng-orange mb-2">
                     Sign Up
                 </h1>
-                <p className="text-[15px] text-[#666] mb-8">
+                <p className="text-[15px] text-[#666] dark:text-[#e5e5e5] mb-8">
                     Join MacEngDB to share and access interview experiences.
                 </p>
 
                 {error && (
-                    <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                    <div className="mb-6 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-950/50 rounded text-red-700 dark:text-red-400 text-sm">
                         {error}
                     </div>
                 )}
 
                 {success && (
-                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
+                    <div className="mb-6 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/50 rounded text-green-700 dark:text-green-400 text-sm">
                         {success}
                         <Link
                             to="/signin"
-                            className="block mt-3 text-maceng-maroon font-medium underline"
+                            className="block mt-3 text-maceng-maroon dark:text-maceng-orange font-medium underline"
                         >
                             Go to Sign In →
                         </Link>
@@ -147,7 +136,7 @@ export default function SignUpPage() {
                     <div>
                         <label
                             htmlFor="name"
-                            className="block text-sm font-medium text-[#333] mb-1.5"
+                            className="block text-sm font-medium text-[#333] dark:text-white mb-1.5"
                         >
                             Full Name
                         </label>
@@ -158,14 +147,14 @@ export default function SignUpPage() {
                             onChange={handleChange}
                             placeholder="John Doe"
                             required
-                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon transition-colors"
+                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
                         />
                     </div>
 
                     <div>
                         <label
                             htmlFor="email"
-                            className="block text-sm font-medium text-[#333] mb-1.5"
+                            className="block text-sm font-medium text-[#333] dark:text-white mb-1.5"
                         >
                             McMaster Email
                         </label>
@@ -176,9 +165,9 @@ export default function SignUpPage() {
                             onChange={handleChange}
                             placeholder="you@mcmaster.ca"
                             required
-                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon transition-colors"
+                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
                         />
-                        <p className="text-xs text-[#888] mt-1">
+                        <p className="text-xs text-[#888] dark:text-[#999999] mt-1">
                             Must be @mcmaster.ca or @alumni.mcmaster.ca
                         </p>
                     </div>
@@ -186,7 +175,7 @@ export default function SignUpPage() {
                     <div>
                         <label
                             htmlFor="program"
-                            className="block text-sm font-medium text-[#333] mb-1.5"
+                            className="block text-sm font-medium text-[#333] dark:text-white mb-1.5"
                         >
                             Program
                         </label>
@@ -195,7 +184,7 @@ export default function SignUpPage() {
                             value={formData.program}
                             onChange={handleChange}
                             required
-                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon transition-colors"
+                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
                         >
                             <option value="">Select your program</option>
                             <option value="Software">Software Engineering</option>
@@ -213,7 +202,7 @@ export default function SignUpPage() {
                     <div>
                         <label
                             htmlFor="graduationYear"
-                            className="block text-sm font-medium text-[#333] mb-1.5"
+                            className="block text-sm font-medium text-[#333] dark:text-white mb-1.5"
                         >
                             Graduation Year
                         </label>
@@ -226,14 +215,14 @@ export default function SignUpPage() {
                             min="2020"
                             max="2035"
                             required
-                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon transition-colors"
+                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
                         />
                     </div>
 
                     <div>
                         <label
                             htmlFor="password"
-                            className="block text-sm font-medium text-[#333] mb-1.5"
+                            className="block text-sm font-medium text-[#333] dark:text-white mb-1.5"
                         >
                             Password
                         </label>
@@ -245,14 +234,14 @@ export default function SignUpPage() {
                             placeholder="••••••••"
                             required
                             minLength={6}
-                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon transition-colors"
+                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
                         />
                     </div>
 
                     <div>
                         <label
                             htmlFor="confirmPassword"
-                            className="block text-sm font-medium text-[#333] mb-1.5"
+                            className="block text-sm font-medium text-[#333] dark:text-white mb-1.5"
                         >
                             Confirm Password
                         </label>
@@ -264,24 +253,24 @@ export default function SignUpPage() {
                             placeholder="••••••••"
                             required
                             minLength={6}
-                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon transition-colors"
+                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
                         />
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-2.5 px-4 bg-maceng-maroon text-white rounded font-medium text-[15px] hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-2.5 px-4 bg-maceng-maroon dark:bg-maceng-orange text-white rounded font-medium text-[15px] hover:bg-maceng-maroon/90 dark:hover:bg-maceng-orange/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
                         {loading ? 'Creating account...' : 'Create Account'}
                     </button>
                 </form>
 
-                <p className="mt-8 text-center text-sm text-[#666]">
+                <p className="mt-8 text-center text-sm text-[#666] dark:text-[#e5e5e5]">
                     Already have an account?{' '}
                     <Link
                         to="/signin"
-                        className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange"
+                        className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange font-medium"
                     >
                         Sign in
                     </Link>
@@ -289,7 +278,7 @@ export default function SignUpPage() {
             </main>
 
             {/* Footer */}
-            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] text-[13px] text-[#666]">
+            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] dark:border-[#444] text-[13px] text-[#666] dark:text-[#d4d4d4]">
                 <p>© {new Date().getFullYear()} MacEngDB</p>
             </footer>
         </div>

@@ -8,7 +8,7 @@ export default function CompanyDetailSkeleton() {
                 <Skeleton width="140px" height="16px" className="mb-8" />
                 <Skeleton width="280px" height="40px" className="mb-4" />
                 <Skeleton width="200px" height="20px" className="mb-6" />
-                <div className="flex gap-4 border-b border-[#e5e5e5] pb-6">
+                <div className="flex gap-4 border-b border-[#e5e5e5] dark:border-[#444] pb-6">
                     <Skeleton width="100px" height="16px" />
                 </div>
             </header>
@@ -19,7 +19,7 @@ export default function CompanyDetailSkeleton() {
 
                 <div className="space-y-8">
                     {Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="border-b border-[#e5e5e5] pb-8">
+                        <div key={i} className="border-b border-[#e5e5e5] dark:border-[#444] pb-8">
                             <div className="flex justify-between items-start mb-4">
                                 <Skeleton width="180px" height="24px" />
                                 <Skeleton width="60px" height="18px" />

@@ -167,13 +167,13 @@ export default function DesignTeamDetailPage() {
                     />
                 ))}
                 {difficulty > 0 && (
-                    <span className="text-xs text-[#888] ml-2">{DIFFICULTY_LABELS[difficulty]}</span>
+                    <span className="text-xs text-[#888] dark:text-[#a0a0a0] ml-2">{DIFFICULTY_LABELS[difficulty]}</span>
                 )}
             </div>
         );
     };
 
-    const inputClass = "w-full py-2.5 px-3.5 text-sm border border-[#ddd] rounded-lg font-inter bg-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all";
+    const inputClass = "w-full py-2.5 px-3.5 text-sm border border-[#ddd] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 dark:focus:ring-maceng-orange/10 focus:border-maceng-maroon dark:focus:border-maceng-orange transition-all";
 
     return (
         <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
@@ -189,25 +189,25 @@ export default function DesignTeamDetailPage() {
 
             {/* Header */}
             <header className="mb-8">
-                <h1 className="font-playfair text-2xl md:text-3xl lg:text-4xl font-bold text-maceng-maroon mb-3 tracking-tight animate-row-in" style={{ animationDelay: '50ms' }}>
+                <h1 className="font-playfair text-2xl md:text-3xl lg:text-4xl font-bold text-maceng-maroon dark:text-maceng-orange mb-3 tracking-tight animate-row-in" style={{ animationDelay: '50ms' }}>
                     {team.name}
                 </h1>
                 {team.description && (
-                    <p className="text-[15px] text-[#555] leading-relaxed mb-4 animate-row-in" style={{ animationDelay: '100ms' }}>
+                    <p className="text-[15px] text-[#555] dark:text-[#e5e5e5] leading-relaxed mb-4 animate-row-in" style={{ animationDelay: '100ms' }}>
                         {team.description}
                     </p>
                 )}
-                <div className="flex flex-wrap gap-2 md:gap-3 items-center border-b border-[#e5e5e5] pb-6 animate-row-in" style={{ animationDelay: '150ms' }}>
+                <div className="flex flex-wrap gap-2 md:gap-3 items-center border-b border-[#e5e5e5] dark:border-[#444] pb-6 animate-row-in" style={{ animationDelay: '150ms' }}>
                     {team.categories.map((cat: string) => (
                         <span
                             key={cat}
-                            className="px-3 py-1 bg-maceng-maroon/5 text-maceng-maroon text-[12px] font-semibold rounded-full uppercase tracking-wider"
+                            className="px-3 py-1 bg-maceng-maroon/5 dark:bg-maceng-maroon/20 text-maceng-maroon dark:text-maceng-orange text-[12px] font-semibold rounded-full uppercase tracking-wider"
                         >
                             {cat}
                         </span>
                     ))}
                     {team.avg_difficulty && (
-                        <span className="text-[14px] font-semibold text-[#555] flex items-center gap-1">
+                        <span className="text-[14px] font-semibold text-[#555] dark:text-[#d4d4d4] flex items-center gap-1">
                             Avg Difficulty: {team.avg_difficulty.toFixed(1)}/5
                         </span>
                     )}
@@ -216,7 +216,7 @@ export default function DesignTeamDetailPage() {
                             href={team.website_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-maceng-orange text-[13px] underline hover:text-maceng-maroon transition-colors"
+                            className="text-maceng-orange underline hover:text-maceng-maroon dark:hover:text-white text-[13px] transition-colors"
                         >
                             Website ↗
                         </a>
@@ -227,7 +227,7 @@ export default function DesignTeamDetailPage() {
             {/* Application Experiences */}
             <section>
                 <div className="flex items-center justify-between mb-8 animate-row-in" style={{ animationDelay: '200ms' }}>
-                    <h2 className="font-playfair text-xl md:text-2xl font-semibold text-[#333]">
+                    <h2 className="font-playfair text-xl md:text-2xl font-semibold text-[#333] dark:text-white">
                         Application Experiences ({reviews.length})
                     </h2>
                     {!showForm && (
@@ -248,9 +248,9 @@ export default function DesignTeamDetailPage() {
 
                 {/* Submission Form */}
                 {showForm && (
-                    <div className="mb-10 p-4 md:p-6 bg-[#fafafa] border border-[#eee] rounded-xl animate-fade-in">
-                        <h3 className="font-playfair text-lg text-maceng-maroon mb-1">Share Your Application Experience</h3>
-                        <p className="text-xs text-[#888] mb-5">Help others prepare to apply. Your submission will be reviewed before publishing.</p>
+                    <div className="mb-10 p-4 md:p-6 bg-[#fafafa] dark:bg-[#111111] border border-[#eee] dark:border-[#444] rounded-xl animate-fade-in">
+                        <h3 className="font-playfair text-lg text-maceng-maroon dark:text-maceng-orange mb-1">Share Your Application Experience</h3>
+                        <p className="text-xs text-[#888] dark:text-[#999999] mb-5">Help others prepare to apply. Your submission will be reviewed before publishing.</p>
 
                         {submitStatus === 'success' ? (
                             <div className="text-center py-6">
@@ -260,7 +260,7 @@ export default function DesignTeamDetailPage() {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 mb-1 block">
+                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
                                             McMaster Email *
                                         </label>
                                         <input
@@ -273,7 +273,7 @@ export default function DesignTeamDetailPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 mb-1 block">
+                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
                                             Position Applied For *
                                         </label>
                                         <input
@@ -286,7 +286,7 @@ export default function DesignTeamDetailPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 mb-1 block">
+                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
                                             Term *
                                         </label>
                                         <select
@@ -302,7 +302,7 @@ export default function DesignTeamDetailPage() {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 mb-1 block">
+                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
                                             Received an Acceptance
                                         </label>
                                         <div className="flex items-center gap-3 mt-1.5">
@@ -313,22 +313,22 @@ export default function DesignTeamDetailPage() {
                                                     onChange={(e) => setFormData(prev => ({ ...prev, accepted: e.target.checked }))}
                                                     className="sr-only peer"
                                                 />
-                                                <div className="w-11 h-6 bg-[#ddd] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-maceng-maroon"></div>
+                                                <div className="w-11 h-6 bg-[#ddd] dark:bg-[#333] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-maceng-maroon dark:peer-checked:bg-maceng-orange"></div>
                                             </label>
-                                            <span className="text-sm text-[#555]">{formData.accepted ? 'Yes' : 'No'}</span>
+                                            <span className="text-sm text-[#555] dark:text-[#d4d4d4]">{formData.accepted ? 'Yes' : 'No'}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 mb-1 block">
+                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
                                         Application Difficulty *
                                     </label>
                                     {renderClickableDifficulty(formData.difficulty, (v) => setFormData(prev => ({ ...prev, difficulty: v })))}
                                 </div>
 
                                 <div>
-                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 mb-1 block">
+                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
                                         How Did You Find Out About Recruiting?
                                     </label>
                                     <input
@@ -341,7 +341,7 @@ export default function DesignTeamDetailPage() {
                                 </div>
 
                                 <div>
-                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 mb-1 block">
+                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
                                         Describe the Application Process
                                     </label>
                                     <textarea
@@ -354,7 +354,7 @@ export default function DesignTeamDetailPage() {
                                 </div>
 
                                 <div>
-                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 mb-1 block">
+                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
                                         Tips for Future Applicants
                                     </label>
                                     <textarea
@@ -374,14 +374,14 @@ export default function DesignTeamDetailPage() {
                                     <button
                                         type="button"
                                         onClick={() => { setShowForm(false); setSubmitStatus('idle'); }}
-                                        className="px-4 py-2 text-sm text-[#666] hover:text-[#333] transition-colors cursor-pointer"
+                                        className="px-4 py-2 text-sm text-[#666] dark:text-[#e5e5e5] hover:text-[#333] dark:hover:text-white transition-colors cursor-pointer"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={submitStatus === 'submitting' || formData.difficulty === 0 || !formData.position || !formData.term || !formData.submitter_email}
-                                        className="px-5 py-2 bg-maceng-maroon text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50 cursor-pointer"
+                                        className="px-5 py-2 bg-maceng-maroon dark:bg-maceng-orange text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 dark:hover:bg-maceng-orange/90 transition-colors disabled:opacity-50 cursor-pointer"
                                     >
                                         {submitStatus === 'submitting' ? 'Submitting...' : 'Submit Experience'}
                                     </button>
@@ -398,21 +398,21 @@ export default function DesignTeamDetailPage() {
                 ) : (
                     <div className="space-y-8">
                         {reviews.map((review: DesignTeamReview, index: number) => (
-                            <div key={review.id} className="border-b border-[#e5e5e5] pb-8 animate-row-in" style={{ animationDelay: `${250 + index * 60}ms` }}>
+                            <div key={review.id} className="border-b border-[#e5e5e5] dark:border-[#444] pb-8 animate-row-in" style={{ animationDelay: `${250 + index * 60}ms` }}>
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h3 className="font-semibold text-maceng-maroon text-[17px]">
+                                            <h3 className="font-semibold text-maceng-maroon dark:text-maceng-orange text-[17px]">
                                                 {review.position}
                                             </h3>
                                             <span className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${review.accepted
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-red-50 text-red-500'
+                                                ? 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400'
+                                                : 'bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400'
                                                 }`}>
                                                 {review.accepted ? 'Accepted' : 'Not Accepted'}
                                             </span>
                                         </div>
-                                        <p className="text-[13px] text-[#888] italic font-inter text-nowrap">
+                                        <p className="text-[13px] text-[#888] dark:text-[#a0a0a0] italic font-inter text-nowrap">
                                             {review.term}
                                         </p>
                                     </div>
@@ -452,8 +452,8 @@ export default function DesignTeamDetailPage() {
             </section>
 
             {/* Footer */}
-            <footer className="mt-16 pt-8 border-t border-[#eee] text-center">
-                <p className="text-[12px] text-[#aaa] italic font-inter">
+            <footer className="mt-16 pt-8 border-t border-[#eee] dark:border-[#444] text-center">
+                <p className="text-[12px] text-[#aaa] dark:text-[#999999] italic font-inter">
                     MacEngDB — Built by McMaster Engineering students, for McMaster Engineering students.
                 </p>
             </footer>

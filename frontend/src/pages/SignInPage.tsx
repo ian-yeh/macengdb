@@ -89,29 +89,18 @@ export default function SignInPage() {
     };
 
     return (
-        <div className="min-h-screen py-12 px-8 max-w-md mx-auto">
-            {/* Header */}
-            <header className="mb-10">
-                <Link
-                    to="/"
-                    className="font-playfair text-2xl font-semibold no-underline"
-                >
-                    <span className="text-maceng-maroon">MacEng</span>
-                    <span className="text-[#666]">DB</span>
-                </Link>
-            </header>
-
+        <div className="min-h-screen py-6 px-8 max-w-md mx-auto">
             {/* Sign In Form */}
             <main>
-                <h1 className="font-playfair text-2xl text-maceng-maroon mb-2">
+                <h1 className="font-playfair text-2xl text-maceng-maroon dark:text-maceng-orange mb-2">
                     Sign In
                 </h1>
-                <p className="text-[15px] text-[#666] mb-8">
+                <p className="text-[15px] text-[#666] dark:text-[#e5e5e5] mb-8">
                     Welcome back. Sign in to access your account.
                 </p>
 
                 {error && (
-                    <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                    <div className="mb-6 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded text-red-700 dark:text-red-400 text-sm">
                         {error}
                     </div>
                 )}
@@ -120,7 +109,7 @@ export default function SignInPage() {
                     <div>
                         <label
                             htmlFor="email"
-                            className="block text-sm font-medium text-[#333] mb-1.5"
+                            className="block text-sm font-medium text-[#333] dark:text-white mb-1.5"
                         >
                             Email
                         </label>
@@ -131,14 +120,14 @@ export default function SignInPage() {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="you@mcmaster.ca"
                             required
-                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon transition-colors"
+                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
                         />
                     </div>
 
                     <div>
                         <label
                             htmlFor="password"
-                            className="block text-sm font-medium text-[#333] mb-1.5"
+                            className="block text-sm font-medium text-[#333] dark:text-white mb-1.5"
                         >
                             Password
                         </label>
@@ -149,7 +138,7 @@ export default function SignInPage() {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
                             required
-                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon transition-colors"
+                            className="w-full py-2.5 px-3 text-[15px] border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
                         />
                     </div>
 
@@ -165,17 +154,17 @@ export default function SignInPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-2.5 px-4 bg-maceng-maroon text-white rounded font-medium text-[15px] hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-2.5 px-4 bg-maceng-maroon dark:bg-maceng-orange text-white rounded font-medium text-[15px] hover:bg-maceng-maroon/90 dark:hover:bg-maceng-orange/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
                         {loading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
 
-                <p className="mt-8 text-center text-sm text-[#666]">
+                <p className="mt-8 text-center text-sm text-[#666] dark:text-[#e5e5e5]">
                     Don't have an account?{' '}
                     <Link
                         to="/signup"
-                        className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange"
+                        className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange font-medium"
                     >
                         Sign up
                     </Link>
@@ -183,7 +172,7 @@ export default function SignInPage() {
             </main>
 
             {/* Footer */}
-            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] text-[13px] text-[#666]">
+            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] dark:border-[#444] text-[13px] text-[#666] dark:text-[#d4d4d4]">
                 <p>© {new Date().getFullYear()} MacEngDB</p>
             </footer>
         </div>

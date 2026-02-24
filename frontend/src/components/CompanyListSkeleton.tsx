@@ -5,19 +5,19 @@ export default function CompanyListSkeleton() {
         <div className="animate-fade-in">
             <table className="w-full border-collapse">
                 <thead>
-                    <tr className="border-b-2 border-maceng-maroon/10">
-                        <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon/40 font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
+                    <tr className="border-b-2 border-maceng-maroon/10 dark:border-maceng-orange/10">
+                        <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon/40 dark:text-maceng-orange/40 font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
                             Company
                         </th>
-                        <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon/40 font-semibold text-[16px] uppercase tracking-wider">
+                        <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon/40 dark:text-maceng-orange/40 font-semibold text-[16px] uppercase tracking-wider">
                             Industry
                         </th>
-                        <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon/40 font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
+                        <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon/40 dark:text-maceng-orange/40 font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
                             Experiences
                         </th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-[#eee]">
+                <tbody className="divide-y divide-[#eee] dark:divide-[#333]">
                     {Array.from({ length: 8 }).map((_, i) => (
                         <tr key={i} className="animate-row-in" style={{ animationDelay: `${i * 30}ms` }}>
                             <td className="py-4 pr-4">
