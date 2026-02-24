@@ -151,16 +151,16 @@ export default function SubmitExperiencePage() {
         return (
             <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto">
                 <div className="text-center py-16">
-                    <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mb-4">
+                    <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon dark:text-maceng-orange mb-4">
                         Thank you!
                     </h1>
-                    <p className="text-[15px] text-[#555] mb-8">
+                    <p className="text-[15px] text-[#555] dark:text-[#e5e5e5] mb-8">
                         Your experience has been submitted successfully, and was sent to an admin for review. It will help fellow McMaster Engineering students prepare for interviews.
                     </p>
                     <div className="flex gap-4 justify-center">
                         <button
                             onClick={() => navigate('/')}
-                            className="px-6 py-2.5 bg-maceng-maroon text-white rounded font-medium text-sm hover:bg-maceng-maroon/90 transition-colors"
+                            className="px-6 py-2.5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded font-medium text-sm hover:bg-maceng-maroon/90 dark:hover:bg-maceng-orange/90 transition-colors"
                         >
                             Back to Companies
                         </button>
@@ -178,7 +178,7 @@ export default function SubmitExperiencePage() {
                                 setTips('');
                                 setInterviewAcquisition('');
                             }}
-                            className="px-6 py-2.5 border border-maceng-maroon text-maceng-maroon rounded font-medium text-sm hover:bg-maceng-maroon/5 transition-colors"
+                            className="px-6 py-2.5 border border-maceng-maroon dark:border-maceng-orange text-maceng-maroon dark:text-maceng-orange rounded font-medium text-sm hover:bg-maceng-maroon/5 dark:hover:bg-maceng-orange/10 transition-colors"
                         >
                             Submit Another
                         </button>
@@ -199,10 +199,10 @@ export default function SubmitExperiencePage() {
                     ← Back to companies
                 </Link>
 
-                <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon mt-6 mb-2">
+                <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon dark:text-maceng-orange mt-6 mb-2">
                     Submit an Experience
                 </h1>
-                <p className="text-[15px] text-[#555]">
+                <p className="text-[15px] text-[#555] dark:text-[#e5e5e5]">
                     Share your interview experience to help fellow McMaster Engineering students.
                 </p>
             </header>
@@ -211,7 +211,7 @@ export default function SubmitExperiencePage() {
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Email */}
                 <div>
-                    <label className="block text-sm font-medium text-[#333] mb-1.5">
+                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
                         McMaster Email <span className="text-maceng-orange">*</span>
                     </label>
                     <input
@@ -219,15 +219,15 @@ export default function SubmitExperiencePage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="yourname@mcmaster.ca"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
+                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
                         required
                     />
-                    <p className="text-xs text-[#888] mt-1">Must be a @mcmaster.ca email address. Don't worry, this is only to verify you're a student and prevent spam. Your identity remains anonymous. </p>
+                    <p className="text-xs text-[#888] dark:text-[#a0a0a0] mt-1">Must be a @mcmaster.ca email address. Don't worry, this is only to verify you're a student and prevent spam. Your identity remains anonymous. </p>
                 </div>
 
                 {/* Company Search */}
                 <div className="relative" ref={suggestionsRef}>
-                    <label className="block text-sm font-medium text-[#333] mb-1.5">
+                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
                         Company <span className="text-maceng-orange">*</span>
                     </label>
                     <div className="flex gap-2">
@@ -239,7 +239,7 @@ export default function SubmitExperiencePage() {
                                 if (selectedCompany) setSelectedCompany(null);
                             }}
                             placeholder="Search for a company..."
-                            className={`flex-1 py-2 px-3 text-sm border rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon ${selectedCompany ? 'border-green-500 bg-green-50' : 'border-[#ccc]'
+                            className={`flex-1 py-2 px-3 text-sm border rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange ${selectedCompany ? 'border-green-500 bg-green-50 dark:bg-green-950/20 dark:border-green-800' : 'border-[#ccc] dark:border-[#444]'
                                 }`}
                         />
                         {selectedCompany && (
@@ -253,17 +253,17 @@ export default function SubmitExperiencePage() {
                         )}
                     </div>
                     {showSuggestions && companySuggestions.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-[#ccc] rounded shadow-lg max-h-48 overflow-y-auto">
+                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-[#111111] border border-[#ccc] dark:border-[#444] rounded shadow-lg max-h-48 overflow-y-auto">
                             {companySuggestions.map((company) => (
                                 <button
                                     key={company.id}
                                     type="button"
                                     onClick={() => handleCompanySelect(company)}
-                                    className="w-full text-left px-3 py-2 text-sm hover:bg-[#fafafa] transition-colors border-b border-[#f0f0f0] last:border-b-0"
+                                    className="w-full text-left px-3 py-2 text-sm hover:bg-[#fafafa] dark:hover:bg-[#222] transition-colors border-b border-[#f0f0f0] dark:border-[#444] last:border-b-0"
                                 >
-                                    <span className="font-medium text-[#333]">{company.name}</span>
+                                    <span className="font-medium text-[#333] dark:text-white">{company.name}</span>
                                     {company.industries.length > 0 && (
-                                        <span className="text-[#888] ml-2 text-xs">
+                                        <span className="text-[#888] dark:text-[#a0a0a0] ml-2 text-xs">
                                             {company.industries.join(', ')}
                                         </span>
                                     )}
@@ -287,7 +287,7 @@ export default function SubmitExperiencePage() {
 
                 {/* Position */}
                 <div>
-                    <label className="block text-sm font-medium text-[#333] mb-1.5">
+                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
                         Position <span className="text-maceng-orange">*</span>
                     </label>
                     <input
@@ -295,14 +295,14 @@ export default function SubmitExperiencePage() {
                         value={position}
                         onChange={(e) => setPosition(e.target.value)}
                         placeholder="e.g. Software Engineering Intern"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
+                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
                         required
                     />
                 </div>
 
                 {/* Interview Acquisition */}
                 <div>
-                    <label className="block text-sm font-medium text-[#333] mb-1.5">
+                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
                         How did you get the interview?
                     </label>
                     <input
@@ -310,20 +310,20 @@ export default function SubmitExperiencePage() {
                         value={interviewAcquisition}
                         onChange={(e) => setInterviewAcquisition(e.target.value)}
                         placeholder="e.g. Career Fair, LinkedIn, Cold Apply, Referral"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
+                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
                     />
-                    <p className="text-xs text-[#888] mt-1">Optional. Helps others understand the application process.</p>
+                    <p className="text-xs text-[#888] dark:text-[#a0a0a0] mt-1">Optional. Helps others understand the application process.</p>
                 </div>
 
                 {/* Term */}
                 <div>
-                    <label className="block text-sm font-medium text-[#333] mb-1.5">
+                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
                         Term <span className="text-maceng-orange">*</span>
                     </label>
                     <select
                         value={term}
                         onChange={(e) => setTerm(e.target.value)}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
+                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
                         required
                     >
                         <option value="">Select a term...</option>
@@ -342,14 +342,14 @@ export default function SubmitExperiencePage() {
                             onChange={(e) => setOfferReceived(e.target.checked)}
                             className="sr-only peer"
                         />
-                        <div className="w-9 h-5 bg-[#ddd] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-maceng-maroon"></div>
+                        <div className="w-9 h-5 bg-[#ddd] dark:bg-[#333] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-maceng-maroon dark:peer-checked:bg-maceng-orange"></div>
                     </label>
-                    <span className="text-sm text-[#333]">Received an offer</span>
+                    <span className="text-sm text-[#333] dark:text-white">Received an offer</span>
                 </div>
 
                 {/* Difficulty */}
                 <div>
-                    <label className="block text-sm font-medium text-[#333] mb-1.5">
+                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
                         Interview Difficulty
                     </label>
                     <div className="flex gap-2 items-center">
@@ -359,14 +359,14 @@ export default function SubmitExperiencePage() {
                                 type="button"
                                 onClick={() => setDifficulty(level)}
                                 className={`w-10 h-10 rounded-full text-sm font-medium transition-all ${difficulty === level
-                                    ? 'bg-maceng-maroon text-white shadow-md'
-                                    : 'bg-[#f0f0f0] text-[#555] hover:bg-[#e0e0e0]'
+                                    ? 'bg-maceng-maroon dark:bg-maceng-orange text-white shadow-md'
+                                    : 'bg-[#f0f0f0] dark:bg-[#333] text-[#555] dark:text-[#e5e5e5] hover:bg-[#e0e0e0] dark:hover:bg-[#444]'
                                     }`}
                             >
                                 {level}
                             </button>
                         ))}
-                        <span className="text-xs text-[#888] ml-2">
+                        <span className="text-xs text-[#888] dark:text-[#a0a0a0] ml-2">
                             {difficulty <= 2 ? 'Easy' : difficulty === 3 ? 'Medium' : 'Hard'}
                         </span>
                     </div>
@@ -375,33 +375,33 @@ export default function SubmitExperiencePage() {
                 {/* Interview Stages */}
                 <div>
                     <div className="flex justify-between items-center mb-3">
-                        <label className="block text-sm font-medium text-[#333]">
+                        <label className="block text-sm font-medium text-[#333] dark:text-white">
                             Interview Stages
                         </label>
                         <button
                             type="button"
                             onClick={addStage}
-                            className="text-sm text-maceng-orange hover:text-maceng-maroon transition-colors font-medium"
+                            className="text-sm text-maceng-orange hover:text-maceng-maroon dark:hover:text-maceng-orange/80 transition-colors font-medium"
                         >
                             + Add Stage
                         </button>
                     </div>
                     {stages.length === 0 && (
-                        <p className="text-xs text-[#888] italic">
+                        <p className="text-xs text-[#888] dark:text-[#a0a0a0] italic">
                             No stages added yet. Click "Add Stage" to document each interview round.
                         </p>
                     )}
                     <div className="space-y-4">
                         {stages.map((stage, index) => (
-                            <div key={index} className="border border-[#e5e5e5] rounded p-4 bg-[#fafafa]">
+                            <div key={index} className="border border-[#e5e5e5] dark:border-[#444] rounded p-4 bg-[#fafafa] dark:bg-[#111111]">
                                 <div className="flex justify-between items-center mb-3">
-                                    <span className="text-xs font-medium text-maceng-maroon uppercase tracking-wide">
+                                    <span className="text-xs font-medium text-maceng-maroon dark:text-maceng-orange uppercase tracking-wide">
                                         Stage {index + 1}
                                     </span>
                                     <button
                                         type="button"
                                         onClick={() => removeStage(index)}
-                                        className="text-xs text-[#888] hover:text-red-500 transition-colors"
+                                        className="text-xs text-[#888] dark:text-[#a0a0a0] hover:text-red-500 transition-colors"
                                     >
                                         Remove
                                     </button>
@@ -412,14 +412,14 @@ export default function SubmitExperiencePage() {
                                         value={stage.name}
                                         onChange={(e) => updateStage(index, 'name', e.target.value)}
                                         placeholder="Stage name (e.g. Technical Interview)"
-                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
+                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#161616] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
                                     />
                                     <input
                                         type="text"
                                         value={stage.duration || ''}
                                         onChange={(e) => updateStage(index, 'duration', e.target.value)}
                                         placeholder="Duration (e.g. 45 min)"
-                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon"
+                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#161616] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
                                     />
                                 </div>
                                 <textarea
@@ -427,7 +427,7 @@ export default function SubmitExperiencePage() {
                                     onChange={(e) => updateStage(index, 'questions', e.target.value.split('\n').filter(q => q.trim()))}
                                     placeholder="Questions asked"
                                     rows={2}
-                                    className="w-full py-1.5 px-2.5 text-sm border border-[#ddd] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon min-h-[80px]"
+                                    className="w-full py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#161616] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange min-h-[80px]"
                                 />
                             </div>
                         ))}
@@ -436,7 +436,7 @@ export default function SubmitExperiencePage() {
 
                 {/* Tips */}
                 <div>
-                    <label className="block text-sm font-medium text-[#333] mb-1.5">
+                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
                         Tips & Advice
                     </label>
                     <textarea
@@ -444,7 +444,7 @@ export default function SubmitExperiencePage() {
                         onChange={(e) => setTips(e.target.value)}
                         placeholder="Any advice for future candidates? (optional)"
                         rows={3}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] rounded font-inter bg-white focus:outline-none focus:border-maceng-maroon min-h-[100px]"
+                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange min-h-[100px]"
                     />
                 </div>
 
@@ -472,7 +472,7 @@ export default function SubmitExperiencePage() {
             />
 
             {/* Footer */}
-            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] text-[13px] text-[#666]">
+            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] dark:border-[#444] text-[13px] text-[#666] dark:text-[#d4d4d4]">
                 <p>
                     © {new Date().getFullYear()} MacEngDB · Built by McMaster Engineering students
                 </p>

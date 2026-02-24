@@ -4,9 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --maceng-maroon: 122 37 24;
+  --maceng-orange: 194 94 27;
+}
+
+.dark {
+  /* High visibility dark mode brand colors */
+  --maceng-maroon: 255 120 120;
+  /* Brighter, more visible maroon */
+  --maceng-orange: 255 165 0;
+  /* Brighter, more vibrant orange */
+}
+
 @layer base {
   body {
-    @apply font-inter bg-white text-[#333] antialiased;
+    @apply font-inter bg-white text-[#333] dark:bg-[#0a0a0a] dark:text-white antialiased transition-colors duration-200;
   }
 
   h1,
@@ -52,9 +65,12 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -65,5 +81,5 @@
 }
 
 .skeleton {
-  @apply bg-[#f0f0f0] rounded animate-pulse;
+  @apply bg-[#f0f0f0] dark:bg-[#1e1e1e] rounded animate-pulse;
 }
