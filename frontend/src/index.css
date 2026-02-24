@@ -19,7 +19,7 @@
 
 @layer base {
   body {
-    @apply font-inter bg-white text-[#333] dark:bg-[#0a0a0a] dark:text-white antialiased transition-colors duration-200;
+    @apply font-inter bg-white text-[#333] dark:bg-[#141414] dark:text-white antialiased transition-colors duration-200;
   }
 
   h1,

@@ -200,7 +200,7 @@ export default function LandingPage() {
                             <select
                                 value={selectedIndustry}
                                 onChange={(e) => { setSelectedIndustry(e.target.value); setCurrentPage(1); }}
-                                className="py-2 px-3 text-sm border border-[#ddd] dark:border-[#444] rounded-lg bg-white dark:bg-[#161616] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
+                                className="py-2 px-3 text-sm border border-[#ddd] dark:border-[#444] rounded-lg bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
                             >
                                 <option value="All">All Industries</option>
                                 <option value="Software">Software</option>
@@ -220,7 +220,7 @@ export default function LandingPage() {
                             <select
                                 value={minRating || ''}
                                 onChange={(e) => { setMinRating(e.target.value ? Number(e.target.value) : undefined); setCurrentPage(1); }}
-                                className="py-2 px-3 text-sm border border-[#ddd] dark:border-[#444] rounded-lg bg-white dark:bg-[#161616] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
+                                className="py-2 px-3 text-sm border border-[#ddd] dark:border-[#444] rounded-lg bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
                             >
                                 <option value="">Any</option>
                                 <option value="4">4+ Stars</option>
@@ -237,7 +237,7 @@ export default function LandingPage() {
                                     type="checkbox"
                                     checked={hasOffer === true}
                                     onChange={(e) => { setHasOffer(e.target.checked ? true : undefined); setCurrentPage(1); }}
-                                    className="w-4 h-4 rounded border-[#ddd] dark:border-[#444] bg-white dark:bg-[#161616] text-maceng-maroon focus:ring-maceng-maroon transition-all"
+                                    className="w-4 h-4 rounded border-[#ddd] dark:border-[#444] bg-white dark:bg-[#202020] text-maceng-maroon focus:ring-maceng-maroon transition-all"
                                 />
                                 <span className="text-sm text-[#444] dark:text-[#bbb] group-hover:text-maceng-maroon dark:group-hover:text-maceng-orange transition-colors">Only with offers</span>
                             </label>
@@ -251,7 +251,7 @@ export default function LandingPage() {
                                 placeholder="Filter by role (e.g. Intern)"
                                 value={position}
                                 onChange={(e) => { setPosition(e.target.value); setCurrentPage(1); }}
-                                className="py-2 px-3 text-sm border border-[#ddd] dark:border-[#444] rounded-lg bg-white dark:bg-[#161616] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
+                                className="py-2 px-3 text-sm border border-[#ddd] dark:border-[#444] rounded-lg bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
                             />
                         </div>
 
@@ -318,7 +318,7 @@ export default function LandingPage() {
                                         {paginatedCompanies.map((company: Company, index: number) => (
                                             <tr
                                                 key={`${company.id}-${searchQuery}-${safePage}`}
-                                                className="group hover:bg-[#fafafa] dark:hover:bg-[#222222] transition-all cursor-pointer animate-row-in"
+                                                className="group hover:bg-[#fafafa] dark:hover:bg-[#282828] transition-all cursor-pointer animate-row-in"
                                                 style={{ animationDelay: `${index * 30}ms` }}
                                                 onClick={() => handleCompanyClick(company.id)}
                                             >
@@ -362,7 +362,7 @@ export default function LandingPage() {
                                     <button
                                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                         disabled={safePage === 1}
-                                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#222222] hover:border-[#ddd] dark:hover:border-[#666] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -374,7 +374,7 @@ export default function LandingPage() {
                                             onClick={() => setCurrentPage(page)}
                                             className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border text-xs md:text-sm font-semibold transition-all ${page === safePage
                                                 ? 'bg-maceng-maroon dark:bg-maceng-orange text-white border-maceng-maroon dark:border-maceng-orange shadow-md shadow-maceng-maroon/20 dark:shadow-maceng-orange/20'
-                                                : 'border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#222222] hover:border-[#ddd] dark:hover:border-[#666]'
+                                                : 'border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666]'
                                                 }`}
                                         >
                                             {page}
@@ -383,7 +383,7 @@ export default function LandingPage() {
                                     <button
                                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                         disabled={safePage === totalPages}
-                                        className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#222222] hover:border-[#ddd] dark:hover:border-[#666] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                                        className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
@@ -435,7 +435,7 @@ export default function LandingPage() {
                                         {filteredTeams.map((team: DesignTeam, index: number) => (
                                             <tr
                                                 key={team.id}
-                                                className="group hover:bg-[#fafafa] dark:hover:bg-[#222222] transition-all cursor-pointer animate-row-in"
+                                                className="group hover:bg-[#fafafa] dark:hover:bg-[#282828] transition-all cursor-pointer animate-row-in"
                                                 style={{ animationDelay: `${index * 30}ms` }}
                                                 onClick={() => handleTeamClick(team.id)}
                                             >

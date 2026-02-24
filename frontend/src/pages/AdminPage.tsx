@@ -466,7 +466,7 @@ export default function AdminPage() {
                                                                         onChange={(e) => setEditedNames({ ...editedNames, [req.id]: e.target.value })}
                                                                         onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateReqName(req.id); if (e.key === 'Escape') setEditingRequest(null); }}
                                                                         autoFocus
-                                                                        className="flex-1 bg-white dark:bg-[#161616] border border-maceng-maroon/30 dark:border-maceng-orange/30 rounded px-2.5 py-1 text-[15px] font-semibold text-[#222] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
+                                                                        className="flex-1 bg-white dark:bg-[#202020] border border-maceng-maroon/30 dark:border-maceng-orange/30 rounded px-2.5 py-1 text-[15px] font-semibold text-[#222] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
                                                                     />
                                                                     <button onClick={() => handleUpdateReqName(req.id)} disabled={processing.has(`req-${req.id}`)} className="text-xs font-medium text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 disabled:opacity-50 cursor-pointer">Save</button>
                                                                     <button onClick={() => setEditingRequest(null)} className="text-xs text-[#888] dark:text-[#a0a0a0] hover:text-[#333] dark:hover:text-[#aaa] cursor-pointer">Cancel</button>
@@ -591,7 +591,7 @@ export default function AdminPage() {
                                                                         onChange={(e) => setEditedDTNames({ ...editedDTNames, [req.id]: e.target.value })}
                                                                         onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateDTReqName(req.id); if (e.key === 'Escape') setEditingDTRequest(null); }}
                                                                         autoFocus
-                                                                        className="flex-1 bg-white dark:bg-[#161616] border border-maceng-maroon/30 dark:border-maceng-orange/30 rounded px-2.5 py-1 text-[15px] font-semibold text-[#222] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
+                                                                        className="flex-1 bg-white dark:bg-[#202020] border border-maceng-maroon/30 dark:border-maceng-orange/30 rounded px-2.5 py-1 text-[15px] font-semibold text-[#222] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange transition-colors"
                                                                     />
                                                                     <button onClick={() => handleUpdateDTReqName(req.id)} disabled={processing.has(`dtreq-${req.id}`)} className="text-xs font-medium text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 disabled:opacity-50 cursor-pointer">Save</button>
                                                                     <button onClick={() => setEditingDTRequest(null)} className="text-xs text-[#888] dark:text-[#a0a0a0] hover:text-[#333] dark:hover:text-[#aaa] cursor-pointer">Cancel</button>
@@ -705,7 +705,7 @@ export default function AdminPage() {
                                                         <p className="text-[11px] uppercase tracking-widest text-[#999] dark:text-[#999999] font-semibold mb-2">Interview Stages</p>
                                                         <div className="space-y-1.5">
                                                             {experience.stages.map((stage, i) => (
-                                                                <div key={i} className="text-sm text-[#444] dark:text-white bg-[#fafafa] dark:bg-[#161616] rounded px-3 py-2 border border-transparent dark:border-[#444]">
+                                                                <div key={i} className="text-sm text-[#444] dark:text-white bg-[#fafafa] dark:bg-[#202020] rounded px-3 py-2 border border-transparent dark:border-[#444]">
                                                                     <span className="font-medium text-[#222] dark:text-white">{stage.name}</span>
                                                                     {stage.duration && <span className="text-[#999] dark:text-[#a0a0a0] ml-1">({stage.duration})</span>}
                                                                     {stage.questions.length > 0 && (
@@ -809,7 +809,7 @@ export default function AdminPage() {
                                                 {review.description && (
                                                     <div className="mb-4">
                                                         <p className="text-[11px] uppercase tracking-widest text-[#999] dark:text-[#999999] font-semibold mb-2">Application Process</p>
-                                                        <p className="text-sm text-[#444] dark:text-white bg-[#fafafa] dark:bg-[#161616] rounded px-3 py-2 border border-transparent dark:border-[#444]">{review.description}</p>
+                                                        <p className="text-sm text-[#444] dark:text-white bg-[#fafafa] dark:bg-[#202020] rounded px-3 py-2 border border-transparent dark:border-[#444]">{review.description}</p>
                                                     </div>
                                                 )}
 

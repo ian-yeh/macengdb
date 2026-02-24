@@ -412,14 +412,14 @@ export default function SubmitExperiencePage() {
                                         value={stage.name}
                                         onChange={(e) => updateStage(index, 'name', e.target.value)}
                                         placeholder="Stage name (e.g. Technical Interview)"
-                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#161616] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
+                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
                                     />
                                     <input
                                         type="text"
                                         value={stage.duration || ''}
                                         onChange={(e) => updateStage(index, 'duration', e.target.value)}
                                         placeholder="Duration (e.g. 45 min)"
-                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#161616] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
+                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
                                     />
                                 </div>
                                 <textarea
@@ -427,7 +427,7 @@ export default function SubmitExperiencePage() {
                                     onChange={(e) => updateStage(index, 'questions', e.target.value.split('\n').filter(q => q.trim()))}
                                     placeholder="Questions asked"
                                     rows={2}
-                                    className="w-full py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#161616] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange min-h-[80px]"
+                                    className="w-full py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange min-h-[80px]"
                                 />
                             </div>
                         ))}

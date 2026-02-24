@@ -64,7 +64,7 @@ export default function CompanyRequestModal({ isOpen, onClose }: CompanyRequestM
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Company name"
                             autoFocus
-                            className="w-full py-2.5 px-3.5 text-sm border border-[#ddd] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#161616] dark:text-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 dark:focus:ring-maceng-orange/10 focus:border-maceng-maroon dark:focus:border-maceng-orange transition-all mb-3"
+                            className="w-full py-2.5 px-3.5 text-sm border border-[#ddd] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 dark:focus:ring-maceng-orange/10 focus:border-maceng-maroon dark:focus:border-maceng-orange transition-all mb-3"
                         />
                         <input
                             type="email"
@@ -72,7 +72,7 @@ export default function CompanyRequestModal({ isOpen, onClose }: CompanyRequestM
                             onChange={(e) => setEmail(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && name.trim() && handleSubmit()}
                             placeholder="Your email (optional)"
-                            className="w-full py-2.5 px-3.5 text-sm border border-[#ddd] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#161616] dark:text-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 dark:focus:ring-maceng-orange/10 focus:border-maceng-maroon dark:focus:border-maceng-orange transition-all mb-4"
+                            className="w-full py-2.5 px-3.5 text-sm border border-[#ddd] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 dark:focus:ring-maceng-orange/10 focus:border-maceng-maroon dark:focus:border-maceng-orange transition-all mb-4"
                         />
                         {status === 'error' && (
                             <p className="text-xs text-red-600 dark:text-red-400 mb-2">Too many requests! Try again in a minute.</p>
