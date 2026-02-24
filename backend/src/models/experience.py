@@ -20,7 +20,8 @@ class ExperienceModel(Base):
     user_id = Column(
         Integer, ForeignKey("users.id"), nullable=True
     )  # Nullable for anonymous submissions
-    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True)
+    new_company_name = Column(String(255), nullable=True)  # For companies not yet in DB
     submitter_email = Column(String(255), nullable=False)  # McMaster email for tracking
     position = Column(String(255), nullable=False)
     term = Column(String(50), nullable=False)

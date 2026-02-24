@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 
 from src.models.experience import ExperienceModel
+from src.models.company_request import CompanyRequestModel
 from src.schemas.experience import ExperienceCreate, ExperienceUpdate, ExperienceSubmit
 
 
@@ -105,6 +106,7 @@ def create_experience_anonymous(
     db_experience = ExperienceModel(
         submitter_email=experience.submitter_email,
         company_id=experience.company_id,
+        new_company_name=experience.new_company_name,
         position=experience.position,
         term=experience.term,
         offer_received=experience.offer_received,

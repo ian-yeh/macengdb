@@ -109,8 +109,8 @@ export default function SubmitExperiencePage() {
             return;
         }
 
-        if (!selectedCompany) {
-            setError('Please select a company from the suggestions');
+        if (!selectedCompany && !companyQuery.trim()) {
+            setError('Please search for a company or enter a new one');
             return;
         }
 
@@ -126,7 +126,8 @@ export default function SubmitExperiencePage() {
 
         const data: ExperienceSubmitData = {
             submitter_email: email.trim().toLowerCase(),
-            company_id: selectedCompany.id,
+            company_id: selectedCompany?.id,
+            new_company_name: !selectedCompany ? companyQuery.trim() : undefined,
             position: position.trim(),
             term,
             offer_received: offerReceived,
@@ -143,7 +144,7 @@ export default function SubmitExperiencePage() {
             queryClient.invalidateQueries({ queryKey: ['experiences'] });
             setSuccess(true);
             posthog.capture('interview_experience_submit_success', {
-                company_name: selectedCompany.name,
+                company_name: selectedCompany?.name || data.new_company_name,
                 position: data.position
             });
         } catch (err) {
@@ -263,8 +264,8 @@ export default function SubmitExperiencePage() {
                             </button>
                         )}
                     </div>
-                    {showSuggestions && companySuggestions.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-[#111111] border border-[#ccc] dark:border-[#444] rounded shadow-lg max-h-48 overflow-y-auto">
+                    {showSuggestions && (companySuggestions.length > 0 || (companyQuery.trim() && !selectedCompany)) && (
+                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-[#111111] border border-[#ccc] dark:border-[#444] rounded shadow-lg max-h-64 overflow-y-auto">
                             {companySuggestions.map((company) => (
                                 <button
                                     key={company.id}
@@ -280,6 +281,20 @@ export default function SubmitExperiencePage() {
                                     )}
                                 </button>
                             ))}
+                            {companyQuery.trim() && !selectedCompany && !companySuggestions.some(c => c.name.toLowerCase() === companyQuery.toLowerCase().trim()) && (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowSuggestions(false)}
+                                    className="w-full text-left px-3 py-3 text-sm hover:bg-maceng-orange/5 transition-colors border-t border-[#f0f0f0] dark:border-[#444] flex items-center justify-between"
+                                >
+                                    <div>
+                                        <span className="text-[#333] dark:text-white">Use </span>
+                                        <span className="font-bold text-maceng-orange">"{companyQuery}"</span>
+                                        <span className="text-[#333] dark:text-white"> as a new company</span>
+                                    </div>
+                                    <span className="text-[10px] bg-maceng-orange/10 text-maceng-orange px-2 py-0.5 rounded font-bold uppercase tracking-wider">New</span>
+                                </button>
+                            )}
                         </div>
                     )}
                     {/* Company request trigger */}

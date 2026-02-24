@@ -17,7 +17,8 @@ export interface InterviewStage {
 export interface Experience {
     id: number;
     user_id: number | null;
-    company_id: number;
+    company_id: number | null;
+    new_company_name: string | null;
     submitter_email: string;
     position: string;
     term: string;
@@ -33,7 +34,8 @@ export interface Experience {
 
 export interface ExperienceSubmitData {
     submitter_email: string;
-    company_id: number;
+    company_id?: number;
+    new_company_name?: string;
     position: string;
     term: string;
     offer_received: boolean;

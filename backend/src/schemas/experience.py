@@ -31,7 +31,8 @@ class ExperienceBase(BaseModel):
 class ExperienceResponse(ExperienceBase):
     id: int
     user_id: Optional[int] = None
-    company_id: int
+    company_id: Optional[int] = None
+    new_company_name: Optional[str] = None
     submitter_email: str
     status: str = "pending"
     created_at: datetime
@@ -48,7 +49,8 @@ class ExperienceCreate(ExperienceBase):
 class ExperienceSubmit(ExperienceBase):
     """Schema for anonymous experience submission (no auth required)."""
 
-    company_id: int
+    company_id: Optional[int] = None
+    new_company_name: Optional[str] = None
     submitter_email: str
 
     @field_validator("submitter_email")
