@@ -10,16 +10,14 @@
 }
 
 .dark {
-  /* High visibility dark mode brand colors */
-  --maceng-maroon: 255 120 120;
-  /* Brighter, more visible maroon */
-  --maceng-orange: 255 165 0;
-  /* Brighter, more vibrant orange */
+  /* Slightly lighter than light mode maroon (122 37 24) */
+  --maceng-maroon: 245 50 50;
+  --maceng-orange: 245 50 50;
 }
 
 @layer base {
   body {
-    @apply font-inter bg-white text-[#333] dark:bg-[#141414] dark:text-white antialiased transition-colors duration-200;
+    @apply font-inter bg-white text-[#333] dark:bg-[#1c1c1c] dark:text-white antialiased transition-colors duration-200;
   }
 
   h1,
