@@ -174,7 +174,7 @@ export default function SubmitDesignTeamExperiencePage() {
                     </div>
                     <h1 className="font-playfair text-4xl font-bold text-[#222] dark:text-white mb-4">You're in.</h1>
                     <p className="text-[#666] dark:text-[#a0a0a0] mb-8 text-lg">
-                        Thanks for sharing your journey. Your experience has been sent for review.
+                        Your story is recorded. Your experience has been sent for review.
                     </p>
                     <div className="flex flex-col gap-3">
                         <button
@@ -233,10 +233,10 @@ export default function SubmitDesignTeamExperiencePage() {
                     {step === 0 && (
                         <div className="animate-fade-up text-center space-y-8">
                             <h1 className="font-playfair text-5xl md:text-6xl font-bold text-[#222] dark:text-white leading-tight">
-                                Help others join the <span className="text-maceng-maroon dark:text-maceng-orange">design community</span>.
+                                You survived it. Now <span className="text-maceng-maroon dark:text-maceng-orange">own your experience</span>.
                             </h1>
                             <p className="text-xl text-[#666] dark:text-[#a0a0a0] max-w-lg mx-auto">
-                                What was it like applying to a design team? Your story helps fellow students find their fit.
+                                You went through it. Now, document exactly how it was.
                             </p>
                             <div className="flex flex-col items-center gap-6">
                                 <button 

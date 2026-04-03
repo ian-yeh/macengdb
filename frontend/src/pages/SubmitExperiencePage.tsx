@@ -179,7 +179,7 @@ export default function SubmitExperiencePage() {
                     </div>
                     <h1 className="font-playfair text-4xl font-bold text-[#222] dark:text-white mb-4">You're all set.</h1>
                     <p className="text-[#666] dark:text-[#a0a0a0] mb-8 text-lg">
-                        Thanks for helping future students. Your experience has been sent for review.
+                        Your story is recorded. Your experience has been sent for review.
                     </p>
                     <div className="flex flex-col gap-3">
                         <button
@@ -238,10 +238,10 @@ export default function SubmitExperiencePage() {
                     {step === 0 && (
                         <div className="animate-fade-up text-center space-y-8">
                             <h1 className="font-playfair text-5xl md:text-6xl font-bold text-[#222] dark:text-white leading-tight">
-                                Pay it forward to the <span className="text-maceng-maroon dark:text-maceng-orange">next generation</span>.
+                                You survived it. Now <span className="text-maceng-maroon dark:text-maceng-orange">own your experience</span>.
                             </h1>
                             <p className="text-xl text-[#666] dark:text-[#a0a0a0] max-w-lg mx-auto">
-                                Share your company interview experience in a few minutes. Your insights could be the difference for another student.
+                                You've navigated the process. Now, tell your side of it.
                             </p>
                             <div className="flex flex-col items-center gap-6">
                                 <button 
