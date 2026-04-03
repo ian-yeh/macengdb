@@ -23,10 +23,10 @@ function AnimatedNumber({ value }: { value: number }) {
         const animate = (currentTime: number) => {
             if (!startTime) startTime = currentTime;
             const progress = Math.min((currentTime - startTime) / duration, 1);
-            
+
             // Quartic ease-out: smooth and responsive
             const easedProgress = 1 - Math.pow(1 - progress, 4);
-            
+
             setDisplayValue(Math.floor(easedProgress * value));
 
             if (progress < 1) {
@@ -128,7 +128,7 @@ export default function Header({
                         }}
                         className="px-6 py-2.5 border border-maceng-maroon/30 dark:border-maceng-orange/30 text-maceng-maroon dark:text-maceng-orange rounded-lg font-bold text-sm hover:bg-maceng-maroon/5 dark:hover:bg-maceng-orange/5 transition-all"
                     >
-                        Browse all {activeTab}
+                        Browse all {activeTab === 'companies' ? 'companies' : 'design teams'}
                     </button>
                     {/* Tiny request link moved down */}
                     <div className="w-full mt-2">

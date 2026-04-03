@@ -203,297 +203,329 @@ export default function SubmitExperiencePage() {
     }
 
     return (
-        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto flex flex-col">
+        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto flex flex-col animate-fade-up">
             {/* Header */}
-            <header className="mb-8">
+            <header className="mb-12">
                 <Link
                     to="/"
-                    className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange text-sm"
+                    className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange text-sm mb-6 inline-block"
                 >
                     ← Back to companies
                 </Link>
 
-                <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon dark:text-maceng-orange mt-6 mb-2">
+                <h1 className="font-playfair text-4xl font-bold text-[#222] dark:text-white mb-3">
                     Submit an Experience
                 </h1>
-                <p className="text-[15px] text-[#555] dark:text-[#e5e5e5]">
-                    Share your interview experience to help fellow McMaster Engineering students.
+                <p className="text-[17px] text-[#555] dark:text-[#b0b0b0] leading-relaxed">
+                    Share your interview journey to help fellow McMaster Engineering students prepare with confidence.
                 </p>
             </header>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6 flex-grow">
-                {/* Email */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        McMaster Email <span className="text-maceng-orange">*</span>
-                    </label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="yourname@mcmaster.ca"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                        required
-                    />
-                    <p className="text-xs text-[#888] dark:text-[#a0a0a0] mt-1">Must be a @mcmaster.ca email address. Don't worry, this is only to verify you're a student and prevent spam. Your identity remains anonymous. </p>
-                </div>
-
-                {/* Company Search */}
-                <div className="relative" ref={suggestionsRef}>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Company <span className="text-maceng-orange">*</span>
-                    </label>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            value={companyQuery}
-                            onChange={(e) => {
-                                setCompanyQuery(e.target.value);
-                                if (selectedCompany) setSelectedCompany(null);
-                            }}
-                            placeholder="Search for a company..."
-                            className={`flex-1 py-2 px-3 text-sm border rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange ${selectedCompany ? 'border-green-500 bg-green-50 dark:bg-green-950/20 dark:border-green-800' : 'border-[#ccc] dark:border-[#444]'
-                                }`}
-                        />
-                        {selectedCompany && (
-                            <button
-                                type="button"
-                                onClick={handleCompanyClear}
-                                className="px-3 text-sm text-[#888] hover:text-[#333] transition-colors"
-                            >
-                                ✕
-                            </button>
-                        )}
+            <form onSubmit={handleSubmit} className="space-y-12 flex-grow">
+                {/* 1. Core Details */}
+                <section className="space-y-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-8 h-8 rounded-full bg-maceng-maroon/10 dark:bg-maceng-orange/10 flex items-center justify-center text-maceng-maroon dark:text-maceng-orange font-bold text-sm">1</div>
+                        <h2 className="text-xl font-bold text-[#222] dark:text-white">Role Details</h2>
                     </div>
-                    {showSuggestions && (companySuggestions.length > 0 || (companyQuery.trim() && !selectedCompany)) && (
-                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-[#111111] border border-[#ccc] dark:border-[#444] rounded shadow-lg max-h-64 overflow-y-auto">
-                            {companySuggestions.map((company) => (
-                                <button
-                                    key={company.id}
-                                    type="button"
-                                    onClick={() => handleCompanySelect(company)}
-                                    className="w-full text-left px-3 py-2 text-sm hover:bg-[#fafafa] dark:hover:bg-[#222] transition-colors border-b border-[#f0f0f0] dark:border-[#444] last:border-b-0"
-                                >
-                                    <span className="font-medium text-[#333] dark:text-white">{company.name}</span>
-                                    {company.industries.length > 0 && (
-                                        <span className="text-[#888] dark:text-[#a0a0a0] ml-2 text-xs">
-                                            {company.industries.join(', ')}
-                                        </span>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Company Search */}
+                        <div className="relative md:col-span-2" ref={suggestionsRef}>
+                            <label className="block text-sm font-semibold text-[#333] dark:text-white mb-2">
+                                Company <span className="text-maceng-orange">*</span>
+                            </label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={companyQuery}
+                                    onChange={(e) => {
+                                        setCompanyQuery(e.target.value);
+                                        if (selectedCompany) setSelectedCompany(null);
+                                    }}
+                                    placeholder="Search for a company..."
+                                    className={`flex-1 py-2.5 px-4 text-sm border rounded-lg font-inter bg-white dark:bg-[#111] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/20 dark:focus:ring-maceng-orange/20 ${selectedCompany ? 'border-green-500 bg-green-50/30 dark:bg-green-950/20' : 'border-[#ccc] dark:border-[#444]'}`}
+                                />
+                                {selectedCompany && (
+                                    <button
+                                        type="button"
+                                        onClick={handleCompanyClear}
+                                        className="px-2 text-[#888] hover:text-[#333] transition-colors"
+                                    >
+                                        ✕
+                                    </button>
+                                )}
+                            </div>
+                            {showSuggestions && (companySuggestions.length > 0 || (companyQuery.trim() && !selectedCompany)) && (
+                                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-[#111] border border-[#ccc] dark:border-[#444] rounded-lg shadow-xl max-h-64 overflow-y-auto">
+                                    {companySuggestions.map((company) => (
+                                        <button
+                                            key={company.id}
+                                            type="button"
+                                            onClick={() => handleCompanySelect(company)}
+                                            className="w-full text-left px-4 py-3 text-sm hover:bg-[#fafafa] dark:hover:bg-[#222] transition-colors border-b border-[#f0f0f0] dark:border-[#444] last:border-b-0"
+                                        >
+                                            <span className="font-medium text-[#333] dark:text-white">{company.name}</span>
+                                            {company.industries.length > 0 && (
+                                                <span className="text-[#888] dark:text-[#a0a0a0] ml-2 text-xs">
+                                                    {company.industries.join(', ')}
+                                                </span>
+                                            )}
+                                        </button>
+                                    ))}
+                                    {companyQuery.trim() && !selectedCompany && !companySuggestions.some(c => c.name.toLowerCase() === companyQuery.toLowerCase().trim()) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowSuggestions(false)}
+                                            className="w-full text-left px-4 py-4 text-sm hover:bg-maceng-orange/5 transition-colors border-t border-[#f0f0f0] dark:border-[#444] flex items-center justify-between"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[#333] dark:text-white">Use <span className="font-bold text-maceng-orange">"{companyQuery}"</span> as a new company</span>
+                                            </div>
+                                            <span className="text-[10px] bg-maceng-orange/10 text-maceng-orange px-2 py-0.5 rounded font-bold uppercase tracking-wider">New</span>
+                                        </button>
                                     )}
-                                </button>
-                            ))}
-                            {companyQuery.trim() && !selectedCompany && !companySuggestions.some(c => c.name.toLowerCase() === companyQuery.toLowerCase().trim()) && (
-                                <button
-                                    type="button"
-                                    onClick={() => setShowSuggestions(false)}
-                                    className="w-full text-left px-3 py-3 text-sm hover:bg-maceng-orange/5 transition-colors border-t border-[#f0f0f0] dark:border-[#444] flex items-center justify-between"
-                                >
-                                    <div>
-                                        <span className="text-[#333] dark:text-white">Use </span>
-                                        <span className="font-bold text-maceng-orange">"{companyQuery}"</span>
-                                        <span className="text-[#333] dark:text-white"> as a new company</span>
-                                    </div>
-                                    <span className="text-[10px] bg-maceng-orange/10 text-maceng-orange px-2 py-0.5 rounded font-bold uppercase tracking-wider">New</span>
-                                </button>
+                                </div>
+                            )}
+                            {!selectedCompany && (
+                                <div className="mt-2.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowRequestModal(true)}
+                                        className="text-xs font-semibold text-maceng-orange hover:text-maceng-maroon transition-colors"
+                                    >
+                                        Don't see your company? Request it →
+                                    </button>
+                                </div>
                             )}
                         </div>
-                    )}
-                    {/* Company request trigger */}
-                    {!selectedCompany && (
-                        <div className="mt-2">
-                            <button
-                                type="button"
-                                onClick={() => setShowRequestModal(true)}
-                                className="text-xs text-maceng-orange hover:text-maceng-maroon transition-colors"
-                            >
-                                Can't find your company? Request it →
-                            </button>
+
+                        {/* Position */}
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-semibold text-[#333] dark:text-white mb-2">
+                                Position <span className="text-maceng-orange">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={position}
+                                onChange={(e) => setPosition(e.target.value)}
+                                placeholder="e.g. Software Engineering Intern"
+                                className="w-full py-2.5 px-4 text-sm border border-[#ccc] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#111] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/20 dark:focus:ring-maceng-orange/20"
+                                required
+                            />
                         </div>
-                    )}
-                </div>
 
-                {/* Position */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Position <span className="text-maceng-orange">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        value={position}
-                        onChange={(e) => setPosition(e.target.value)}
-                        placeholder="e.g. Software Engineering Intern"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                        required
-                    />
-                </div>
-
-                {/* Interview Acquisition */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        How did you get the interview?
-                    </label>
-                    <input
-                        type="text"
-                        value={interviewAcquisition}
-                        onChange={(e) => setInterviewAcquisition(e.target.value)}
-                        placeholder="e.g. Career Fair, LinkedIn, Cold Apply, Referral"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                    />
-                    <p className="text-xs text-[#888] dark:text-[#a0a0a0] mt-1">Optional. Helps others understand the application process.</p>
-                </div>
-
-                {/* Term */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Term <span className="text-maceng-orange">*</span>
-                    </label>
-                    <select
-                        value={term}
-                        onChange={(e) => setTerm(e.target.value)}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                        required
-                    >
-                        <option value="">Select a term...</option>
-                        {TERM_OPTIONS.map((t) => (
-                            <option key={t} value={t}>{t}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Offer Received */}
-                <div className="flex items-center gap-3">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={offerReceived}
-                            onChange={(e) => setOfferReceived(e.target.checked)}
-                            className="sr-only peer"
-                        />
-                        <div className="w-9 h-5 bg-[#ddd] dark:bg-[#333] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-maceng-maroon dark:peer-checked:bg-maceng-orange"></div>
-                    </label>
-                    <span className="text-sm text-[#333] dark:text-white">Received an offer</span>
-                </div>
-
-                {/* Difficulty */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Interview Difficulty
-                    </label>
-                    <div className="flex gap-2 items-center">
-                        {[1, 2, 3, 4, 5].map((level) => (
-                            <button
-                                key={level}
-                                type="button"
-                                onClick={() => setDifficulty(level)}
-                                className={`w-10 h-10 rounded-full text-sm font-medium transition-all ${difficulty === level
-                                    ? 'bg-maceng-maroon dark:bg-maceng-orange text-white shadow-md'
-                                    : 'bg-[#f0f0f0] dark:bg-[#333] text-[#555] dark:text-[#e5e5e5] hover:bg-[#e0e0e0] dark:hover:bg-[#444]'
-                                    }`}
+                        {/* Term */}
+                        <div>
+                            <label className="block text-sm font-semibold text-[#333] dark:text-white mb-2">
+                                Term <span className="text-maceng-orange">*</span>
+                            </label>
+                            <select
+                                value={term}
+                                onChange={(e) => setTerm(e.target.value)}
+                                className="w-full py-2.5 px-4 text-sm border border-[#ccc] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#111] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/20 dark:focus:ring-maceng-orange/20"
+                                required
                             >
-                                {level}
-                            </button>
-                        ))}
-                        <span className="text-xs text-[#888] dark:text-[#a0a0a0] ml-2">
-                            {difficulty <= 2 ? 'Easy' : difficulty === 3 ? 'Medium' : 'Hard'}
-                        </span>
-                    </div>
-                </div>
+                                <option value="">Select a term...</option>
+                                {TERM_OPTIONS.map((t) => (
+                                    <option key={t} value={t}>{t}</option>
+                                ))}
+                            </select>
+                        </div>
 
-                {/* Interview Stages */}
-                <div>
-                    <div className="flex justify-between items-center mb-3">
-                        <label className="block text-sm font-medium text-[#333] dark:text-white">
-                            Interview Stages
-                        </label>
+                        {/* Interview Acquisition */}
+                        <div>
+                            <label className="block text-sm font-semibold text-[#333] dark:text-white mb-2">
+                                Acquisition
+                            </label>
+                            <input
+                                type="text"
+                                value={interviewAcquisition}
+                                onChange={(e) => setInterviewAcquisition(e.target.value)}
+                                placeholder="e.g. Referral, OscarPlus"
+                                className="w-full py-2.5 px-4 text-sm border border-[#ccc] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#111] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/20 dark:focus:ring-maceng-orange/20"
+                            />
+                        </div>
+
+                        {/* Offer & Difficulty Group */}
+                        <div className="md:col-span-2 flex flex-col md:flex-row md:items-end gap-8 pt-2">
+                            <div className="flex-1">
+                                <label className="block text-sm font-semibold text-[#333] dark:text-white mb-3">
+                                    Overall Difficulty
+                                </label>
+                                <div className="flex gap-2 items-center">
+                                    {[1, 2, 3, 4, 5].map((level) => (
+                                        <button
+                                            key={level}
+                                            type="button"
+                                            onClick={() => setDifficulty(level)}
+                                            className={`w-10 h-10 rounded-full text-sm font-bold transition-all ${difficulty === level
+                                                ? 'bg-maceng-maroon dark:bg-maceng-orange text-white shadow-lg'
+                                                : 'bg-[#f0f0f0] dark:bg-[#222] text-[#555] dark:text-[#e5e5e5] hover:bg-[#e0e0e0] dark:hover:bg-[#333]'
+                                                }`}
+                                        >
+                                            {level}
+                                        </button>
+                                    ))}
+                                    <span className="text-xs font-bold text-maceng-orange ml-3 uppercase tracking-wider">
+                                        {difficulty <= 2 ? 'Easy' : difficulty === 3 ? 'Medium' : 'Hard'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3 h-10">
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={offerReceived}
+                                        onChange={(e) => setOfferReceived(e.target.checked)}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-10 h-5 bg-[#ddd] dark:bg-[#333] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-maceng-maroon dark:peer-checked:bg-maceng-orange"></div>
+                                </label>
+                                <span className="text-sm font-semibold text-[#333] dark:text-white">Received an offer</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 2. Interview Process */}
+                <section className="space-y-6">
+                    <div className="flex justify-between items-center mb-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-maceng-maroon/10 dark:bg-maceng-orange/10 flex items-center justify-center text-maceng-maroon dark:text-maceng-orange font-bold text-sm">2</div>
+                            <h2 className="text-xl font-bold text-[#222] dark:text-white">Interview Rounds</h2>
+                        </div>
                         <button
                             type="button"
                             onClick={addStage}
-                            className="text-sm text-maceng-orange hover:text-maceng-maroon dark:hover:text-maceng-orange/80 transition-colors font-medium"
+                            className="px-4 py-1.5 bg-maceng-maroon/5 dark:bg-maceng-orange/10 text-maceng-maroon dark:text-maceng-orange rounded-lg font-bold text-xs hover:bg-maceng-maroon/10 dark:hover:bg-maceng-orange/20 transition-all border border-maceng-maroon/10 dark:border-maceng-orange/20"
                         >
-                            + Add Stage
+                            + Add Round
                         </button>
                     </div>
+
+                    <p className="text-[14px] text-[#777] dark:text-[#a0a0a0] leading-relaxed mb-6">
+                        Break down each stage of the process. Mention the format (video, coding, in-person), typical questions, and how long it lasted.
+                    </p>
+
                     {stages.length === 0 && (
-                        <p className="text-xs text-[#888] dark:text-[#a0a0a0] italic">
-                            No stages added yet. Click "Add Stage" to document each interview round.
-                        </p>
+                        <div className="bg-[#fcfcfc] dark:bg-[#111] border-2 border-dashed border-[#eee] dark:border-[#333] rounded-xl py-12 text-center">
+                            <p className="text-sm text-[#888] italic">No rounds documented yet. Share the process step-by-step.</p>
+                        </div>
                     )}
-                    <div className="space-y-4">
+
+                    <div className="space-y-6">
                         {stages.map((stage, index) => (
-                            <div key={index} className="border border-[#e5e5e5] dark:border-[#444] rounded p-4 bg-[#fafafa] dark:bg-[#111111]">
-                                <div className="flex justify-between items-center mb-3">
-                                    <span className="text-xs font-medium text-maceng-maroon dark:text-maceng-orange uppercase tracking-wide">
-                                        Stage {index + 1}
-                                    </span>
+                            <div key={index} className="relative group bg-white dark:bg-[#111] border border-[#eee] dark:border-[#333] rounded-xl p-6 shadow-sm hover:shadow-md transition-all">
+                                <div className="flex justify-between items-center mb-6">
+                                    <div className="flex items-center gap-2">
+                                        <span className="bg-maceng-maroon/10 dark:bg-maceng-orange/10 text-maceng-maroon dark:text-maceng-orange px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-widest">
+                                            Stage {index + 1}
+                                        </span>
+                                    </div>
                                     <button
                                         type="button"
                                         onClick={() => removeStage(index)}
-                                        className="text-xs text-[#888] dark:text-[#a0a0a0] hover:text-red-500 transition-colors"
+                                        className="text-xs font-bold text-[#bbb] hover:text-red-500 transition-colors"
                                     >
-                                        Remove
+                                        Remove Round
                                     </button>
                                 </div>
-                                <div className="grid grid-cols-2 gap-3 mb-3">
-                                    <input
-                                        type="text"
-                                        value={stage.name}
-                                        onChange={(e) => updateStage(index, 'name', e.target.value)}
-                                        placeholder="Stage name (e.g. Technical Interview)"
-                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                                    />
-                                    <input
-                                        type="text"
-                                        value={stage.duration || ''}
-                                        onChange={(e) => updateStage(index, 'duration', e.target.value)}
-                                        placeholder="Duration (e.g. 45 min)"
-                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-bold uppercase tracking-wider text-[#999]">Stage Name</label>
+                                        <input
+                                            type="text"
+                                            value={stage.name}
+                                            onChange={(e) => updateStage(index, 'name', e.target.value)}
+                                            placeholder="e.g. Technical Interview"
+                                            className="w-full py-2 px-3 text-sm border border-[#eee] dark:border-[#333] rounded-lg font-inter bg-[#fafafa] dark:bg-[#1a1a1a] dark:text-white focus:outline-none focus:border-maceng-maroon/30 dark:focus:border-maceng-orange/30"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-bold uppercase tracking-wider text-[#999]">Duration</label>
+                                        <input
+                                            type="text"
+                                            value={stage.duration || ''}
+                                            onChange={(e) => updateStage(index, 'duration', e.target.value)}
+                                            placeholder="e.g. 1 hour"
+                                            className="w-full py-2 px-3 text-sm border border-[#eee] dark:border-[#333] rounded-lg font-inter bg-[#fafafa] dark:bg-[#1a1a1a] dark:text-white focus:outline-none focus:border-maceng-maroon/30 dark:focus:border-maceng-orange/30"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#999]">Questions & Content</label>
+                                    <textarea
+                                        value={stage.questions.join('\n')}
+                                        onChange={(e) => updateStage(index, 'questions', e.target.value.split('\n').filter(q => q.trim()))}
+                                        placeholder="What did they ask? What topics were covered?"
+                                        rows={3}
+                                        className="w-full py-3 px-3 text-sm border border-[#eee] dark:border-[#333] rounded-lg font-inter bg-[#fafafa] dark:bg-[#1a1a1a] dark:text-white focus:outline-none focus:border-maceng-maroon/30 dark:focus:border-maceng-orange/30 min-h-[100px]"
                                     />
                                 </div>
-                                <textarea
-                                    value={stage.questions.join('\n')}
-                                    onChange={(e) => updateStage(index, 'questions', e.target.value.split('\n').filter(q => q.trim()))}
-                                    placeholder="Questions asked"
-                                    rows={2}
-                                    className="w-full py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange min-h-[80px]"
-                                />
                             </div>
                         ))}
                     </div>
-                </div>
+                </section>
 
-                {/* Tips */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Tips & Advice
+                {/* Tips & Advice - De-emphasized */}
+                <div className="pt-6 border-t border-[#eee] dark:border-[#333]">
+                    <label className="block text-xs font-bold uppercase tracking-widest text-[#999] mb-3">
+                        Tips & Advice (Optional)
                     </label>
                     <textarea
                         value={tips}
                         onChange={(e) => setTips(e.target.value)}
-                        placeholder="Any advice for future candidates? (optional)"
+                        placeholder="Any last advice for future candidates? What helped you succeed?"
                         rows={3}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange min-h-[100px]"
+                        className="w-full py-3 px-4 text-sm border border-[#eee] dark:border-[#333] rounded-xl font-inter bg-[#fafafa] dark:bg-[#1a1a1a] dark:text-white focus:outline-none focus:border-maceng-maroon/30 dark:focus:border-maceng-orange/30 min-h-[100px]"
                     />
                 </div>
 
-                {/* Error */}
-                {error && (
-                    <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-4 py-3">
-                        {error}
+                {/* Verification - De-emphasized */}
+                <div className="pt-6 border-t border-[#eee] dark:border-[#333]">
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-[#999] mb-3">
+                                McMaster Email <span className="text-maceng-orange">*</span>
+                            </label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="yourname@mcmaster.ca"
+                                className="w-full py-3 px-4 text-sm border border-[#eee] dark:border-[#333] rounded-lg font-inter bg-[#fafafa] dark:bg-[#1a1a1a] dark:text-white focus:outline-none focus:border-maceng-maroon/30 dark:focus:border-maceng-orange/30"
+                                required
+                            />
+                        </div>
+                        <p className="text-[12px] text-[#aaa] dark:text-[#777] leading-relaxed">
+                            Verified students only. Your identity remains <strong>anonymous</strong> to others.
+                        </p>
                     </div>
-                )}
+                </div>
 
-                {/* Submit */}
-                <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-3 bg-maceng-maroon text-white rounded font-medium text-sm hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {submitting ? 'Submitting...' : 'Submit Experience'}
-                </button>
+                {/* Footer Actions */}
+                <div className="pt-4">
+                    {error && (
+                        <div className="text-sm text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-lg px-4 py-3 mb-6 animate-shake">
+                            {error}
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={submitting}
+                        className="w-full py-4 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-xl font-bold text-base hover:scale-[1.01] active:scale-[0.99] transition-all shadow-xl shadow-maceng-maroon/20 dark:shadow-maceng-orange/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {submitting ? 'Submitting...' : 'Submit Experience'}
+                    </button>
+                    <p className="text-center text-xs text-[#999] mt-4">
+                        By submitting, you agree that your experience will be reviewed by an admin.
+                    </p>
+                </div>
             </form>
 
-            {/* Request Modal */}
             <CompanyRequestModal
                 isOpen={showRequestModal}
                 onClose={() => setShowRequestModal(false)}
