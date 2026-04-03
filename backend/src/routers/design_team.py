@@ -52,7 +52,6 @@ async def get_design_team(team_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Design team not found")
     return team
 
-
     return review_crud.get_reviews_for_team(db, team_id)
 
 
