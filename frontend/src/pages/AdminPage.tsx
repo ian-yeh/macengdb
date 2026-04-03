@@ -9,7 +9,7 @@ import {
     adminCreateCompany, bulkDeleteCompanyRequests, bulkDeleteDesignTeamRequests
 } from '../api/api';
 import { type Experience, type CompanyRequest, type DesignTeamReview, type DesignTeamRequest } from '../api/types';
-import Loader from '../components/Loader';
+import Loader from '../components/ui/Loader';
 
 type AdminTab = 'requests' | 'dt-requests' | 'company-exp' | 'dt-exp' | 'create';
 

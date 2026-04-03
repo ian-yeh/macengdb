@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { submitCompanyRequest } from '../api/api';
+import { submitDesignTeamRequest } from '../../../api/api';
 
-interface CompanyRequestModalProps {
+interface DesignTeamRequestModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-export default function CompanyRequestModal({ isOpen, onClose }: CompanyRequestModalProps) {
+export default function DesignTeamRequestModal({ isOpen, onClose }: DesignTeamRequestModalProps) {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
@@ -17,7 +17,7 @@ export default function CompanyRequestModal({ isOpen, onClose }: CompanyRequestM
         if (!name.trim()) return;
         setStatus('submitting');
         try {
-            await submitCompanyRequest(name.trim(), email.trim() || undefined);
+            await submitDesignTeamRequest(name.trim(), email.trim() || undefined);
             setStatus('success');
             setName('');
             setEmail('');
@@ -35,7 +35,7 @@ export default function CompanyRequestModal({ isOpen, onClose }: CompanyRequestM
                 className="bg-white dark:bg-[#111111] border dark:border-[#444] rounded-lg shadow-xl p-6 w-full max-w-sm transition-colors"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h3 className="font-playfair text-lg text-maceng-maroon dark:text-maceng-orange mb-1">Request a Company</h3>
+                <h3 className="font-playfair text-lg text-maceng-maroon dark:text-maceng-orange mb-1">Request a Design Team</h3>
                 <p className="text-xs text-[#888] dark:text-[#a0a0a0] mb-4">An admin will review and add it shortly.</p>
 
                 {status === 'success' ? (
@@ -62,7 +62,7 @@ export default function CompanyRequestModal({ isOpen, onClose }: CompanyRequestM
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="Company name"
+                            placeholder="Design team name"
                             autoFocus
                             className="w-full py-2.5 px-3.5 text-sm border border-[#ddd] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 dark:focus:ring-maceng-orange/10 focus:border-maceng-maroon dark:focus:border-maceng-orange transition-all mb-3"
                         />

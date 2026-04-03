@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Analytics } from "@vercel/analytics/react"
-import DarkModeToggle from './components/DarkModeToggle';
+import DarkModeToggle from './components/ui/DarkModeToggle';
 import LandingPage from './pages/LandingPage';
 import CompanyPage from './pages/CompanyPage';
 import SubmitExperiencePage from './pages/SubmitExperiencePage';

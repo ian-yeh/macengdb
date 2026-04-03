@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchDesignTeam, fetchDesignTeamReviews, submitDesignTeamReview } from '../api/api';
 import { type DesignTeamReview } from '../api/types';
-import CompanyDetailSkeleton from '../components/CompanyDetailSkeleton';
-import { useEffect } from 'react';
+import CompanyDetailSkeleton from '../components/features/companies/CompanyDetailSkeleton';
+import Footer from '../components/layout/Footer';
 import { usePostHog } from '@posthog/react';
 
 const TERM_OPTIONS = [
@@ -176,7 +176,7 @@ export default function DesignTeamDetailPage() {
     const inputClass = "w-full py-2.5 px-3.5 text-sm border border-[#ddd] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 dark:focus:ring-maceng-orange/10 focus:border-maceng-maroon dark:focus:border-maceng-orange transition-all";
 
     return (
-        <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
+        <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto flex flex-col">
             {/* Back Link */}
             <div className="animate-row-in">
                 <Link
@@ -225,7 +225,7 @@ export default function DesignTeamDetailPage() {
             </header>
 
             {/* Application Experiences */}
-            <section>
+            <section className="flex-grow">
                 <div className="flex items-center justify-between mb-8 animate-row-in" style={{ animationDelay: '200ms' }}>
                     <h2 className="font-playfair text-xl md:text-2xl font-semibold text-[#333] dark:text-white">
                         Application Experiences ({reviews.length})
@@ -451,12 +451,7 @@ export default function DesignTeamDetailPage() {
                 )}
             </section>
 
-            {/* Footer */}
-            <footer className="mt-16 pt-8 border-t border-[#eee] dark:border-[#444] text-center">
-                <p className="text-[12px] text-[#aaa] dark:text-[#999999] italic font-inter">
-                    MacEngDB — Built by McMaster Engineering students, for McMaster Engineering students.
-                </p>
-            </footer>
+            <Footer />
         </div>
     );
 }

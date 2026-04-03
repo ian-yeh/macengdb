@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { searchCompanies, submitExperience } from '../api/api';
 import { type Company, type InterviewStage, type ExperienceSubmitData } from '../api/types';
-import CompanyRequestModal from '../components/CompanyRequestModal';
+import CompanyRequestModal from '../components/features/companies/CompanyRequestModal';
+import Footer from '../components/layout/Footer';
 import { usePostHog } from '@posthog/react';
 
 const TERM_OPTIONS = [
@@ -161,8 +162,8 @@ export default function SubmitExperiencePage() {
 
     if (success) {
         return (
-            <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto">
-                <div className="text-center py-16">
+            <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto flex flex-col items-center justify-center">
+                <div className="text-center py-16 flex-grow">
                     <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon dark:text-maceng-orange mb-4">
                         Thank you!
                     </h1>
@@ -196,12 +197,13 @@ export default function SubmitExperiencePage() {
                         </button>
                     </div>
                 </div>
+                <Footer />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto">
+        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto flex flex-col">
             {/* Header */}
             <header className="mb-8">
                 <Link
@@ -220,7 +222,7 @@ export default function SubmitExperiencePage() {
             </header>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 flex-grow">
                 {/* Email */}
                 <div>
                     <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
@@ -497,12 +499,7 @@ export default function SubmitExperiencePage() {
                 onClose={() => setShowRequestModal(false)}
             />
 
-            {/* Footer */}
-            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] dark:border-[#444] text-[13px] text-[#666] dark:text-[#d4d4d4]">
-                <p>
-                    © {new Date().getFullYear()} MacEngDB · Built by McMaster Engineering students
-                </p>
-            </footer>
+            <Footer />
         </div>
     );
 }

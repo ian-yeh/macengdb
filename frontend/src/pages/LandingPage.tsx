@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useDebounce from '../hooks/useDebounce';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { type Company, type DesignTeam } from '../api/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompanies, fetchDesignTeams } from '../api/api';
-import CompanyListSkeleton from '../components/CompanyListSkeleton';
-import TabNav from '../components/TabNav';
-import CompanyRequestModal from '../components/CompanyRequestModal';
-import DesignTeamRequestModal from '../components/DesignTeamRequestModal';
+import CompanyListSkeleton from '../components/features/companies/CompanyListSkeleton';
+import Header from '../components/layout/Header';
+import Footer from '../components/layout/Footer';
+import CompanyRequestModal from '../components/features/companies/CompanyRequestModal';
+import DesignTeamRequestModal from '../components/features/design-teams/DesignTeamRequestModal';
 import { usePostHog } from '@posthog/react';
-import { useEffect } from 'react';
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -110,88 +110,35 @@ export default function LandingPage() {
         navigate(`/design-teams/${teamId}`);
     };
 
+    const stats = {
+        experienceCount: companies.reduce((acc: number, c: Company) => acc + (c.experience_count || 0), 0) + 
+                        designTeams.reduce((acc: number, t: DesignTeam) => acc + (t.review_count || 0), 0),
+        companyCount: companies.length,
+        designTeamCount: designTeams.length
+    };
 
     return (
-        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-4xl mx-auto">
-            {/* Header */}
-            <header className="mb-12">
-                <h1 className="font-playfair text-3xl md:text-4xl font-bold text-maceng-maroon dark:text-maceng-orange mb-6 tracking-tight">
-                    MacEngDB
-                </h1>
-
-                {/* Tab Navigation */}
-                <TabNav activeTab={activeTab} onTabChange={(tab) => {
+        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-4xl mx-auto flex flex-col">
+            <Header 
+                activeTab={activeTab} 
+                onTabChange={(tab: 'companies' | 'design-teams') => {
                     setActiveTab(tab);
                     setSearchQuery('');
                     setCurrentPage(1);
                     posthog.capture('tab_changed', { tab });
-                }} />
-
-                <div className="space-y-4">
-                    {activeTab === 'companies' ? (
-                        <>
-                            <p className="text-[14px] md:text-[16px] leading-relaxed text-[#333] dark:text-white">
-                                Welcome to the interview database for engineering students at{' '}
-                                <a
-                                    href="https://www.eng.mcmaster.ca/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-maceng-orange font-medium underline decoration-maceng-orange/30 hover:decoration-maceng-orange transition-all"
-                                >
-                                    McMaster University
-                                </a>{' '}
-                                in Hamilton, Ontario. We're on a mission to document co-op and internship
-                                interview experiences, helping MacEng students prepare smarter.
-                            </p>
-                            <p className="text-[15px] leading-relaxed text-[#444] dark:text-[#e5e5e5] font-medium">
-                                If you're a <span className="text-maceng-maroon dark:text-maceng-orange">McMaster</span> student, we welcome your contributions (
-                                <Link
-                                    to="/submit"
-                                    className="text-maceng-orange font-bold underline decoration-maceng-orange/30 hover:decoration-maceng-orange"
-                                >
-                                    submit an interview experience
-                                </Link>
-                                ).
-                            </p>
-                        </>
-                    ) : (
-                        <>
-                            <p className="text-[14px] md:text-[16px] leading-relaxed text-[#333] dark:text-white">
-                                Explore McMaster Engineering's design teams and student-run technical organizations.
-                                Read about real application experiences from students to help you prepare.
-                            </p>
-                            <p className="text-[15px] leading-relaxed text-[#444] dark:text-[#e5e5e5] font-medium">
-                                If you're a <span className="text-maceng-maroon dark:text-maceng-orange">McMaster</span> student, we welcome your contributions (
-                                <Link
-                                    to="/submit-design-team"
-                                    className="text-maceng-orange font-bold underline decoration-maceng-orange/30 hover:decoration-maceng-orange"
-                                >
-                                    submit an application experience
-                                </Link>
-                                ).
-                            </p>
-                        </>
-                    )}
-                    <p className="text-[13px] leading-relaxed text-[#777] dark:text-[#d4d4d4]">
-                        Don't see your company or design team?{' '}
-                        <button
-                            onClick={() => {
-                                if (activeTab === 'companies') {
-                                    setShowCompanyRequestModal(true);
-                                    posthog.capture('request_modal_opened', { type: 'company' });
-                                }
-                                else {
-                                    setShowDesignTeamRequestModal(true);
-                                    posthog.capture('request_modal_opened', { type: 'design_team' });
-                                }
-                            }}
-                            className="text-maceng-orange font-bold hover:text-maceng-maroon dark:hover:text-maceng-orange/80 transition-colors cursor-pointer bg-transparent border-none p-0 inline-flex items-center gap-0.5 group"
-                        >
-                            Request it <span className="text-[10px] group-hover:translate-x-0.5 transition-transform">→</span>
-                        </button>
-                    </p>
-                </div>
-            </header>
+                }} 
+                onRequestCompany={() => {
+                    setShowCompanyRequestModal(true);
+                    posthog.capture('request_modal_opened', { type: 'company' });
+                }} 
+                onRequestDesignTeam={() => {
+                    setShowDesignTeamRequestModal(true);
+                    posthog.capture('request_modal_opened', { type: 'design_team' });
+                }} 
+                experienceCount={stats.experienceCount}
+                companyCount={stats.companyCount}
+                designTeamCount={stats.designTeamCount}
+            />
 
             {/* Request Modals */}
             <CompanyRequestModal
@@ -204,7 +151,7 @@ export default function LandingPage() {
             />
 
             {/* Search and Filters */}
-            <div className="mb-6 space-y-4">
+            <div id="search-filters" className="mb-6 space-y-4 pt-16 -mt-16">
                 <div className="flex gap-3">
                     <div className="relative group flex-1">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -337,213 +284,190 @@ export default function LandingPage() {
             </div>
 
             {/* Content Area */}
-            {activeTab === 'companies' ? (
-                <>
-                    {/* Share Button */}
-                    <div className="flex justify-start mb-4">
-                        <Link
-                            to="/submit"
-                            className="px-4 py-2 bg-maceng-maroon dark:bg-maceng-orange text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors inline-flex items-center gap-1.5"
-                        >
-                            + Share an Interview Experience
-                        </Link>
-                    </div>
-                    {/* Company List Content */}
-                    {error ? (
-                        <div className="text-center py-12 text-red-600 italic">
-                            Failed to load companies. Please try again later.
-                        </div>
-                    ) : isLoading ? (
-                        <div className="mb-8">
-                            <CompanyListSkeleton />
-                        </div>
-                    ) : (
-                        <>
-                            {/* Company List Table */}
-                            <div className="mb-8 overflow-hidden">
-                                <table className="w-full border-collapse">
-                                    <thead>
-                                        <tr className="border-b-2 border-maceng-maroon/20 dark:border-maceng-maroon/40">
-                                            <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
-                                                Company
-                                            </th>
-                                            <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[16px] uppercase tracking-wider">
-                                                Industry
-                                            </th>
-                                            <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
-                                                Experiences
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-[#eee] dark:divide-[#333]">
-                                        {paginatedCompanies.map((company: Company, index: number) => (
-                                            <tr
-                                                key={`${company.id}-${searchQuery}-${safePage}`}
-                                                className="group hover:bg-[#fafafa] dark:hover:bg-[#282828] transition-all cursor-pointer animate-row-in"
-                                                style={{ animationDelay: `${index * 30}ms` }}
-                                                onClick={() => handleCompanyClick(company.id)}
-                                            >
-                                                <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
-                                                    <div className="flex flex-col">
-                                                        <span className="font-semibold text-[#333] dark:text-white group-hover:text-maceng-orange transition-colors">
-                                                            {company.name}
-                                                        </span>
-                                                        <span className="md:hidden text-[#888] dark:text-[#b8b8b8] text-[11px] italic font-inter mt-0.5 line-clamp-1">
-                                                            {company.industries.join(', ')}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="hidden md:table-cell py-3 pr-6 text-[#777] dark:text-[#cccccc] text-sm italic font-inter leading-tight">
-                                                    {company.industries.join(', ')}
-                                                </td>
-                                                <td className="py-3 text-right md:text-center">
-                                                    {company.experience_count > 0 ? (
-                                                        <span className="font-bold text-maceng-maroon dark:text-maceng-orange text-[15px]">
-                                                            {company.experience_count}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-[#bbb] dark:text-[#b0b0b0]">—</span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+            <div className="flex-grow">
+                {activeTab === 'companies' ? (
+                    <>
+
+                        {error ? (
+                            <div className="text-center py-12 text-red-600 italic">
+                                Failed to load companies. Please try again later.
                             </div>
-
-                            {filteredCompanies.length === 0 && (
-                                <div className="text-center py-12 text-[#666] italic">
-                                    No companies found matching your search.
+                        ) : isLoading ? (
+                            <div className="mb-8">
+                                <CompanyListSkeleton />
+                            </div>
+                        ) : (
+                            <>
+                                <div className="mb-8 overflow-hidden">
+                                    <table className="w-full border-collapse">
+                                        <thead>
+                                            <tr className="border-b-2 border-maceng-maroon/20 dark:border-maceng-maroon/40">
+                                                <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
+                                                    Company
+                                                </th>
+                                                <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[16px] uppercase tracking-wider">
+                                                    Industry
+                                                </th>
+                                                <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
+                                                    Experiences
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-[#eee] dark:divide-[#333]">
+                                            {paginatedCompanies.map((company: Company, index: number) => (
+                                                <tr
+                                                    key={`${company.id}-${searchQuery}-${safePage}`}
+                                                    className={`group hover:bg-[#fafafa] dark:hover:bg-[#282828] transition-all cursor-pointer animate-row-in ${company.experience_count === 0 ? 'opacity-60 hover:opacity-100' : ''}`}
+                                                    style={{ animationDelay: `${index * 30}ms` }}
+                                                    onClick={() => handleCompanyClick(company.id)}
+                                                >
+                                                    <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
+                                                        <div className="flex flex-col">
+                                                            <span className="font-semibold text-[#333] dark:text-white group-hover:text-maceng-orange transition-colors">
+                                                                {company.name}
+                                                            </span>
+                                                            <span className="md:hidden text-[#888] dark:text-[#b8b8b8] text-[11px] italic font-inter mt-0.5 line-clamp-1">
+                                                                {company.industries.join(', ')}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="hidden md:table-cell py-3 pr-6 text-[#777] dark:text-[#cccccc] text-sm italic font-inter leading-tight">
+                                                        {company.industries.join(', ')}
+                                                    </td>
+                                                    <td className="py-3 text-right md:text-center text-[15px]">
+                                                        {company.experience_count > 0 ? (
+                                                            <span className="font-bold text-maceng-maroon dark:text-maceng-orange">
+                                                                {company.experience_count}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-[#bbb] dark:text-[#666]">—</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
-                            )}
 
-                            {/* Pagination */}
-                            {totalPages > 1 && (
-                                <div className="flex items-center justify-center gap-1 md:gap-1.5 mt-4 flex-wrap">
-                                    <button
-                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                        disabled={safePage === 1}
-                                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                                        </svg>
-                                    </button>
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                {filteredCompanies.length === 0 && (
+                                    <div className="text-center py-12 text-[#666] italic">
+                                        No companies found matching your search.
+                                    </div>
+                                )}
+
+                                {totalPages > 1 && (
+                                    <div className="flex items-center justify-center gap-1 md:gap-1.5 mt-4 flex-wrap">
                                         <button
-                                            key={page}
-                                            onClick={() => setCurrentPage(page)}
-                                            className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border text-xs md:text-sm font-semibold transition-all ${page === safePage
-                                                ? 'bg-maceng-maroon dark:bg-maceng-orange text-white border-maceng-maroon dark:border-maceng-orange shadow-md shadow-maceng-maroon/20 dark:shadow-maceng-orange/20'
-                                                : 'border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666]'
-                                                }`}
+                                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                            disabled={safePage === 1}
+                                            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
                                         >
-                                            {page}
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                                            </svg>
                                         </button>
-                                    ))}
-                                    <button
-                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                        disabled={safePage === totalPages}
-                                        className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </>
-            ) : (
-                <>
-                    {/* Share Button */}
-                    <div className="flex justify-start mb-4">
-                        <Link
-                            to="/submit-design-team"
-                            className="px-4 py-2 bg-maceng-maroon dark:bg-maceng-orange text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors inline-flex items-center gap-1.5"
-                        >
-                            + Share an Application Experience
-                        </Link>
-                    </div>
-                    {/* Design Teams Content */}
-                    {teamsError ? (
-                        <div className="text-center py-12 text-red-600 italic">
-                            Failed to load design teams. Please try again later.
-                        </div>
-                    ) : teamsLoading ? (
-                        <div className="mb-8">
-                            <CompanyListSkeleton />
-                        </div>
-                    ) : (
-                        <>
-                            <div className="mb-8 overflow-hidden">
-                                <table className="w-full border-collapse">
-                                    <thead>
-                                        <tr className="border-b-2 border-maceng-maroon/20 dark:border-maceng-maroon/40">
-                                            <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
-                                                Team
-                                            </th>
-                                            <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[16px] uppercase tracking-wider">
-                                                Category
-                                            </th>
-                                            <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
-                                                Experiences
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-[#eee] dark:divide-[#333]">
-                                        {filteredTeams.map((team: DesignTeam, index: number) => (
-                                            <tr
-                                                key={team.id}
-                                                className="group hover:bg-[#fafafa] dark:hover:bg-[#282828] transition-all cursor-pointer animate-row-in"
-                                                style={{ animationDelay: `${index * 30}ms` }}
-                                                onClick={() => handleTeamClick(team.id)}
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                            <button
+                                                key={page}
+                                                onClick={() => setCurrentPage(page)}
+                                                className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border text-xs md:text-sm font-semibold transition-all ${page === safePage
+                                                    ? 'bg-maceng-maroon dark:bg-maceng-orange text-white border-maceng-maroon dark:border-maceng-orange shadow-md shadow-maceng-maroon/20 dark:shadow-maceng-orange/20'
+                                                    : 'border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666]'
+                                                    }`}
                                             >
-                                                <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
-                                                    <div className="flex flex-col">
-                                                        <span className="font-semibold text-[#333] dark:text-white group-hover:text-maceng-orange transition-colors">
-                                                            {team.name}
-                                                        </span>
-                                                        <span className="md:hidden text-[#888] dark:text-[#b8b8b8] text-[11px] italic font-inter mt-0.5 line-clamp-1">
-                                                            {team.categories.join(', ')}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="hidden md:table-cell py-3 pr-6 text-[#777] dark:text-[#cccccc] text-sm italic font-inter leading-tight">
-                                                    {team.categories.join(', ')}
-                                                </td>
-                                                <td className="py-3 text-right md:text-center">
-                                                    {team.review_count > 0 ? (
-                                                        <span className="font-bold text-maceng-maroon dark:text-maceng-orange text-[15px]">
-                                                            {team.review_count}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-[#bbb] dark:text-[#b0b0b0]">—</span>
-                                                    )}
-                                                </td>
-                                            </tr>
+                                                {page}
+                                            </button>
                                         ))}
-                                    </tbody>
-                                </table>
+                                        <button
+                                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                            disabled={safePage === totalPages}
+                                            className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </>
+                ) : (
+                    <>
+
+                        {teamsError ? (
+                            <div className="text-center py-12 text-red-600 italic">
+                                Failed to load design teams. Please try again later.
                             </div>
-
-                            {filteredTeams.length === 0 && (
-                                <div className="text-center py-12 text-[#666] italic">
-                                    No design teams found matching your search.
+                        ) : teamsLoading ? (
+                            <div className="mb-8">
+                                <CompanyListSkeleton />
+                            </div>
+                        ) : (
+                            <>
+                                <div className="mb-8 overflow-hidden">
+                                    <table className="w-full border-collapse">
+                                        <thead>
+                                            <tr className="border-b-2 border-maceng-maroon/20 dark:border-maceng-maroon/40">
+                                                <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
+                                                    Team
+                                                </th>
+                                                <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[16px] uppercase tracking-wider">
+                                                    Category
+                                                </th>
+                                                <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
+                                                    Experiences
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-[#eee] dark:divide-[#333]">
+                                            {filteredTeams.map((team: DesignTeam, index: number) => (
+                                                <tr
+                                                    key={team.id}
+                                                    className={`group hover:bg-[#fafafa] dark:hover:bg-[#282828] transition-all cursor-pointer animate-row-in ${team.review_count === 0 ? 'opacity-60 hover:opacity-100' : ''}`}
+                                                    style={{ animationDelay: `${index * 30}ms` }}
+                                                    onClick={() => handleTeamClick(team.id)}
+                                                >
+                                                    <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
+                                                        <div className="flex flex-col">
+                                                            <span className="font-semibold text-[#333] dark:text-white group-hover:text-maceng-orange transition-colors">
+                                                                {team.name}
+                                                            </span>
+                                                            <span className="md:hidden text-[#888] dark:text-[#b8b8b8] text-[11px] italic font-inter mt-0.5 line-clamp-1">
+                                                                {team.categories.join(', ')}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="hidden md:table-cell py-3 pr-6 text-[#777] dark:text-[#cccccc] text-sm italic font-inter leading-tight">
+                                                        {team.categories.join(', ')}
+                                                    </td>
+                                                    <td className="py-3 text-right md:text-center text-[15px]">
+                                                        {team.review_count > 0 ? (
+                                                            <span className="font-bold text-maceng-maroon dark:text-maceng-orange">
+                                                                {team.review_count}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-[#bbb] dark:text-[#666]">—</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
-                            )}
-                        </>
-                    )}
-                </>
-            )}
 
-            {/* Footer */}
-            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] dark:border-[#444] text-[13px] text-[#666] dark:text-[#d4d4d4]">
-                <p>
-                    © {new Date().getFullYear()} MacEngDB · Built by McMaster Engineering students
-                </p>
-            </footer>
+                                {filteredTeams.length === 0 && (
+                                    <div className="text-center py-12 text-[#666] italic">
+                                        No design teams found matching your search.
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </>
+                )}
+            </div>
+
+            <Footer />
         </div>
     );
 }
