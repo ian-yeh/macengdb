@@ -109,6 +109,19 @@ export async function rejectExperience(id: number, adminKey: string): Promise<Ex
   if (!response.ok) throw new Error('Failed to reject experience');
   return response.json();
 }
+export async function updateExperience(id: number, adminKey: string, data: Partial<ExperienceSubmitData>): Promise<Experience> {
+  const response = await fetch(`${API_BASE_URL}/admin/experiences/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'X-Admin-Key': adminKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) throw new Error('Failed to update experience');
+  return response.json();
+}
 
 export async function deleteExperience(id: number, adminKey: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/admin/experiences/${id}`, {
@@ -126,6 +139,20 @@ export async function deleteCompany(id: number, adminKey: string): Promise<void>
   });
 
   if (!response.ok) throw new Error('Failed to delete company');
+}
+
+export async function updateCompany(id: number, adminKey: string, data: { name?: string; industries?: string[]; rating?: number }): Promise<Company> {
+  const response = await fetch(`${API_BASE_URL}/admin/companies/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'X-Admin-Key': adminKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) throw new Error('Failed to update company');
+  return response.json();
 }
 
 export async function fetchAllExperiences(adminKey: string): Promise<Experience[]> {
@@ -286,6 +313,34 @@ export async function deleteDesignTeam(id: number, adminKey: string): Promise<vo
   });
 
   if (!response.ok) throw new Error('Failed to delete design team');
+}
+
+export async function updateDesignTeam(id: number, adminKey: string, data: { name?: string; categories?: string[] }): Promise<DesignTeam> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-teams/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'X-Admin-Key': adminKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) throw new Error('Failed to update design team');
+  return response.json();
+}
+
+export async function updateDesignTeamReview(id: number, adminKey: string, data: Partial<DesignTeamReviewSubmitData>): Promise<DesignTeamReview> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-team-reviews/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'X-Admin-Key': adminKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) throw new Error('Failed to update review');
+  return response.json();
 }
 
 export async function fetchAllDesignTeamReviews(adminKey: string): Promise<DesignTeamReview[]> {

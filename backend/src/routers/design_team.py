@@ -6,10 +6,12 @@ from src.schemas.design_team import (
     DesignTeamResponse,
     DesignTeamCreate,
     DesignTeamApprove,
+    DesignTeamUpdate,
 )
 from src.schemas.design_team_review import (
     DesignTeamReviewResponse,
     DesignTeamReviewSubmit,
+    DesignTeamReviewUpdate,
 )
 from src.schemas.design_team_request import (
     DesignTeamRequestCreate,
@@ -65,6 +67,20 @@ async def delete_design_team(
     if not success:
         raise HTTPException(status_code=404, detail="Design team not found")
     return {"detail": "Design team deleted"}
+
+
+@router.patch("/admin/design-teams/{team_id}", response_model=DesignTeamResponse)
+async def update_design_team_admin(
+    team_id: int,
+    team: DesignTeamUpdate,
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Update a design team (admin only)."""
+    updated_team = team_crud.update_design_team(db, team_id, team)
+    if not updated_team:
+        raise HTTPException(status_code=404, detail="Design team not found")
+    return updated_team
 
 
 @router.post(
@@ -154,6 +170,22 @@ async def delete_design_team_review(
     if not success:
         raise HTTPException(status_code=404, detail="Review not found")
     return {"detail": "Review deleted"}
+
+
+@router.patch(
+    "/admin/design-team-reviews/{review_id}", response_model=DesignTeamReviewResponse
+)
+async def update_design_team_review_admin(
+    review_id: int,
+    review: DesignTeamReviewUpdate,
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Update a design team review (admin only)."""
+    updated_review = review_crud.update_design_team_review(db, review_id, review)
+    if not updated_review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    return updated_review
 
 
 @router.post("/admin/companies", response_model=CompanyResponse)

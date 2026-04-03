@@ -1,6 +1,8 @@
+import React, { useState } from 'react';
 import { type Company } from '../../api/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { deleteCompany } from '../../api/api';
+import AdminEditCompanyModal from './AdminEditCompanyModal';
 
 interface ManageCompaniesTabProps {
     companies: Company[];
@@ -20,8 +22,10 @@ export default function ManageCompaniesTab({
     processing
 }: ManageCompaniesTabProps) {
     const queryClient = useQueryClient();
+    const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
-    const handleDelete = async (id: number, name: string) => {
+    const handleDelete = async (e: React.MouseEvent, id: number, name: string) => {
+        e.stopPropagation(); // Don't trigger the row click
         if (!window.confirm(`Are you sure you want to permanently delete ${name}? This will delete all associated experiences.`)) return;
         
         const key = `manage-comp-${id}`;
@@ -29,7 +33,6 @@ export default function ManageCompaniesTab({
         startProcessing(key);
         
         try {
-            // Note: We need a deleteCompany endpoint in the API
             await deleteCompany(id, adminKey);
             showFeedback(key, 'Company deleted successfully', 'success');
             queryClient.invalidateQueries({ queryKey: ['admin'] });
@@ -56,9 +59,15 @@ export default function ManageCompaniesTab({
                 </thead>
                 <tbody className="divide-y divide-[#eee] dark:divide-[#333]">
                     {companies.map(company => (
-                        <tr key={company.id} className="hover:bg-[#fafafa] dark:hover:bg-[#111] transition-colors group">
+                        <tr 
+                            key={company.id} 
+                            onClick={() => setSelectedCompany(company)}
+                            className="hover:bg-[#fafafa] dark:hover:bg-[#111] transition-colors group cursor-pointer"
+                        >
                             <td className="px-6 py-4">
-                                <span className="font-bold dark:text-white capitalize">{company.name}</span>
+                                <span className="font-bold dark:text-white capitalize group-hover:text-maceng-maroon dark:group-hover:text-maceng-orange transition-colors">
+                                    {company.name}
+                                </span>
                             </td>
                             <td className="px-6 py-4 text-[#666] dark:text-[#a0a0a0]">
                                 {company.industries.join(', ')}
@@ -66,9 +75,9 @@ export default function ManageCompaniesTab({
                             <td className="px-6 py-4 text-[#666] dark:text-[#a0a0a0]">
                                 {company.experience_count}
                             </td>
-                            <td className="px-6 py-4 text-right">
+                            <td className="px-6 py-4 text-right transition-all">
                                 <button 
-                                    onClick={() => handleDelete(company.id, company.name)}
+                                    onClick={(e) => handleDelete(e, company.id, company.name)}
                                     className="text-red-500 hover:text-red-600 font-bold uppercase text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                     Delete
@@ -78,6 +87,19 @@ export default function ManageCompaniesTab({
                     ))}
                 </tbody>
             </table>
+
+            {selectedCompany && (
+                <AdminEditCompanyModal 
+                    company={selectedCompany}
+                    adminKey={adminKey}
+                    onClose={() => setSelectedCompany(null)}
+                    onSuccess={() => {
+                        queryClient.invalidateQueries({ queryKey: ['admin'] });
+                        queryClient.invalidateQueries({ queryKey: ['companies'] });
+                    }}
+                    showFeedback={(msg, type) => showFeedback(`edit-comp-${selectedCompany.id}`, msg, type)}
+                />
+            )}
         </div>
     );
 }

@@ -1,6 +1,8 @@
+import React, { useState } from 'react';
 import { type Experience, type DesignTeamReview } from '../../api/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { deleteExperience, deleteDesignTeamReview } from '../../api/api';
+import AdminEditExperienceModal from './AdminEditExperienceModal';
 
 interface ManageExperiencesTabProps {
     experiences: Experience[];
@@ -22,8 +24,11 @@ export default function ManageExperiencesTab({
     processing
 }: ManageExperiencesTabProps) {
     const queryClient = useQueryClient();
+    const [selectedItem, setSelectedItem] = useState<Experience | DesignTeamReview | null>(null);
+    const [selectedType, setSelectedType] = useState<'company' | 'dt'>('company');
 
-    const handleDeleteExp = async (id: number) => {
+    const handleDeleteExp = async (e: React.MouseEvent, id: number) => {
+        e.stopPropagation();
         if (!window.confirm('Are you sure you want to delete this experience?')) return;
         const key = `manage-exp-${id}`;
         if (processing.has(key)) return;
@@ -36,7 +41,8 @@ export default function ManageExperiencesTab({
         finally { stopProcessing(key); }
     };
 
-    const handleDeleteReview = async (id: number) => {
+    const handleDeleteReview = async (e: React.MouseEvent, id: number) => {
+        e.stopPropagation();
         if (!window.confirm('Are you sure you want to delete this review?')) return;
         const key = `manage-rvw-${id}`;
         if (processing.has(key)) return;
@@ -47,6 +53,11 @@ export default function ManageExperiencesTab({
             queryClient.invalidateQueries({ queryKey: ['admin'] });
         } catch { showFeedback(key, 'Failed to delete', 'error'); }
         finally { stopProcessing(key); }
+    };
+
+    const handleRowClick = (item: Experience | DesignTeamReview, type: 'company' | 'dt') => {
+        setSelectedItem(item);
+        setSelectedType(type);
     };
 
     return (
@@ -67,15 +78,26 @@ export default function ManageExperiencesTab({
                         </thead>
                         <tbody className="divide-y divide-[#eee] dark:divide-[#333]">
                             {experiences.map(exp => (
-                                <tr key={exp.id} className="hover:bg-[#fafafa] dark:hover:bg-[#111] transition-colors group">
+                                <tr 
+                                    key={exp.id} 
+                                    onClick={() => handleRowClick(exp, 'company')}
+                                    className="hover:bg-[#fafafa] dark:hover:bg-[#111] transition-colors group cursor-pointer"
+                                >
                                     <td className="px-6 py-4 font-bold dark:text-white capitalize text-xs">
-                                        {exp.company_name || exp.new_company_name || 'Unknown'}
+                                        <div className="group-hover:text-maceng-maroon dark:group-hover:text-maceng-orange transition-colors">
+                                            {exp.company_name || exp.new_company_name || 'Unknown'}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 text-xs dark:text-white">{exp.position}</td>
                                     <td className="px-6 py-4 text-xs text-[#666] dark:text-[#a0a0a0]">{exp.term}</td>
-                                    <td className="px-6 py-4 text-[10px] text-[#999]">{exp.submitter_email}</td>
+                                    <td className="px-6 py-4 text-[10px] text-[#999] font-bold">{exp.submitter_email}</td>
                                     <td className="px-6 py-4 text-right">
-                                        <button onClick={() => handleDeleteExp(exp.id)} className="text-red-500 hover:text-red-600 font-bold uppercase text-[9px] opacity-0 group-hover:opacity-100 transition-opacity">Delete</button>
+                                        <button 
+                                            onClick={(e) => handleDeleteExp(e, exp.id)} 
+                                            className="text-red-500 hover:text-red-600 font-bold uppercase text-[9px] opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            Delete
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -100,13 +122,26 @@ export default function ManageExperiencesTab({
                         </thead>
                         <tbody className="divide-y divide-[#eee] dark:divide-[#333]">
                             {reviews.map(rvw => (
-                                <tr key={rvw.id} className="hover:bg-[#fafafa] dark:hover:bg-[#111] transition-colors group">
-                                    <td className="px-6 py-4 font-bold dark:text-white capitalize text-xs">{rvw.design_team_name || 'Unknown'}</td>
+                                <tr 
+                                    key={rvw.id} 
+                                    onClick={() => handleRowClick(rvw, 'dt')}
+                                    className="hover:bg-[#fafafa] dark:hover:bg-[#111] transition-colors group cursor-pointer"
+                                >
+                                    <td className="px-6 py-4 font-bold dark:text-white capitalize text-xs">
+                                        <div className="group-hover:text-maceng-maroon dark:group-hover:text-maceng-orange transition-colors">
+                                            {rvw.design_team_name || 'Unknown'}
+                                        </div>
+                                    </td>
                                     <td className="px-6 py-4 text-xs dark:text-white">{rvw.position}</td>
                                     <td className="px-6 py-4 text-xs text-[#666] dark:text-[#a0a0a0]">{rvw.term}</td>
-                                    <td className="px-6 py-4 text-[10px] text-[#999]">{rvw.submitter_email}</td>
+                                    <td className="px-6 py-4 text-[10px] text-[#999] font-bold">{rvw.submitter_email}</td>
                                     <td className="px-6 py-4 text-right">
-                                        <button onClick={() => handleDeleteReview(rvw.id)} className="text-red-500 hover:text-red-600 font-bold uppercase text-[9px] opacity-0 group-hover:opacity-100 transition-opacity">Delete</button>
+                                        <button 
+                                            onClick={(e) => handleDeleteReview(e, rvw.id)} 
+                                            className="text-red-500 hover:text-red-600 font-bold uppercase text-[9px] opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            Delete
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -114,6 +149,19 @@ export default function ManageExperiencesTab({
                     </table>
                 </div>
             </section>
+
+            {selectedItem && (
+                <AdminEditExperienceModal 
+                    item={selectedItem}
+                    type={selectedType}
+                    adminKey={adminKey}
+                    onClose={() => setSelectedItem(null)}
+                    onSuccess={() => {
+                        queryClient.invalidateQueries({ queryKey: ['admin'] });
+                    }}
+                    showFeedback={(msg, type) => showFeedback(`edit-exp-${selectedItem.id}`, msg, type)}
+                />
+            )}
         </div>
     );
 }

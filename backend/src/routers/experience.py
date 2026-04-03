@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
-from src.schemas import ExperienceResponse, ExperienceCreate, ExperienceSubmit
+from src.schemas import ExperienceResponse, ExperienceCreate, ExperienceSubmit, ExperienceUpdate
 import src.crud.experience as crud
 from src.utils.database import get_db
 from src.utils.limiter import limiter
@@ -107,3 +107,17 @@ async def delete_experience(
     if not success:
         raise HTTPException(status_code=404, detail="Experience not found")
     return {"detail": "Experience deleted"}
+
+
+@router.patch("/admin/experiences/{experience_id}", response_model=ExperienceResponse)
+async def update_experience_admin(
+    experience_id: int,
+    experience: ExperienceUpdate,
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Update an experience (admin only)."""
+    updated_experience = crud.update_experience(db, experience_id, experience)
+    if not updated_experience:
+        raise HTTPException(status_code=404, detail="Experience not found")
+    return updated_experience

@@ -109,16 +109,21 @@ def delete_company(db: Session, company_id: int) -> bool:
     return True
 
 
-# def update_company(db: Session, company_id: int, company: CompanyUpdate) -> Optional[CompanyModel]:
-#    """Update an existing company"""
-#    db_company = get_company_by_id(db, company_id)
-#    if not db_company:
-#        return None
-#
-#    update_data = company.model_dump(exclude_unset=True)
-#    for field, value in update_data.items():
-#        setattr(db_company, field, value)
-#
-#    db.commit()
-#    db.refresh(db_company)
-#    return db_company
+from src.schemas import CompanyCreate, CompanyUpdate
+
+
+def update_company(
+    db: Session, company_id: int, company: CompanyUpdate
+) -> Optional[CompanyModel]:
+    """Update an existing company"""
+    db_company = get_company_by_id(db, company_id)
+    if not db_company:
+        return None
+
+    update_data = company.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_company, field, value)
+
+    db.commit()
+    db.refresh(db_company)
+    return db_company

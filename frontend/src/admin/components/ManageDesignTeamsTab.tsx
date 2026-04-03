@@ -1,6 +1,8 @@
+import React, { useState } from 'react';
 import { type DesignTeam } from '../../api/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { deleteDesignTeam } from '../../api/api';
+import AdminEditTeamModal from './AdminEditTeamModal';
 
 interface ManageDesignTeamsTabProps {
     teams: DesignTeam[];
@@ -20,8 +22,10 @@ export default function ManageDesignTeamsTab({
     processing
 }: ManageDesignTeamsTabProps) {
     const queryClient = useQueryClient();
+    const [selectedTeam, setSelectedTeam] = useState<DesignTeam | null>(null);
 
-    const handleDelete = async (id: number, name: string) => {
+    const handleDelete = async (e: React.MouseEvent, id: number, name: string) => {
+        e.stopPropagation();
         if (!window.confirm(`Are you sure you want to permanently delete ${name}? This will delete all associated reviews.`)) return;
         
         const key = `manage-team-${id}`;
@@ -55,9 +59,15 @@ export default function ManageDesignTeamsTab({
                 </thead>
                 <tbody className="divide-y divide-[#eee] dark:divide-[#333]">
                     {teams.map(team => (
-                        <tr key={team.id} className="hover:bg-[#fafafa] dark:hover:bg-[#111] transition-colors group">
+                        <tr 
+                            key={team.id} 
+                            onClick={() => setSelectedTeam(team)}
+                            className="hover:bg-[#fafafa] dark:hover:bg-[#111] transition-colors group cursor-pointer"
+                        >
                             <td className="px-6 py-4">
-                                <span className="font-bold dark:text-white capitalize">{team.name}</span>
+                                <span className="font-bold dark:text-white capitalize group-hover:text-maceng-maroon dark:group-hover:text-maceng-orange transition-colors">
+                                    {team.name}
+                                </span>
                             </td>
                             <td className="px-6 py-4 text-[#666] dark:text-[#a0a0a0]">
                                 {team.categories.join(', ')}
@@ -67,7 +77,7 @@ export default function ManageDesignTeamsTab({
                             </td>
                             <td className="px-6 py-4 text-right">
                                 <button 
-                                    onClick={() => handleDelete(team.id, team.name)}
+                                    onClick={(e) => handleDelete(e, team.id, team.name)}
                                     className="text-red-500 hover:text-red-600 font-bold uppercase text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                     Delete
@@ -77,6 +87,19 @@ export default function ManageDesignTeamsTab({
                     ))}
                 </tbody>
             </table>
+
+            {selectedTeam && (
+                <AdminEditTeamModal 
+                    team={selectedTeam}
+                    adminKey={adminKey}
+                    onClose={() => setSelectedTeam(null)}
+                    onSuccess={() => {
+                        queryClient.invalidateQueries({ queryKey: ['admin'] });
+                        queryClient.invalidateQueries({ queryKey: ['design-teams'] });
+                    }}
+                    showFeedback={(msg, type) => showFeedback(`edit-team-${selectedTeam.id}`, msg, type)}
+                />
+            )}
         </div>
     );
 }
