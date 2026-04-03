@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, text, desc
 from src.models.design_team import DesignTeamModel
 from src.models.design_team_review import DesignTeamReviewModel
-from src.schemas.design_team import DesignTeamCreate
+from src.schemas.design_team import DesignTeamCreate, DesignTeamUpdate
 from typing import Optional
 
 
@@ -75,4 +75,32 @@ def create_design_team(db: Session, team: DesignTeamCreate):
     db.refresh(db_team)
     db_team.review_count = 0
     db_team.avg_difficulty = None
+    return db_team
+
+
+def delete_design_team(db: Session, team_id: int) -> bool:
+    """Delete a design team"""
+    db_team = db.query(DesignTeamModel).filter(DesignTeamModel.id == team_id).first()
+    if not db_team:
+        return False
+
+    db.delete(db_team)
+    db.commit()
+    return True
+
+
+def update_design_team(
+    db: Session, team_id: int, team: DesignTeamUpdate
+) -> Optional[DesignTeamModel]:
+    """Update a design team"""
+    db_team = db.query(DesignTeamModel).filter(DesignTeamModel.id == team_id).first()
+    if not db_team:
+        return None
+
+    update_data = team.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_team, field, value)
+
+    db.commit()
+    db.refresh(db_team)
     return db_team

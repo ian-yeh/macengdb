@@ -18,6 +18,7 @@ export interface Experience {
     id: number;
     user_id: number | null;
     company_id: number | null;
+    company_name: string | null;
     new_company_name: string | null;
     submitter_email: string;
     position: string;
@@ -76,6 +77,7 @@ export interface DesignTeam {
 export interface DesignTeamReview {
     id: number;
     design_team_id: number;
+    design_team_name: string | null;
     submitter_email: string;
     position: string;
     term: string;

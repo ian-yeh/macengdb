@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { fetchDesignTeams, submitDesignTeamReview } from '../api/api';
 import { type DesignTeam } from '../api/types';
-import DesignTeamRequestModal from '../components/DesignTeamRequestModal';
+import DesignTeamRequestModal from '../components/features/design-teams/DesignTeamRequestModal';
 import { usePostHog } from '@posthog/react';
 
 const TERM_OPTIONS = [
@@ -13,17 +13,21 @@ const TERM_OPTIONS = [
 ];
 
 const DIFFICULTY_LABELS: Record<number, string> = {
-    1: 'Very Easy',
-    2: 'Easy',
+    1: 'Quite Chill',
+    2: 'Easy Enough',
     3: 'Moderate',
-    4: 'Hard',
-    5: 'Very Hard',
+    4: 'Competitive',
+    5: 'Very Intense',
 };
 
 export default function SubmitDesignTeamExperiencePage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const posthog = usePostHog();
+
+    // Step state
+    const [step, setStep] = useState(0);
+    const totalSteps = 4; // Intro, Details, Process, Final/Submit
 
     // Form state
     const [email, setEmail] = useState('');
@@ -34,7 +38,7 @@ export default function SubmitDesignTeamExperiencePage() {
     const [position, setPosition] = useState('');
     const [term, setTerm] = useState('');
     const [accepted, setAccepted] = useState(false);
-    const [difficulty, setDifficulty] = useState(0);
+    const [difficulty, setDifficulty] = useState(3);
     const [description, setDescription] = useState('');
     const [tips, setTips] = useState('');
     const [interviewAcquisition, setInterviewAcquisition] = useState('');
@@ -45,6 +49,53 @@ export default function SubmitDesignTeamExperiencePage() {
     const [success, setSuccess] = useState(false);
     const suggestionsRef = useRef<HTMLDivElement>(null);
     const [showRequestModal, setShowRequestModal] = useState(false);
+
+    // Navigation
+    const nextStep = useCallback(() => {
+        if (step === 1) {
+            if (!selectedTeam) {
+                setError('Which team did you apply to?');
+                return;
+            }
+            if (!position.trim()) {
+                setError('What was the position name?');
+                return;
+            }
+            if (!term) {
+                setError('What term was this for?');
+                return;
+            }
+        }
+        if (step === 3 && !description.trim()) {
+            setError('Please describe what the recruitment process was like.');
+            return;
+        }
+
+        setError('');
+        setStep(s => Math.min(s + 1, totalSteps));
+    }, [step, selectedTeam, position, term, description, totalSteps]);
+
+    const prevStep = () => {
+        setError('');
+        setStep(s => Math.max(s - 1, 0));
+    };
+
+    // Keyboard support
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Enter' && e.metaKey) {
+                if (step < totalSteps) {
+                    nextStep();
+                } else if (step === totalSteps) {
+                    // Trigger form submission
+                    const form = document.querySelector('form');
+                    if (form) form.requestSubmit();
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [step, nextStep]);
 
     // Team search
     useEffect(() => {
@@ -69,26 +120,10 @@ export default function SubmitDesignTeamExperiencePage() {
         return () => clearTimeout(timer);
     }, [teamQuery, selectedTeam]);
 
-    // Close suggestions on outside click
-    useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
-            if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
-                setShowSuggestions(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClick);
-        return () => document.removeEventListener('mousedown', handleClick);
-    }, []);
-
     const handleTeamSelect = (team: DesignTeam) => {
         setSelectedTeam(team);
         setTeamQuery(team.name);
         setShowSuggestions(false);
-    };
-
-    const handleTeamClear = () => {
-        setSelectedTeam(null);
-        setTeamQuery('');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -100,30 +135,10 @@ export default function SubmitDesignTeamExperiencePage() {
             return;
         }
 
-        if (!selectedTeam) {
-            setError('Please select a design team from the suggestions');
-            return;
-        }
-
-        if (!position.trim()) {
-            setError('Please enter the position you applied for');
-            return;
-        }
-
-        if (!term) {
-            setError('Please select a term');
-            return;
-        }
-
-        if (difficulty === 0) {
-            setError('Please select the application difficulty');
-            return;
-        }
-
         setSubmitting(true);
         try {
             await submitDesignTeamReview({
-                design_team_id: selectedTeam.id,
+                design_team_id: selectedTeam!.id,
                 submitter_email: email.trim().toLowerCase(),
                 position: position.trim(),
                 term,
@@ -137,16 +152,12 @@ export default function SubmitDesignTeamExperiencePage() {
             queryClient.invalidateQueries({ queryKey: ['design-team-reviews'] });
             setSuccess(true);
             posthog.capture('design_team_experience_submit_success', {
-                team_name: selectedTeam.name,
+                team_name: selectedTeam!.name,
                 position: position.trim()
             });
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Something went wrong';
             setError(errorMessage);
-            posthog.capture('design_team_experience_submit_failed', {
-                team_name: selectedTeam?.name,
-                error: errorMessage
-            });
         } finally {
             setSubmitting(false);
         }
@@ -154,38 +165,29 @@ export default function SubmitDesignTeamExperiencePage() {
 
     if (success) {
         return (
-            <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto">
-                <div className="text-center py-16">
-                    <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon dark:text-maceng-orange mb-4">
-                        Thank you!
-                    </h1>
-                    <p className="text-[15px] text-[#555] dark:text-[#e5e5e5] mb-8">
-                        Your application experience has been submitted successfully and sent to an admin for review. It will help fellow McMaster Engineering students prepare to join design teams.
+            <div className="fixed inset-0 bg-white dark:bg-[#0f0f0f] flex items-center justify-center p-8 transition-colors duration-500">
+                <div className="max-w-md w-full text-center animate-fade-up">
+                    <div className="mb-8 inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/10 text-green-500">
+                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h1 className="font-playfair text-4xl font-bold text-[#222] dark:text-white mb-4">You're in.</h1>
+                    <p className="text-[#666] dark:text-[#a0a0a0] mb-8 text-lg">
+                        Your story is recorded. Your experience has been sent for review.
                     </p>
-                    <div className="flex gap-4 justify-center">
+                    <div className="flex flex-col gap-3">
                         <button
                             onClick={() => navigate('/')}
-                            className="px-6 py-2.5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded font-medium text-sm hover:bg-maceng-maroon/90 dark:hover:bg-maceng-orange/90 transition-colors cursor-pointer"
+                            className="w-full py-4 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-maceng-maroon/10 dark:shadow-maceng-orange/20"
                         >
-                            Back to Home
+                            Return home
                         </button>
                         <button
-                            onClick={() => {
-                                setSuccess(false);
-                                setEmail('');
-                                setSelectedTeam(null);
-                                setTeamQuery('');
-                                setPosition('');
-                                setTerm('');
-                                setAccepted(false);
-                                setDifficulty(0);
-                                setDescription('');
-                                setTips('');
-                                setInterviewAcquisition('');
-                            }}
-                            className="px-6 py-2.5 border border-maceng-maroon dark:border-maceng-orange text-maceng-maroon dark:text-maceng-orange rounded font-medium text-sm hover:bg-maceng-maroon/5 dark:hover:bg-maceng-orange/10 transition-colors cursor-pointer"
+                            onClick={() => window.location.reload()}
+                            className="w-full py-4 border border-[#eee] dark:border-[#333] text-[#888] rounded-xl font-bold hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a] transition-all"
                         >
-                            Submit Another
+                            Submit another
                         </button>
                     </div>
                 </div>
@@ -193,247 +195,310 @@ export default function SubmitDesignTeamExperiencePage() {
         );
     }
 
+    const progress = (step / totalSteps) * 100;
+
     return (
-        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto">
-            {/* Header */}
-            <header className="mb-8">
-                <Link
-                    to="/"
-                    className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange text-sm"
+        <div className="fixed inset-0 bg-white dark:bg-[#0f0f0f] flex flex-col font-inter transition-colors duration-500">
+            {/* Progress Bar */}
+            <div className="h-1.5 w-full bg-[#f0f0f0] dark:bg-[#1a1a1a]">
+                <div 
+                    className="h-full bg-maceng-maroon dark:bg-maceng-orange transition-all duration-700 ease-in-out" 
+                    style={{ width: `${progress}%` }} 
+                />
+            </div>
+
+            {/* Back Button */}
+            {step > 0 && (
+                <button 
+                    onClick={prevStep}
+                    className="absolute top-8 left-8 text-[#999] hover:text-[#333] dark:hover:text-white transition-colors flex items-center gap-2 group z-50 text-sm font-medium"
                 >
-                    ← Back to home
-                </Link>
-
-                <h1 className="font-playfair text-2xl md:text-3xl font-semibold text-maceng-maroon dark:text-maceng-orange mt-6 mb-2">
-                    Submit an Application Experience
-                </h1>
-                <p className="text-[15px] text-[#555] dark:text-[#e5e5e5]">
-                    Share your experience applying to a McMaster design team to help fellow students prepare.
-                </p>
-            </header>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Email */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        McMaster Email <span className="text-maceng-orange">*</span>
-                    </label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="yourname@mcmaster.ca"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                        required
-                    />
-                    <p className="text-xs text-[#888] dark:text-[#a0a0a0] mt-1">Must be a @mcmaster.ca email address. Your identity remains anonymous.</p>
-                </div>
-
-                {/* Team Search */}
-                <div className="relative" ref={suggestionsRef}>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Design Team <span className="text-maceng-orange">*</span>
-                    </label>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            value={teamQuery}
-                            onChange={(e) => {
-                                setTeamQuery(e.target.value);
-                                if (selectedTeam) setSelectedTeam(null);
-                            }}
-                            placeholder="Search for a design team..."
-                            className={`flex-1 py-2 px-3 text-sm border rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange ${selectedTeam ? 'border-green-500 bg-green-50 dark:bg-green-950/20 dark:border-green-800' : 'border-[#ccc] dark:border-[#444]'
-                                }`}
-                        />
-                        {selectedTeam && (
-                            <button
-                                type="button"
-                                onClick={handleTeamClear}
-                                className="px-3 text-sm text-[#888] hover:text-[#333] transition-colors cursor-pointer"
-                            >
-                                ✕
-                            </button>
-                        )}
-                    </div>
-                    {showSuggestions && teamSuggestions.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-[#111111] border border-[#ccc] dark:border-[#444] rounded shadow-lg max-h-48 overflow-y-auto">
-                            {teamSuggestions.map((team) => (
-                                <button
-                                    key={team.id}
-                                    type="button"
-                                    onClick={() => handleTeamSelect(team)}
-                                    className="w-full text-left px-3 py-2 text-sm hover:bg-[#fafafa] dark:hover:bg-[#222] transition-colors border-b border-[#f0f0f0] dark:border-[#444] last:border-b-0 cursor-pointer"
-                                >
-                                    <span className="font-medium text-[#333] dark:text-white">{team.name}</span>
-                                    {team.categories.length > 0 && (
-                                        <span className="text-[#888] dark:text-[#a0a0a0] ml-2 text-xs">
-                                            {team.categories.join(', ')}
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                    {/* Design Team request trigger */}
-                    {!selectedTeam && (
-                        <div className="mt-2">
-                            <button
-                                type="button"
-                                onClick={() => setShowRequestModal(true)}
-                                className="text-xs text-maceng-orange hover:text-maceng-maroon transition-colors cursor-pointer"
-                            >
-                                Can't find your design team? Request it →
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Position */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Position Applied For <span className="text-maceng-orange">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        value={position}
-                        onChange={(e) => setPosition(e.target.value)}
-                        placeholder="e.g. Mechanical Lead, Software Developer, Electrical Member"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                        required
-                    />
-                </div>
-
-                {/* Term */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Term <span className="text-maceng-orange">*</span>
-                    </label>
-                    <select
-                        value={term}
-                        onChange={(e) => setTerm(e.target.value)}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                        required
-                    >
-                        <option value="">Select a term...</option>
-                        {TERM_OPTIONS.map((t) => (
-                            <option key={t} value={t}>{t}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Accepted */}
-                <div className="flex items-center gap-3">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={accepted}
-                            onChange={(e) => setAccepted(e.target.checked)}
-                            className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-[#ddd] dark:bg-[#333] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-maceng-maroon dark:peer-checked:bg-maceng-orange"></div>
-                    </label>
-                    <span className="text-sm font-medium text-[#333] dark:text-white">Received an acceptance</span>
-                </div>
-
-                {/* Difficulty */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Application Difficulty <span className="text-maceng-orange">*</span>
-                    </label>
-                    <div className="flex gap-1.5 items-center">
-                        {[1, 2, 3, 4, 5].map((level) => (
-                            <button
-                                key={level}
-                                type="button"
-                                onClick={() => setDifficulty(level)}
-                                className={`w-7 h-7 rounded-full transition-colors cursor-pointer border-2 ${level <= difficulty
-                                    ? 'bg-maceng-orange border-maceng-orange'
-                                    : 'bg-white dark:bg-[#333] border-[#ddd] dark:border-[#444] hover:border-maceng-orange/50'
-                                    }`}
-                            />
-                        ))}
-                        {difficulty > 0 && (
-                            <span className="text-xs text-[#888] dark:text-[#a0a0a0] ml-2">
-                                {DIFFICULTY_LABELS[difficulty]}
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                {/* How You Found Out */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        How Did You Find Out About Recruiting?
-                    </label>
-                    <input
-                        type="text"
-                        value={interviewAcquisition}
-                        onChange={(e) => setInterviewAcquisition(e.target.value)}
-                        placeholder="e.g. Club fair, friend, Instagram, Discord"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                    />
-                    <p className="text-xs text-[#888] dark:text-[#a0a0a0] mt-1">Optional. Helps others know where to look for openings.</p>
-                </div>
-
-                {/* Description */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Describe the Application Process
-                    </label>
-                    <textarea
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="What was the application process like? Were there interviews, technical challenges, or portfolio reviews?"
-                        rows={4}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange min-h-[120px]"
-                    />
-                </div>
-
-                {/* Tips */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Tips for Future Applicants
-                    </label>
-                    <textarea
-                        value={tips}
-                        onChange={(e) => setTips(e.target.value)}
-                        placeholder="Any advice for someone applying to this team? (optional)"
-                        rows={3}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange min-h-[80px]"
-                    />
-                </div>
-
-                {/* Error */}
-                {error && (
-                    <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-4 py-3">
-                        {error}
-                    </div>
-                )}
-
-                {/* Submit */}
-                <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-3 bg-maceng-maroon text-white rounded font-medium text-sm hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                >
-                    {submitting ? 'Submitting...' : 'Submit Application Experience'}
+                    <span className="group-hover:-translate-x-1 transition-transform">←</span> Back
                 </button>
-            </form>
+            )}
 
-            {/* Request Modal */}
+            {/* Exit Button */}
+            <button 
+                onClick={() => navigate('/')}
+                className="absolute top-8 right-8 text-[#999] hover:text-[#333] dark:hover:text-white transition-colors z-50 flex items-center gap-2 group text-sm font-medium"
+            >
+                Exit <span className="bg-[#eee] dark:bg-[#222] w-6 h-6 flex items-center justify-center rounded-md group-hover:bg-red-500/10 group-hover:text-red-500 transition-all">✕</span>
+            </button>
+
+            {/* Main Content Area */}
+            <div className="flex-grow flex items-center justify-center p-6 md:p-12 overflow-y-auto">
+                <div className="max-w-2xl w-full">
+                    
+                    {/* Step 0: Welcome */}
+                    {step === 0 && (
+                        <div className="animate-fade-up text-center space-y-8">
+                            <h1 className="font-playfair text-5xl md:text-6xl font-bold text-[#222] dark:text-white leading-tight">
+                                You survived it. Now <span className="text-maceng-maroon dark:text-maceng-orange">own your experience</span>.
+                            </h1>
+                            <p className="text-xl text-[#666] dark:text-[#a0a0a0] max-w-lg mx-auto">
+                                You went through it. Now, document exactly how it was.
+                            </p>
+                            <div className="flex flex-col items-center gap-6">
+                                <button 
+                                    onClick={nextStep}
+                                    className="px-10 py-5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-2xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-maceng-maroon/20 dark:shadow-maceng-orange/30"
+                                >
+                                    Start Application Review
+                                </button>
+                                <button 
+                                    onClick={() => navigate('/')}
+                                    className="text-sm font-medium text-[#999] hover:text-maceng-maroon dark:hover:text-maceng-orange transition-colors"
+                                >
+                                    Maybe later, take me back
+                                </button>
+                            </div>
+                            <p className="text-xs text-[#999] dark:text-[#555]">takes ~90 seconds • press ⌘+Enter to skip</p>
+                        </div>
+                    )}
+
+                    {/* Step 1: Team & Position */}
+                    {step === 1 && (
+                        <div className="animate-fade-up space-y-12">
+                            <div className="space-y-4">
+                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-maceng-maroon dark:text-maceng-orange">01. TEAM DETAILS</h2>
+                                <h3 className="font-playfair text-4xl font-bold dark:text-white">Which team did you apply for?</h3>
+                            </div>
+
+                            <div className="space-y-10" ref={suggestionsRef}>
+                                <div className="space-y-3">
+                                    <label className="text-xs font-bold text-[#999] uppercase tracking-widest">Team Name</label>
+                                    <div className="relative">
+                                        <input 
+                                            autoFocus
+                                            type="text" 
+                                            value={teamQuery}
+                                            onChange={(e) => {
+                                                setTeamQuery(e.target.value);
+                                                if (selectedTeam) setSelectedTeam(null);
+                                            }}
+                                            className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-4 text-3xl font-playfair outline-none transition-colors dark:text-white placeholder:text-[#ccc] dark:placeholder:text-[#333]"
+                                            placeholder="Type team name..."
+                                        />
+                                        {showSuggestions && teamSuggestions.length > 0 && (
+                                            <div className="absolute top-full left-0 w-full bg-white dark:bg-[#1a1a1a] border border-[#eee] dark:border-[#333] rounded-xl shadow-2xl mt-2 overflow-hidden z-20">
+                                                {teamSuggestions.map(t => (
+                                                    <button 
+                                                        key={t.id}
+                                                        onClick={() => handleTeamSelect(t)}
+                                                        className="w-full text-left px-6 py-4 hover:bg-[#fafafa] dark:hover:bg-[#252525] transition-colors border-b border-[#eee] dark:border-[#333] last:border-0 dark:text-white font-medium"
+                                                    >
+                                                        {t.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowRequestModal(true)}
+                                        className="text-xs font-semibold text-maceng-orange hover:opacity-80 transition-opacity"
+                                    >
+                                        Can't find your design team? Request it →
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-[#999] uppercase tracking-widest">Role Name</label>
+                                        <input 
+                                            type="text" 
+                                            value={position}
+                                            onChange={(e) => setPosition(e.target.value)}
+                                            className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-2 text-xl outline-none transition-colors dark:text-white"
+                                            placeholder="e.g. Mechanical Lead"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-[#999] uppercase tracking-widest">Recruitment Term</label>
+                                        <select 
+                                            value={term}
+                                            onChange={(e) => setTerm(e.target.value)}
+                                            className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-2 text-xl outline-none transition-colors dark:text-white appearance-none cursor-pointer"
+                                        >
+                                            <option value="">Select term...</option>
+                                            {TERM_OPTIONS.map(t => <option key={t} value={t} className="bg-white dark:bg-[#1a1a1a]">{t}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={nextStep}
+                                className="px-8 py-4 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-xl font-bold hover:scale-[1.02] transition-all"
+                            >
+                                Continue
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Step 2: Context */}
+                    {step === 2 && (
+                        <div className="animate-fade-up space-y-12">
+                            <div className="space-y-4">
+                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-maceng-maroon dark:text-maceng-orange">02. THE PROCESS</h2>
+                                <h3 className="font-playfair text-4xl font-bold dark:text-white">How was the recruitment?</h3>
+                            </div>
+
+                            <div className="space-y-16">
+                                <div className="space-y-6">
+                                    <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">Process Difficulty</label>
+                                    <div className="flex gap-4">
+                                        {[1, 2, 3, 4, 5].map((level) => (
+                                            <button
+                                                key={level}
+                                                onClick={() => setDifficulty(level)}
+                                                className={`w-16 h-16 rounded-2xl text-2xl font-bold transition-all border-2 ${difficulty === level
+                                                    ? 'bg-maceng-maroon dark:bg-maceng-orange border-transparent text-white scale-110 shadow-lg'
+                                                    : 'bg-transparent border-[#eee] dark:border-[#333] text-[#999] hover:border-maceng-maroon dark:hover:border-maceng-orange'
+                                                }`}
+                                            >
+                                                {level}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="text-maceng-maroon dark:text-maceng-orange font-bold uppercase tracking-[0.1em] text-sm">
+                                        {DIFFICULTY_LABELS[difficulty]}
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                    <div className="space-y-4">
+                                        <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">Were you accepted?</label>
+                                        <button 
+                                            onClick={() => setAccepted(!accepted)}
+                                            className={`w-full py-4 rounded-xl border-2 font-bold transition-all ${accepted 
+                                                ? 'bg-green-500/10 border-green-500 text-green-500' 
+                                                : 'border-[#eee] dark:border-[#333] text-[#999]'}`}
+                                        >
+                                            {accepted ? 'Yes, Joined!' : 'No / Declined'}
+                                        </button>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">How did you find it?</label>
+                                        <input 
+                                            type="text" 
+                                            value={interviewAcquisition}
+                                            onChange={(e) => setInterviewAcquisition(e.target.value)}
+                                            className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-2 text-xl outline-none transition-colors dark:text-white"
+                                            placeholder="Friend, Fair, Discord..."
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={nextStep}
+                                className="px-8 py-4 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-xl font-bold hover:scale-[1.02] transition-all"
+                            >
+                                Continue
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Step 3: Description */}
+                    {step === 3 && (
+                        <div className="animate-fade-up space-y-12">
+                            <div className="space-y-4">
+                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-maceng-maroon dark:text-maceng-orange">03. THE JOURNEY</h2>
+                                <h3 className="font-playfair text-4xl font-bold dark:text-white">Describe the process.</h3>
+                                <p className="text-[#666] dark:text-[#888]">Was there a portfolio review? A technical task? Multiple interviews?</p>
+                            </div>
+
+                            <div className="space-y-6">
+                                <textarea 
+                                    autoFocus
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-4 text-2xl outline-none transition-colors dark:text-white min-h-[200px]"
+                                    placeholder="Write your story here..."
+                                />
+                            </div>
+
+                            <button 
+                                onClick={nextStep}
+                                className="px-8 py-4 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-xl font-bold hover:scale-[1.02] transition-all"
+                            >
+                                Continue
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Step 4: Advice & Email */}
+                    {step === 4 && (
+                        <form onSubmit={handleSubmit} className="animate-fade-up space-y-12">
+                            <div className="space-y-4">
+                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-maceng-maroon dark:text-maceng-orange">04. FINAL DETAILS</h2>
+                                <h3 className="font-playfair text-4xl font-bold dark:text-white">Almost there.</h3>
+                            </div>
+
+                            <div className="space-y-10">
+                                <div className="space-y-4">
+                                    <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">Tips for Success (Optional)</label>
+                                    <textarea 
+                                        value={tips}
+                                        onChange={(e) => setTips(e.target.value)}
+                                        className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-4 text-2xl outline-none transition-colors dark:text-white min-h-[150px]"
+                                        placeholder="Any advice for other applicants?"
+                                    />
+                                </div>
+
+                                <div className="space-y-4">
+                                    <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">Verify you're a McMaster student (private)</label>
+                                    <input 
+                                        type="email" 
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-4 text-3xl font-playfair outline-none transition-colors dark:text-white"
+                                        placeholder="yourname@mcmaster.ca"
+                                        required
+                                    />
+                                    <p className="text-[11px] text-[#888] flex items-center gap-2 uppercase tracking-widest font-bold">
+                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                        Your identity stays anonymous.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {error && (
+                                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm font-medium animate-shake">
+                                    {error}
+                                </div>
+                            )}
+
+                            <button 
+                                type="submit"
+                                disabled={submitting}
+                                className="w-full py-6 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-2xl font-bold text-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-maceng-maroon/20 dark:shadow-maceng-orange/40 disabled:opacity-50"
+                            >
+                                {submitting ? 'Submitting...' : 'Complete Review →'}
+                            </button>
+                        </form>
+                    )}
+
+                    {/* Step Error Notice (Floating) */}
+                    {error && step < 4 && (
+                        <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm font-medium animate-shake text-center">
+                            {error}
+                        </div>
+                    )}
+
+                </div>
+            </div>
+
+            {/* Footer Navigation Tip */}
+            <div className="absolute bottom-8 left-0 w-full flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold text-[#ccc] dark:text-[#333] pointer-events-none">
+                Step {step} of {totalSteps} — McMaster Engineering Design Teams
+            </div>
+
             <DesignTeamRequestModal
                 isOpen={showRequestModal}
                 onClose={() => setShowRequestModal(false)}
             />
-
-            {/* Footer */}
-            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] dark:border-[#444] text-[13px] text-[#666] dark:text-[#d4d4d4]">
-                <p>
-                    © {new Date().getFullYear()} MacEngDB · Built by McMaster Engineering students
-                </p>
-            </footer>
         </div>
     );
 }

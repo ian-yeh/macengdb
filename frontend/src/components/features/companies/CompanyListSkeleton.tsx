@@ -1,4 +1,4 @@
-import Skeleton from './Skeleton';
+import Skeleton from '../../ui/Skeleton';
 
 export default function CompanyListSkeleton() {
     return (

@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchDesignTeam, fetchDesignTeamReviews, submitDesignTeamReview } from '../api/api';
 import { type DesignTeamReview } from '../api/types';
-import CompanyDetailSkeleton from '../components/CompanyDetailSkeleton';
-import { useEffect } from 'react';
+import CompanyDetailSkeleton from '../components/features/companies/CompanyDetailSkeleton';
+import Footer from '../components/layout/Footer';
 import { usePostHog } from '@posthog/react';
 
 const TERM_OPTIONS = [
@@ -176,7 +176,7 @@ export default function DesignTeamDetailPage() {
     const inputClass = "w-full py-2.5 px-3.5 text-sm border border-[#ddd] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 dark:focus:ring-maceng-orange/10 focus:border-maceng-maroon dark:focus:border-maceng-orange transition-all";
 
     return (
-        <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
+        <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto flex flex-col">
             {/* Back Link */}
             <div className="animate-row-in">
                 <Link
@@ -225,7 +225,7 @@ export default function DesignTeamDetailPage() {
             </header>
 
             {/* Application Experiences */}
-            <section>
+            <section className="flex-grow">
                 <div className="flex items-center justify-between mb-8 animate-row-in" style={{ animationDelay: '200ms' }}>
                     <h2 className="font-playfair text-xl md:text-2xl font-semibold text-[#333] dark:text-white">
                         Application Experiences ({reviews.length})
@@ -241,7 +241,7 @@ export default function DesignTeamDetailPage() {
                             }}
                             className="px-3 py-1.5 md:px-4 md:py-2 bg-maceng-maroon text-white text-xs md:text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors cursor-pointer"
                         >
-                            + Share Application Experience
+                            + Share your design team experience
                         </button>
                     )}
                 </div>
@@ -249,7 +249,7 @@ export default function DesignTeamDetailPage() {
                 {/* Submission Form */}
                 {showForm && (
                     <div className="mb-10 p-4 md:p-6 bg-[#fafafa] dark:bg-[#111111] border border-[#eee] dark:border-[#444] rounded-xl animate-fade-in">
-                        <h3 className="font-playfair text-lg text-maceng-maroon dark:text-maceng-orange mb-1">Share Your Application Experience</h3>
+                        <h3 className="font-playfair text-lg text-maceng-maroon dark:text-maceng-orange mb-1">Share Your Design Team Experience</h3>
                         <p className="text-xs text-[#888] dark:text-[#999999] mb-5">Help others prepare to apply. Your submission will be reviewed before publishing.</p>
 
                         {submitStatus === 'success' ? (
@@ -261,7 +261,7 @@ export default function DesignTeamDetailPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
-                                            McMaster Email *
+                                            Verify you're a McMaster student (private) *
                                         </label>
                                         <input
                                             type="email"
@@ -383,7 +383,7 @@ export default function DesignTeamDetailPage() {
                                         disabled={submitStatus === 'submitting' || formData.difficulty === 0 || !formData.position || !formData.term || !formData.submitter_email}
                                         className="px-5 py-2 bg-maceng-maroon dark:bg-maceng-orange text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 dark:hover:bg-maceng-orange/90 transition-colors disabled:opacity-50 cursor-pointer"
                                     >
-                                        {submitStatus === 'submitting' ? 'Submitting...' : 'Submit Experience'}
+                                        {submitStatus === 'submitting' ? 'Submitting...' : 'Submit Design Team Experience'}
                                     </button>
                                 </div>
                             </form>
@@ -451,12 +451,7 @@ export default function DesignTeamDetailPage() {
                 )}
             </section>
 
-            {/* Footer */}
-            <footer className="mt-16 pt-8 border-t border-[#eee] dark:border-[#444] text-center">
-                <p className="text-[12px] text-[#aaa] dark:text-[#999999] italic font-inter">
-                    MacEngDB — Built by McMaster Engineering students, for McMaster Engineering students.
-                </p>
-            </footer>
+            <Footer />
         </div>
     );
 }

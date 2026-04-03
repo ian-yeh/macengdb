@@ -10,6 +10,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from src.utils.database import Base
+from typing import Optional
 from datetime import datetime
 
 
@@ -41,3 +42,9 @@ class ExperienceModel(Base):
     # Relationships
     user = relationship("UserModel", back_populates="experiences")
     company = relationship("CompanyModel", back_populates="experiences")
+
+    @property
+    def company_name(self) -> Optional[str]:
+        if self.company:
+            return self.company.name
+        return None

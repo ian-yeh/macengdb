@@ -23,6 +23,7 @@ class DesignTeamReviewBase(BaseModel):
 class DesignTeamReviewResponse(DesignTeamReviewBase):
     id: int
     design_team_id: int
+    design_team_name: Optional[str] = None
     submitter_email: str
     status: str = "pending"
     created_at: datetime
@@ -44,4 +45,20 @@ class DesignTeamReviewSubmit(DesignTeamReviewBase):
         v = v.strip().lower()
         if not v.endswith("@mcmaster.ca"):
             raise ValueError("Must be a McMaster email address (@mcmaster.ca)")
+        return v
+
+
+class DesignTeamReviewUpdate(BaseModel):
+    position: Optional[str] = None
+    term: Optional[str] = None
+    accepted: Optional[bool] = None
+    difficulty: Optional[int] = None
+    description: Optional[str] = None
+    tips: Optional[str] = None
+
+    @field_validator("difficulty")
+    @classmethod
+    def validate_difficulty(cls, v: Optional[int]) -> Optional[int]:
+        if v is not None and (v < 1 or v > 5):
+            raise ValueError("Difficulty must be between 1 and 5")
         return v

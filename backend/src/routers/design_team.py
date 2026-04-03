@@ -6,10 +6,12 @@ from src.schemas.design_team import (
     DesignTeamResponse,
     DesignTeamCreate,
     DesignTeamApprove,
+    DesignTeamUpdate,
 )
 from src.schemas.design_team_review import (
     DesignTeamReviewResponse,
     DesignTeamReviewSubmit,
+    DesignTeamReviewUpdate,
 )
 from src.schemas.design_team_request import (
     DesignTeamRequestCreate,
@@ -50,16 +52,34 @@ async def get_design_team(team_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Design team not found")
     return team
 
-
-@router.get(
-    "/design-teams/{team_id}/reviews",
-    response_model=List[DesignTeamReviewResponse],
-)
-async def get_design_team_reviews(team_id: int, db: Session = Depends(get_db)):
-    team = team_crud.get_design_team(db, team_id)
-    if not team:
-        raise HTTPException(status_code=404, detail="Design team not found")
     return review_crud.get_reviews_for_team(db, team_id)
+
+
+@router.delete("/admin/design-teams/{team_id}")
+async def delete_design_team(
+    team_id: int,
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Delete a design team (admin only)."""
+    success = team_crud.delete_design_team(db, team_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Design team not found")
+    return {"detail": "Design team deleted"}
+
+
+@router.patch("/admin/design-teams/{team_id}", response_model=DesignTeamResponse)
+async def update_design_team_admin(
+    team_id: int,
+    team: DesignTeamUpdate,
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Update a design team (admin only)."""
+    updated_team = team_crud.update_design_team(db, team_id, team)
+    if not updated_team:
+        raise HTTPException(status_code=404, detail="Design team not found")
+    return updated_team
 
 
 @router.post(
@@ -92,6 +112,18 @@ async def get_pending_design_team_reviews(
 ):
     """Get all pending design team reviews."""
     return review_crud.get_pending_reviews(db)
+
+
+@router.get(
+    "/admin/design-team-reviews/all",
+    response_model=List[DesignTeamReviewResponse],
+)
+async def get_all_design_team_reviews_admin(
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Get all design team reviews (for admin data management)."""
+    return review_crud.get_all_reviews(db)
 
 
 @router.patch(
@@ -137,6 +169,22 @@ async def delete_design_team_review(
     if not success:
         raise HTTPException(status_code=404, detail="Review not found")
     return {"detail": "Review deleted"}
+
+
+@router.patch(
+    "/admin/design-team-reviews/{review_id}", response_model=DesignTeamReviewResponse
+)
+async def update_design_team_review_admin(
+    review_id: int,
+    review: DesignTeamReviewUpdate,
+    db: Session = Depends(get_db),
+    _admin_key: str = Depends(verify_admin_key),
+):
+    """Update a design team review (admin only)."""
+    updated_review = review_crud.update_design_team_review(db, review_id, review)
+    if not updated_review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    return updated_review
 
 
 @router.post("/admin/companies", response_model=CompanyResponse)

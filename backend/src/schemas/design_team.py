@@ -27,3 +27,10 @@ class DesignTeamCreate(DesignTeamBase):
 
 class DesignTeamApprove(BaseModel):
     categories: List[str] = []
+
+
+class DesignTeamUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    categories: Optional[List[str]] = None
+    website_url: Optional[str] = None

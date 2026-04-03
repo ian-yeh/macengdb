@@ -2,7 +2,8 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompany, fetchCompanyExperiences } from '../api/api';
 import { type Experience as ExperienceType } from '../api/types';
-import CompanyDetailSkeleton from '../components/CompanyDetailSkeleton';
+import CompanyDetailSkeleton from '../components/features/companies/CompanyDetailSkeleton';
+import Footer from '../components/layout/Footer';
 import { useEffect } from 'react';
 import { usePostHog } from '@posthog/react';
 
@@ -41,7 +42,7 @@ export default function CompanyPage() {
 
     if (error || !company || experiencesError) {
         return (
-            <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
+            <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto flex flex-col items-center justify-center">
                 <Link to="/" className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange">
                     ← Back to companies
                 </Link>
@@ -51,7 +52,7 @@ export default function CompanyPage() {
     }
 
     return (
-        <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto">
+        <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto flex flex-col">
             {/* Header */}
             <header className="mb-8">
                 <div className="animate-row-in">
@@ -80,7 +81,7 @@ export default function CompanyPage() {
             </header>
 
             {/* Experiences List */}
-            <section>
+            <section className="flex-grow">
                 <h2 className="font-playfair italic text-maceng-maroon dark:text-maceng-orange text-xl mb-6 animate-row-in" style={{ animationDelay: '200ms' }}>
                     Interview Experiences
                 </h2>
@@ -93,7 +94,7 @@ export default function CompanyPage() {
                             onClick={() => posthog.capture('submit_experience_from_empty_clicked', { company_name: company.name })}
                             className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange"
                         >
-                            submit an experience
+                            submit a company experience
                         </Link>.
                     </p>
                 ) : (
@@ -178,12 +179,7 @@ export default function CompanyPage() {
                 )}
             </section>
 
-            {/* Footer */}
-            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] dark:border-[#444] text-[13px] text-[#666] dark:text-[#d4d4d4]">
-                <p>
-                    © {new Date().getFullYear()} MacEngDB · Built by McMaster Engineering students
-                </p>
-            </footer>
+            <Footer />
         </div>
     );
 }

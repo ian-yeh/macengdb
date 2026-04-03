@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 
 
@@ -27,3 +27,9 @@ class CompanyCreate(CompanyBase):
 
 class CompanyApprove(BaseModel):
     industries: List[str] = []
+
+
+class CompanyUpdate(BaseModel):
+    name: Optional[str] = None
+    industries: Optional[List[str]] = None
+    rating: Optional[float] = None

@@ -9,6 +9,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from src.utils.database import Base
+from typing import Optional
 from datetime import datetime
 
 
@@ -35,3 +36,9 @@ class DesignTeamReviewModel(Base):
 
     # Relationships
     design_team = relationship("DesignTeamModel", back_populates="reviews")
+
+    @property
+    def design_team_name(self) -> Optional[str]:
+        if self.design_team:
+            return self.design_team.name
+        return None

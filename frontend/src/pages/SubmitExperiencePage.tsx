@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { searchCompanies, submitExperience } from '../api/api';
 import { type Company, type InterviewStage, type ExperienceSubmitData } from '../api/types';
-import CompanyRequestModal from '../components/CompanyRequestModal';
+import CompanyRequestModal from '../components/features/companies/CompanyRequestModal';
 import { usePostHog } from '@posthog/react';
 
 const TERM_OPTIONS = [
@@ -19,6 +19,10 @@ export default function SubmitExperiencePage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const posthog = usePostHog();
+
+    // Step state
+    const [step, setStep] = useState(0);
+    const totalSteps = 5; // Intro, Details, Context, Rounds, Final/Submit
 
     // Form state
     const [email, setEmail] = useState('');
@@ -41,7 +45,55 @@ export default function SubmitExperiencePage() {
     const suggestionsRef = useRef<HTMLDivElement>(null);
     const [showRequestModal, setShowRequestModal] = useState(false);
 
-    // Company search
+    // Navigation
+    const nextStep = useCallback(() => {
+        // Simple validation for each step
+        if (step === 1) {
+            if (!selectedCompany && !companyQuery.trim()) {
+                setError('First, let us know where you interviewed.');
+                return;
+            }
+            if (!position.trim()) {
+                setError('What was the role title?');
+                return;
+            }
+            if (!term) {
+                setError('Which term was this for?');
+                return;
+            }
+        }
+        if (step === 3 && stages.length === 0) {
+            setError('Please add at least one interview stage.');
+            return;
+        }
+
+        setError('');
+        setStep(s => Math.min(s + 1, totalSteps));
+    }, [step, selectedCompany, companyQuery, position, term, stages.length, totalSteps]);
+
+    const prevStep = () => {
+        setError('');
+        setStep(s => Math.max(s - 1, 0));
+    };
+
+    // Keyboard support
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Enter' && e.metaKey) {
+                if (step < totalSteps) {
+                    nextStep();
+                } else if (step === totalSteps) {
+                    // Trigger form submission
+                    const form = document.querySelector('form');
+                    if (form) form.requestSubmit();
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [step, nextStep]);
+
+    // Company search logic
     useEffect(() => {
         if (!companyQuery.trim() || selectedCompany) {
             setCompanySuggestions([]);
@@ -61,66 +113,27 @@ export default function SubmitExperiencePage() {
         return () => clearTimeout(timer);
     }, [companyQuery, selectedCompany]);
 
-    // Close suggestions on outside click
-    useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
-            if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
-                setShowSuggestions(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClick);
-        return () => document.removeEventListener('mousedown', handleClick);
-    }, []);
-
     const handleCompanySelect = (company: Company) => {
         setSelectedCompany(company);
         setCompanyQuery(company.name);
         setShowSuggestions(false);
     };
 
-    const handleCompanyClear = () => {
-        setSelectedCompany(null);
-        setCompanyQuery('');
-    };
-
     // Stage management
-    const addStage = () => {
-        setStages([...stages, { name: '', duration: '', questions: [] }]);
-    };
-
+    const addStage = () => setStages([...stages, { name: '', duration: '', questions: [] }]);
+    const removeStage = (index: number) => setStages(stages.filter((_, i) => i !== index));
     const updateStage = (index: number, field: keyof InterviewStage, value: string | string[]) => {
         const updated = [...stages];
         updated[index] = { ...updated[index], [field]: value };
         setStages(updated);
     };
 
-    const removeStage = (index: number) => {
-        setStages(stages.filter((_, i) => i !== index));
-    };
-
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
-        // Validation
         if (!email.trim().toLowerCase().endsWith('@mcmaster.ca')) {
-            setError('Please use your McMaster email address (@mcmaster.ca)');
-            return;
-        }
-
-        if (!selectedCompany && !companyQuery.trim()) {
-            setError('Please search for a company or enter a new one');
-            return;
-        }
-
-        if (!position.trim()) {
-            setError('Please enter the position title');
-            return;
-        }
-
-        if (!term) {
-            setError('Please select a term');
+            setError('Please use your McMaster email (@mcmaster.ca)');
             return;
         }
 
@@ -132,7 +145,7 @@ export default function SubmitExperiencePage() {
             term,
             offer_received: offerReceived,
             difficulty,
-            stages: stages.filter(s => s.name.trim()), // Only include filled-in stages
+            stages: stages.filter(s => s.name.trim()),
             tips: tips.trim() || undefined,
             interview_acquisition: interviewAcquisition.trim() || undefined,
         };
@@ -150,10 +163,6 @@ export default function SubmitExperiencePage() {
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Something went wrong';
             setError(errorMessage);
-            posthog.capture('interview_experience_submit_failed', {
-                company_name: selectedCompany?.name,
-                error: errorMessage
-            });
         } finally {
             setSubmitting(false);
         }
@@ -161,38 +170,29 @@ export default function SubmitExperiencePage() {
 
     if (success) {
         return (
-            <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto">
-                <div className="text-center py-16">
-                    <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon dark:text-maceng-orange mb-4">
-                        Thank you!
-                    </h1>
-                    <p className="text-[15px] text-[#555] dark:text-[#e5e5e5] mb-8">
-                        Your experience has been submitted successfully, and was sent to an admin for review. It will help fellow McMaster Engineering students prepare for interviews.
+            <div className="fixed inset-0 bg-white dark:bg-[#0f0f0f] flex items-center justify-center p-8 transition-colors duration-500">
+                <div className="max-w-md w-full text-center animate-fade-up">
+                    <div className="mb-8 inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/10 text-green-500">
+                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h1 className="font-playfair text-4xl font-bold text-[#222] dark:text-white mb-4">You're all set.</h1>
+                    <p className="text-[#666] dark:text-[#a0a0a0] mb-8 text-lg">
+                        Your story is recorded. Your experience has been sent for review.
                     </p>
-                    <div className="flex gap-4 justify-center">
+                    <div className="flex flex-col gap-3">
                         <button
                             onClick={() => navigate('/')}
-                            className="px-6 py-2.5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded font-medium text-sm hover:bg-maceng-maroon/90 dark:hover:bg-maceng-orange/90 transition-colors"
+                            className="w-full py-4 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-maceng-maroon/10 dark:shadow-maceng-orange/20"
                         >
-                            Back to Companies
+                            Return home
                         </button>
                         <button
-                            onClick={() => {
-                                setSuccess(false);
-                                setEmail('');
-                                setSelectedCompany(null);
-                                setCompanyQuery('');
-                                setPosition('');
-                                setTerm('');
-                                setOfferReceived(false);
-                                setDifficulty(3);
-                                setStages([]);
-                                setTips('');
-                                setInterviewAcquisition('');
-                            }}
-                            className="px-6 py-2.5 border border-maceng-maroon dark:border-maceng-orange text-maceng-maroon dark:text-maceng-orange rounded font-medium text-sm hover:bg-maceng-maroon/5 dark:hover:bg-maceng-orange/10 transition-colors"
+                            onClick={() => window.location.reload()}
+                            className="w-full py-4 border border-[#eee] dark:border-[#333] text-[#888] rounded-xl font-bold hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a] transition-all"
                         >
-                            Submit Another
+                            Submit another
                         </button>
                     </div>
                 </div>
@@ -200,309 +200,344 @@ export default function SubmitExperiencePage() {
         );
     }
 
+    const progress = (step / totalSteps) * 100;
+
     return (
-        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-2xl mx-auto">
-            {/* Header */}
-            <header className="mb-8">
-                <Link
-                    to="/"
-                    className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange text-sm"
+        <div className="fixed inset-0 bg-white dark:bg-[#0f0f0f] flex flex-col font-inter transition-colors duration-500">
+            {/* Progress Bar */}
+            <div className="h-1.5 w-full bg-[#f0f0f0] dark:bg-[#1a1a1a]">
+                <div 
+                    className="h-full bg-maceng-maroon dark:bg-maceng-orange transition-all duration-700 ease-in-out" 
+                    style={{ width: `${progress}%` }} 
+                />
+            </div>
+
+            {/* Back Button */}
+            {step > 0 && (
+                <button 
+                    onClick={prevStep}
+                    className="absolute top-8 left-8 text-[#999] hover:text-[#333] dark:hover:text-white transition-colors flex items-center gap-2 group z-50 text-sm font-medium"
                 >
-                    ← Back to companies
-                </Link>
-
-                <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon dark:text-maceng-orange mt-6 mb-2">
-                    Submit an Experience
-                </h1>
-                <p className="text-[15px] text-[#555] dark:text-[#e5e5e5]">
-                    Share your interview experience to help fellow McMaster Engineering students.
-                </p>
-            </header>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Email */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        McMaster Email <span className="text-maceng-orange">*</span>
-                    </label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="yourname@mcmaster.ca"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                        required
-                    />
-                    <p className="text-xs text-[#888] dark:text-[#a0a0a0] mt-1">Must be a @mcmaster.ca email address. Don't worry, this is only to verify you're a student and prevent spam. Your identity remains anonymous. </p>
-                </div>
-
-                {/* Company Search */}
-                <div className="relative" ref={suggestionsRef}>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Company <span className="text-maceng-orange">*</span>
-                    </label>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            value={companyQuery}
-                            onChange={(e) => {
-                                setCompanyQuery(e.target.value);
-                                if (selectedCompany) setSelectedCompany(null);
-                            }}
-                            placeholder="Search for a company..."
-                            className={`flex-1 py-2 px-3 text-sm border rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange ${selectedCompany ? 'border-green-500 bg-green-50 dark:bg-green-950/20 dark:border-green-800' : 'border-[#ccc] dark:border-[#444]'
-                                }`}
-                        />
-                        {selectedCompany && (
-                            <button
-                                type="button"
-                                onClick={handleCompanyClear}
-                                className="px-3 text-sm text-[#888] hover:text-[#333] transition-colors"
-                            >
-                                ✕
-                            </button>
-                        )}
-                    </div>
-                    {showSuggestions && (companySuggestions.length > 0 || (companyQuery.trim() && !selectedCompany)) && (
-                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-[#111111] border border-[#ccc] dark:border-[#444] rounded shadow-lg max-h-64 overflow-y-auto">
-                            {companySuggestions.map((company) => (
-                                <button
-                                    key={company.id}
-                                    type="button"
-                                    onClick={() => handleCompanySelect(company)}
-                                    className="w-full text-left px-3 py-2 text-sm hover:bg-[#fafafa] dark:hover:bg-[#222] transition-colors border-b border-[#f0f0f0] dark:border-[#444] last:border-b-0"
-                                >
-                                    <span className="font-medium text-[#333] dark:text-white">{company.name}</span>
-                                    {company.industries.length > 0 && (
-                                        <span className="text-[#888] dark:text-[#a0a0a0] ml-2 text-xs">
-                                            {company.industries.join(', ')}
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
-                            {companyQuery.trim() && !selectedCompany && !companySuggestions.some(c => c.name.toLowerCase() === companyQuery.toLowerCase().trim()) && (
-                                <button
-                                    type="button"
-                                    onClick={() => setShowSuggestions(false)}
-                                    className="w-full text-left px-3 py-3 text-sm hover:bg-maceng-orange/5 transition-colors border-t border-[#f0f0f0] dark:border-[#444] flex items-center justify-between"
-                                >
-                                    <div>
-                                        <span className="text-[#333] dark:text-white">Use </span>
-                                        <span className="font-bold text-maceng-orange">"{companyQuery}"</span>
-                                        <span className="text-[#333] dark:text-white"> as a new company</span>
-                                    </div>
-                                    <span className="text-[10px] bg-maceng-orange/10 text-maceng-orange px-2 py-0.5 rounded font-bold uppercase tracking-wider">New</span>
-                                </button>
-                            )}
-                        </div>
-                    )}
-                    {/* Company request trigger */}
-                    {!selectedCompany && (
-                        <div className="mt-2">
-                            <button
-                                type="button"
-                                onClick={() => setShowRequestModal(true)}
-                                className="text-xs text-maceng-orange hover:text-maceng-maroon transition-colors"
-                            >
-                                Can't find your company? Request it →
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Position */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Position <span className="text-maceng-orange">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        value={position}
-                        onChange={(e) => setPosition(e.target.value)}
-                        placeholder="e.g. Software Engineering Intern"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                        required
-                    />
-                </div>
-
-                {/* Interview Acquisition */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        How did you get the interview?
-                    </label>
-                    <input
-                        type="text"
-                        value={interviewAcquisition}
-                        onChange={(e) => setInterviewAcquisition(e.target.value)}
-                        placeholder="e.g. Career Fair, LinkedIn, Cold Apply, Referral"
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                    />
-                    <p className="text-xs text-[#888] dark:text-[#a0a0a0] mt-1">Optional. Helps others understand the application process.</p>
-                </div>
-
-                {/* Term */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Term <span className="text-maceng-orange">*</span>
-                    </label>
-                    <select
-                        value={term}
-                        onChange={(e) => setTerm(e.target.value)}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                        required
-                    >
-                        <option value="">Select a term...</option>
-                        {TERM_OPTIONS.map((t) => (
-                            <option key={t} value={t}>{t}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Offer Received */}
-                <div className="flex items-center gap-3">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={offerReceived}
-                            onChange={(e) => setOfferReceived(e.target.checked)}
-                            className="sr-only peer"
-                        />
-                        <div className="w-9 h-5 bg-[#ddd] dark:bg-[#333] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-maceng-maroon dark:peer-checked:bg-maceng-orange"></div>
-                    </label>
-                    <span className="text-sm text-[#333] dark:text-white">Received an offer</span>
-                </div>
-
-                {/* Difficulty */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Interview Difficulty
-                    </label>
-                    <div className="flex gap-2 items-center">
-                        {[1, 2, 3, 4, 5].map((level) => (
-                            <button
-                                key={level}
-                                type="button"
-                                onClick={() => setDifficulty(level)}
-                                className={`w-10 h-10 rounded-full text-sm font-medium transition-all ${difficulty === level
-                                    ? 'bg-maceng-maroon dark:bg-maceng-orange text-white shadow-md'
-                                    : 'bg-[#f0f0f0] dark:bg-[#333] text-[#555] dark:text-[#e5e5e5] hover:bg-[#e0e0e0] dark:hover:bg-[#444]'
-                                    }`}
-                            >
-                                {level}
-                            </button>
-                        ))}
-                        <span className="text-xs text-[#888] dark:text-[#a0a0a0] ml-2">
-                            {difficulty <= 2 ? 'Easy' : difficulty === 3 ? 'Medium' : 'Hard'}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Interview Stages */}
-                <div>
-                    <div className="flex justify-between items-center mb-3">
-                        <label className="block text-sm font-medium text-[#333] dark:text-white">
-                            Interview Stages
-                        </label>
-                        <button
-                            type="button"
-                            onClick={addStage}
-                            className="text-sm text-maceng-orange hover:text-maceng-maroon dark:hover:text-maceng-orange/80 transition-colors font-medium"
-                        >
-                            + Add Stage
-                        </button>
-                    </div>
-                    {stages.length === 0 && (
-                        <p className="text-xs text-[#888] dark:text-[#a0a0a0] italic">
-                            No stages added yet. Click "Add Stage" to document each interview round.
-                        </p>
-                    )}
-                    <div className="space-y-4">
-                        {stages.map((stage, index) => (
-                            <div key={index} className="border border-[#e5e5e5] dark:border-[#444] rounded p-4 bg-[#fafafa] dark:bg-[#111111]">
-                                <div className="flex justify-between items-center mb-3">
-                                    <span className="text-xs font-medium text-maceng-maroon dark:text-maceng-orange uppercase tracking-wide">
-                                        Stage {index + 1}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeStage(index)}
-                                        className="text-xs text-[#888] dark:text-[#a0a0a0] hover:text-red-500 transition-colors"
-                                    >
-                                        Remove
-                                    </button>
-                                </div>
-                                <div className="grid grid-cols-2 gap-3 mb-3">
-                                    <input
-                                        type="text"
-                                        value={stage.name}
-                                        onChange={(e) => updateStage(index, 'name', e.target.value)}
-                                        placeholder="Stage name (e.g. Technical Interview)"
-                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                                    />
-                                    <input
-                                        type="text"
-                                        value={stage.duration || ''}
-                                        onChange={(e) => updateStage(index, 'duration', e.target.value)}
-                                        placeholder="Duration (e.g. 45 min)"
-                                        className="py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange"
-                                    />
-                                </div>
-                                <textarea
-                                    value={stage.questions.join('\n')}
-                                    onChange={(e) => updateStage(index, 'questions', e.target.value.split('\n').filter(q => q.trim()))}
-                                    placeholder="Questions asked"
-                                    rows={2}
-                                    className="w-full py-1.5 px-2.5 text-sm border border-[#ddd] dark:border-[#444] rounded font-inter bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange min-h-[80px]"
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Tips */}
-                <div>
-                    <label className="block text-sm font-medium text-[#333] dark:text-white mb-1.5">
-                        Tips & Advice
-                    </label>
-                    <textarea
-                        value={tips}
-                        onChange={(e) => setTips(e.target.value)}
-                        placeholder="Any advice for future candidates? (optional)"
-                        rows={3}
-                        className="w-full py-2 px-3 text-sm border border-[#ccc] dark:border-[#444] rounded font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:border-maceng-maroon dark:focus:border-maceng-orange min-h-[100px]"
-                    />
-                </div>
-
-                {/* Error */}
-                {error && (
-                    <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-4 py-3">
-                        {error}
-                    </div>
-                )}
-
-                {/* Submit */}
-                <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-3 bg-maceng-maroon text-white rounded font-medium text-sm hover:bg-maceng-maroon/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {submitting ? 'Submitting...' : 'Submit Experience'}
+                    <span className="group-hover:-translate-x-1 transition-transform">←</span> Back
                 </button>
-            </form>
+            )}
 
-            {/* Request Modal */}
+            {/* Exit Button */}
+            <button 
+                onClick={() => navigate('/')}
+                className="absolute top-8 right-8 text-[#999] hover:text-[#333] dark:hover:text-white transition-colors z-50 flex items-center gap-2 group text-sm font-medium"
+            >
+                Exit <span className="bg-[#eee] dark:bg-[#222] w-6 h-6 flex items-center justify-center rounded-md group-hover:bg-red-500/10 group-hover:text-red-500 transition-all">✕</span>
+            </button>
+
+            {/* Main Content Area */}
+            <div className="flex-grow flex items-center justify-center p-6 md:p-12 overflow-y-auto">
+                <div className="max-w-2xl w-full">
+                    
+                    {/* Step 0: Welcome */}
+                    {step === 0 && (
+                        <div className="animate-fade-up text-center space-y-8">
+                            <h1 className="font-playfair text-5xl md:text-6xl font-bold text-[#222] dark:text-white leading-tight">
+                                You survived it. Now <span className="text-maceng-maroon dark:text-maceng-orange">own your experience</span>.
+                            </h1>
+                            <p className="text-xl text-[#666] dark:text-[#a0a0a0] max-w-lg mx-auto">
+                                You've navigated the process. Now, tell your side of it.
+                            </p>
+                            <div className="flex flex-col items-center gap-6">
+                                <button 
+                                    onClick={nextStep}
+                                    className="px-10 py-5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-2xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-maceng-maroon/20 dark:shadow-maceng-orange/30"
+                                >
+                                    Get Started
+                                </button>
+                                <button
+                                    onClick={() => navigate('/')}
+                                    className="text-sm font-medium text-[#999] hover:text-maceng-maroon dark:hover:text-maceng-orange transition-colors"
+                                >
+                                    Maybe later, take me back
+                                </button>
+                            </div>
+                            <p className="text-xs text-[#999] dark:text-[#555]">takes ~2 mins • press ⌘+Enter to skip</p>
+                        </div>
+                    )}
+
+                    {/* Step 1: Company & Role */}
+                    {step === 1 && (
+                        <div className="animate-fade-up space-y-12">
+                            <div className="space-y-4">
+                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-maceng-maroon dark:text-maceng-orange">01. THE BASICS</h2>
+                                <h3 className="font-playfair text-4xl font-bold dark:text-white">Where did you interview?</h3>
+                            </div>
+
+                            <div className="space-y-10" ref={suggestionsRef}>
+                                <div className="space-y-3">
+                                    <label className="text-xs font-bold text-[#999] uppercase tracking-widest">Company Name</label>
+                                    <div className="relative">
+                                        <input 
+                                            autoFocus
+                                            type="text" 
+                                            value={companyQuery}
+                                            onChange={(e) => {
+                                                setCompanyQuery(e.target.value);
+                                                if (selectedCompany) setSelectedCompany(null);
+                                            }}
+                                            className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-4 text-3xl font-playfair outline-none transition-colors dark:text-white placeholder:text-[#ccc] dark:placeholder:text-[#333]"
+                                            placeholder="Type company name..."
+                                        />
+                                        {showSuggestions && companySuggestions.length > 0 && (
+                                            <div className="absolute top-full left-0 w-full bg-white dark:bg-[#1a1a1a] border border-[#eee] dark:border-[#333] rounded-xl shadow-2xl mt-2 overflow-hidden z-20">
+                                                {companySuggestions.map(c => (
+                                                    <button 
+                                                        key={c.id}
+                                                        onClick={() => handleCompanySelect(c)}
+                                                        className="w-full text-left px-6 py-4 hover:bg-[#fafafa] dark:hover:bg-[#252525] transition-colors border-b border-[#eee] dark:border-[#333] last:border-0 dark:text-white font-medium"
+                                                    >
+                                                        {c.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-[#999] uppercase tracking-widest">Position Title</label>
+                                        <input 
+                                            type="text" 
+                                            value={position}
+                                            onChange={(e) => setPosition(e.target.value)}
+                                            className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-2 text-xl outline-none transition-colors dark:text-white"
+                                            placeholder="e.g. Software Intern"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-[#999] uppercase tracking-widest">Work Term</label>
+                                        <select 
+                                            value={term}
+                                            onChange={(e) => setTerm(e.target.value)}
+                                            className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-2 text-xl outline-none transition-colors dark:text-white appearance-none cursor-pointer"
+                                        >
+                                            <option value="">Select term...</option>
+                                            {TERM_OPTIONS.map(t => <option key={t} value={t} className="bg-white dark:bg-[#1a1a1a]">{t}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={nextStep}
+                                className="px-8 py-4 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-xl font-bold hover:scale-[1.02] transition-all"
+                            >
+                                Continue
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Step 2: Difficulty & Context */}
+                    {step === 2 && (
+                        <div className="animate-fade-up space-y-12">
+                            <div className="space-y-4">
+                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-maceng-maroon dark:text-maceng-orange">02. THE VIBE</h2>
+                                <h3 className="font-playfair text-4xl font-bold dark:text-white">How was the experience?</h3>
+                            </div>
+
+                            <div className="space-y-16">
+                                <div className="space-y-6">
+                                    <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">Overall Difficulty</label>
+                                    <div className="flex gap-4">
+                                        {[1, 2, 3, 4, 5].map((level) => (
+                                            <button
+                                                key={level}
+                                                onClick={() => setDifficulty(level)}
+                                                className={`w-16 h-16 rounded-2xl text-2xl font-bold transition-all border-2 ${difficulty === level
+                                                    ? 'bg-maceng-maroon dark:bg-maceng-orange border-transparent text-white scale-110 shadow-lg'
+                                                    : 'bg-transparent border-[#eee] dark:border-[#333] text-[#999] hover:border-maceng-maroon dark:hover:border-maceng-orange'
+                                                }`}
+                                            >
+                                                {level}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="text-maceng-maroon dark:text-maceng-orange font-bold uppercase tracking-[0.1em] text-sm">
+                                        {difficulty <= 2 ? 'Quite Chill' : difficulty === 3 ? 'Medium Challenge' : 'Very Intense'}
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                    <div className="space-y-4">
+                                        <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">Did you get the offer?</label>
+                                        <button 
+                                            onClick={() => setOfferReceived(!offerReceived)}
+                                            className={`w-full py-4 rounded-xl border-2 font-bold transition-all ${offerReceived 
+                                                ? 'bg-green-500/10 border-green-500 text-green-500' 
+                                                : 'border-[#eee] dark:border-[#333] text-[#999]'}`}
+                                        >
+                                            {offerReceived ? 'Yes, Secured!' : 'No / Pending'}
+                                        </button>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">How did you get it?</label>
+                                        <input 
+                                            type="text" 
+                                            value={interviewAcquisition}
+                                            onChange={(e) => setInterviewAcquisition(e.target.value)}
+                                            className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-2 text-xl outline-none transition-colors dark:text-white"
+                                            placeholder="Referral, OscarPlus, etc."
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={nextStep}
+                                className="px-8 py-4 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-xl font-bold hover:scale-[1.02] transition-all"
+                            >
+                                Continue
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Step 3: Interview Rounds */}
+                    {step === 3 && (
+                        <div className="animate-fade-up space-y-8 w-full max-w-3xl">
+                            <div className="space-y-4">
+                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-maceng-maroon dark:text-maceng-orange">03. THE PROCESS</h2>
+                                <h3 className="font-playfair text-4xl font-bold dark:text-white">Break down the rounds.</h3>
+                                <p className="text-[#666] dark:text-[#888]">Describe what happened in each interview stage.</p>
+                            </div>
+
+                            <div className="space-y-6">
+                                {stages.map((stage, idx) => (
+                                    <div key={idx} className="bg-[#fafafa] dark:bg-[#1a1a1a] rounded-2xl p-6 border border-[#eee] dark:border-[#333] space-y-6 relative group">
+                                        <button 
+                                            onClick={() => removeStage(idx)}
+                                            className="absolute top-4 right-4 text-xs font-bold text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            Remove
+                                        </button>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-[#999] uppercase tracking-widest">Stage Name</label>
+                                                <input 
+                                                    type="text"
+                                                    value={stage.name}
+                                                    onChange={(e) => updateStage(idx, 'name', e.target.value)}
+                                                    className="w-full bg-white dark:bg-[#0f0f0f] border border-[#eee] dark:border-[#333] rounded-lg p-3 text-sm focus:border-maceng-orange outline-none dark:text-white"
+                                                    placeholder="e.g. Technical Interview"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-[#999] uppercase tracking-widest">Duration</label>
+                                                <input 
+                                                    type="text"
+                                                    value={stage.duration || ''}
+                                                    onChange={(e) => updateStage(idx, 'duration', e.target.value)}
+                                                    className="w-full bg-white dark:bg-[#0f0f0f] border border-[#eee] dark:border-[#333] rounded-lg p-3 text-sm focus:border-maceng-orange outline-none dark:text-white"
+                                                    placeholder="e.g. 1 hour"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-[#999] uppercase tracking-widest">What happened?</label>
+                                            <textarea 
+                                                value={stage.questions.join('\n')}
+                                                onChange={(e) => updateStage(idx, 'questions', e.target.value.split('\n'))}
+                                                className="w-full bg-white dark:bg-[#0f0f0f] border border-[#eee] dark:border-[#333] rounded-lg p-4 text-sm focus:border-maceng-orange outline-none dark:text-white min-h-[100px]"
+                                                placeholder="Format, questions asked, difficulty..."
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <button 
+                                    onClick={addStage}
+                                    className="w-full py-6 border-2 border-dashed border-[#eee] dark:border-[#333] rounded-2xl text-sm font-bold text-[#999] hover:border-maceng-orange hover:text-maceng-orange transition-all"
+                                >
+                                    + Add Interview Round
+                                </button>
+                            </div>
+
+                            <button 
+                                onClick={nextStep}
+                                className="px-8 py-4 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-xl font-bold hover:scale-[1.02] transition-all"
+                            >
+                                Continue
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Step 4: Advice & Email */}
+                    {step === 4 && (
+                        <form onSubmit={handleSubmit} className="animate-fade-up space-y-12">
+                            <div className="space-y-4">
+                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-maceng-maroon dark:text-maceng-orange">04. FINAL DETAILS</h2>
+                                <h3 className="font-playfair text-4xl font-bold dark:text-white">Almost done.</h3>
+                            </div>
+
+                            <div className="space-y-10">
+                                <div className="space-y-4">
+                                    <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">Final Advice (Optional)</label>
+                                    <textarea 
+                                        value={tips}
+                                        onChange={(e) => setTips(e.target.value)}
+                                        className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-4 text-2xl outline-none transition-colors dark:text-white min-h-[150px]"
+                                        placeholder="What should others know?"
+                                    />
+                                </div>
+
+                                <div className="space-y-4">
+                                    <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">Verify you're a McMaster student (private)</label>
+                                    <input 
+                                        type="email" 
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full bg-transparent border-b-2 border-[#eee] dark:border-[#333] focus:border-maceng-maroon dark:focus:border-maceng-orange py-4 text-3xl font-playfair outline-none transition-colors dark:text-white"
+                                        placeholder="yourname@mcmaster.ca"
+                                        required
+                                    />
+                                    <p className="text-[11px] text-[#888] flex items-center gap-2 uppercase tracking-widest font-bold">
+                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                        Your identity stays anonymous.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {error && (
+                                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm font-medium animate-shake">
+                                    {error}
+                                </div>
+                            )}
+
+                            <button 
+                                type="submit"
+                                disabled={submitting}
+                                className="w-full py-6 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-2xl font-bold text-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-maceng-maroon/20 dark:shadow-maceng-orange/40 disabled:opacity-50"
+                            >
+                                {submitting ? 'Submitting...' : 'Complete Submission →'}
+                            </button>
+                        </form>
+                    )}
+
+                    {/* Step Error Notice (Floating) */}
+                    {error && step < 4 && (
+                        <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm font-medium animate-shake text-center">
+                            {error}
+                        </div>
+                    )}
+
+                </div>
+            </div>
+
+            {/* Footer Navigation Tip */}
+            <div className="absolute bottom-8 left-0 w-full flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold text-[#ccc] dark:text-[#333] pointer-events-none">
+                Step {step} of {totalSteps} — McMaster Engineering Interview Database
+            </div>
+
             <CompanyRequestModal
                 isOpen={showRequestModal}
                 onClose={() => setShowRequestModal(false)}
             />
-
-            {/* Footer */}
-            <footer className="mt-16 pt-8 border-t border-[#e5e5e5] dark:border-[#444] text-[13px] text-[#666] dark:text-[#d4d4d4]">
-                <p>
-                    © {new Date().getFullYear()} MacEngDB · Built by McMaster Engineering students
-                </p>
-            </footer>
         </div>
     );
 }
