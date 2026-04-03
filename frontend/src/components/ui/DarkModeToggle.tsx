@@ -4,7 +4,7 @@ export default function DarkModeToggle() {
     const { isDark, toggleDarkMode } = useDarkMode();
 
     return (
-        <div className="fixed top-6 right-6 z-[200]">
+        <div className="fixed bottom-6 right-6 z-[200]">
             <button
                 onClick={toggleDarkMode}
                 className="p-3 rounded-full bg-white dark:bg-[#111111] shadow-lg border border-[#ddd] dark:border-[#444] hover:bg-gray-50 dark:hover:bg-[#222] transition-all duration-200 group"

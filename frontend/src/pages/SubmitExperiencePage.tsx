@@ -222,7 +222,7 @@ export default function SubmitExperiencePage() {
                 </button>
             )}
 
-            {/* Close/Exit */}
+            {/* Exit Button */}
             <button 
                 onClick={() => navigate('/')}
                 className="absolute top-8 right-8 text-[#999] hover:text-[#333] dark:hover:text-white transition-colors z-50 flex items-center gap-2 group text-sm font-medium"
