@@ -56,6 +56,16 @@ async def get_pending_experiences(
     return crud.get_pending_experiences(db)
 
 
+@router.get("/admin/experiences/all", response_model=List[ExperienceResponse])
+async def get_all_experiences_admin(
+    db: Session = Depends(get_db), _admin_key: str = Depends(verify_admin_key)
+):
+    """Get all experiences (for admin data management)."""
+    # Using existing crud.get_all_experiences but without the 'approved' filter if needed.
+    # Actually, let's create a specific one or use existing one if it returns all.
+    return crud.get_all_admin_experiences(db)
+
+
 @router.patch(
     "/admin/experiences/{experience_id}/approve", response_model=ExperienceResponse
 )

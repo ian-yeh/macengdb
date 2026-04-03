@@ -20,6 +20,7 @@ def get_all_reviews(db: Session):
     """Get all reviews (for admin)."""
     return (
         db.query(DesignTeamReviewModel)
+        .options(joinedload(DesignTeamReviewModel.design_team))
         .order_by(DesignTeamReviewModel.created_at.desc())
         .all()
     )

@@ -58,6 +58,16 @@ def get_pending_experiences(db: Session) -> List[ExperienceModel]:
     )
 
 
+def get_all_admin_experiences(db: Session) -> List[ExperienceModel]:
+    """Get all experiences for admin data management"""
+    return (
+        db.query(ExperienceModel)
+        .options(joinedload(ExperienceModel.company))
+        .order_by(ExperienceModel.created_at.desc())
+        .all()
+    )
+
+
 def update_experience_status(
     db: Session, experience_id: int, status: str
 ) -> Optional[ExperienceModel]:

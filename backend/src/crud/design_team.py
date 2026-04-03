@@ -76,3 +76,14 @@ def create_design_team(db: Session, team: DesignTeamCreate):
     db_team.review_count = 0
     db_team.avg_difficulty = None
     return db_team
+
+
+def delete_design_team(db: Session, team_id: int) -> bool:
+    """Delete a design team"""
+    db_team = db.query(DesignTeamModel).filter(DesignTeamModel.id == team_id).first()
+    if not db_team:
+        return False
+
+    db.delete(db_team)
+    db.commit()
+    return True

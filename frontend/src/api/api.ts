@@ -119,6 +119,24 @@ export async function deleteExperience(id: number, adminKey: string): Promise<vo
   if (!response.ok) throw new Error('Failed to delete experience');
 }
 
+export async function deleteCompany(id: number, adminKey: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/admin/companies/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to delete company');
+}
+
+export async function fetchAllExperiences(adminKey: string): Promise<Experience[]> {
+  const response = await fetch(`${API_BASE_URL}/admin/experiences/all`, {
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to fetch all experiences');
+  return response.json();
+}
+
 // Company Request API functions
 
 export async function submitCompanyRequest(name: string, email?: string): Promise<CompanyRequest> {
@@ -259,6 +277,24 @@ export async function deleteDesignTeamReview(id: number, adminKey: string): Prom
   });
 
   if (!response.ok) throw new Error('Failed to delete design team review');
+}
+
+export async function deleteDesignTeam(id: number, adminKey: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-teams/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to delete design team');
+}
+
+export async function fetchAllDesignTeamReviews(adminKey: string): Promise<DesignTeamReview[]> {
+  const response = await fetch(`${API_BASE_URL}/admin/design-team-reviews/all`, {
+    headers: { 'X-Admin-Key': adminKey },
+  });
+
+  if (!response.ok) throw new Error('Failed to fetch all design team reviews');
+  return response.json();
 }
 
 // Admin - Manual Company Creation
