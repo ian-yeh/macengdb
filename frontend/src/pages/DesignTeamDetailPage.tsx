@@ -241,7 +241,7 @@ export default function DesignTeamDetailPage() {
                             }}
                             className="px-3 py-1.5 md:px-4 md:py-2 bg-maceng-maroon text-white text-xs md:text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors cursor-pointer"
                         >
-                            + Share Application Experience
+                            + Share your design team experience
                         </button>
                     )}
                 </div>
@@ -249,7 +249,7 @@ export default function DesignTeamDetailPage() {
                 {/* Submission Form */}
                 {showForm && (
                     <div className="mb-10 p-4 md:p-6 bg-[#fafafa] dark:bg-[#111111] border border-[#eee] dark:border-[#444] rounded-xl animate-fade-in">
-                        <h3 className="font-playfair text-lg text-maceng-maroon dark:text-maceng-orange mb-1">Share Your Application Experience</h3>
+                        <h3 className="font-playfair text-lg text-maceng-maroon dark:text-maceng-orange mb-1">Share Your Design Team Experience</h3>
                         <p className="text-xs text-[#888] dark:text-[#999999] mb-5">Help others prepare to apply. Your submission will be reviewed before publishing.</p>
 
                         {submitStatus === 'success' ? (
@@ -261,7 +261,7 @@ export default function DesignTeamDetailPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
-                                            McMaster Email *
+                                            Verify you're a McMaster student (private) *
                                         </label>
                                         <input
                                             type="email"
@@ -383,7 +383,7 @@ export default function DesignTeamDetailPage() {
                                         disabled={submitStatus === 'submitting' || formData.difficulty === 0 || !formData.position || !formData.term || !formData.submitter_email}
                                         className="px-5 py-2 bg-maceng-maroon dark:bg-maceng-orange text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 dark:hover:bg-maceng-orange/90 transition-colors disabled:opacity-50 cursor-pointer"
                                     >
-                                        {submitStatus === 'submitting' ? 'Submitting...' : 'Submit Experience'}
+                                        {submitStatus === 'submitting' ? 'Submitting...' : 'Submit Design Team Experience'}
                                     </button>
                                 </div>
                             </form>

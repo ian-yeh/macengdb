@@ -54,17 +54,12 @@ export default function Header({
 
     return (
         <header className="mb-16 pt-8">
-            {/* Info Badge */}
-            <div className="flex items-center gap-2 mb-8 animate-fade-up" style={{ animationDelay: '0ms' }}>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-maceng-maroon/10 dark:bg-maceng-orange/10 border border-maceng-maroon/20 dark:border-maceng-orange/20">
-                    <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-maceng-maroon dark:bg-maceng-orange opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-maceng-maroon dark:bg-maceng-orange"></span>
-                    </span>
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-maceng-maroon dark:text-maceng-orange">
-                        Live • McMaster Only
-                    </span>
-                </div>
+            {/* Subtle Info Indicator */}
+            <div className="flex items-center gap-2.5 mb-8 animate-fade-up opacity-60 hover:opacity-100 transition-opacity" style={{ animationDelay: '0ms' }}>
+                <span className="flex h-1.5 w-1.5 rounded-full bg-maceng-maroon dark:bg-maceng-orange"></span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#666] dark:text-[#999]">
+                    McMaster Engineering • Community Driven
+                </span>
             </div>
 
             {/* High Impact Headline */}
@@ -119,7 +114,7 @@ export default function Header({
                         to={activeTab === 'companies' ? "/submit" : "/submit-design-team"}
                         className="px-6 py-2.5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-lg font-bold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md shadow-maceng-maroon/20 dark:shadow-maceng-orange/20"
                     >
-                        + Share your experience
+                        + Share your {activeTab === 'companies' ? 'company' : 'design team'} experience
                     </Link>
                     <button
                         onClick={() => {

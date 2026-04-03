@@ -94,7 +94,7 @@ export default function CompanyPage() {
                             onClick={() => posthog.capture('submit_experience_from_empty_clicked', { company_name: company.name })}
                             className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange"
                         >
-                            submit an experience
+                            submit a company experience
                         </Link>.
                     </p>
                 ) : (

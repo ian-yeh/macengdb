@@ -5,7 +5,7 @@ import LandingPage from './pages/LandingPage';
 import CompanyPage from './pages/CompanyPage';
 import SubmitExperiencePage from './pages/SubmitExperiencePage';
 import SubmitDesignTeamExperiencePage from './pages/SubmitDesignTeamExperiencePage';
-import AdminPage from './pages/AdminPage';
+import AdminPage from './admin/AdminPage';
 import DesignTeamDetailPage from './pages/DesignTeamDetailPage';
 import './App.css';
 
