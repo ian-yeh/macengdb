@@ -79,8 +79,14 @@ export default function SubmitExperiencePage() {
     // Keyboard support
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Enter' && e.metaKey && step < totalSteps) {
-                nextStep();
+            if (e.key === 'Enter' && e.metaKey) {
+                if (step < totalSteps) {
+                    nextStep();
+                } else if (step === totalSteps) {
+                    // Trigger form submission
+                    const form = document.querySelector('form');
+                    if (form) form.requestSubmit();
+                }
             }
         };
         window.addEventListener('keydown', handleKeyDown);

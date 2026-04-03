@@ -71,7 +71,7 @@ export default function CompanyExperiencesTab({
                             <div>
                                 <h3 className="text-xl font-bold dark:text-white">{exp.position}</h3>
                                 <p className="text-sm text-maceng-maroon dark:text-maceng-orange font-bold uppercase tracking-widest">
-                                    {exp.new_company_name || `Company ID: ${exp.company_id}`} · {exp.term}
+                                    {exp.new_company_name || exp.company_name || `Company ID: ${exp.company_id}`} · {exp.term}
                                 </p>
                             </div>
                             <div className="flex gap-2">

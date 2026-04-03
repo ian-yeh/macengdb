@@ -71,7 +71,7 @@ export default function DesignTeamExperiencesTab({
                             <div>
                                 <h3 className="text-xl font-bold dark:text-white">{review.position}</h3>
                                 <p className="text-sm text-maceng-maroon dark:text-maceng-orange font-bold uppercase tracking-widest">
-                                    Team ID: {review.design_team_id} · {review.term}
+                                    {review.design_team_name || `Team ID: ${review.design_team_id}`} · {review.term}
                                 </p>
                             </div>
                             <div className="flex gap-2">

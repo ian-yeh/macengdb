@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from src.models.design_team_review import DesignTeamReviewModel
 from src.schemas.design_team_review import DesignTeamReviewSubmit
 from typing import List, Optional
@@ -29,6 +29,7 @@ def get_pending_reviews(db: Session) -> List[DesignTeamReviewModel]:
     """Get all pending design team reviews."""
     return (
         db.query(DesignTeamReviewModel)
+        .options(joinedload(DesignTeamReviewModel.design_team))
         .filter(DesignTeamReviewModel.status == "pending")
         .order_by(DesignTeamReviewModel.created_at.desc())
         .all()

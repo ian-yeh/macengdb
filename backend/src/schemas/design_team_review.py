@@ -23,6 +23,7 @@ class DesignTeamReviewBase(BaseModel):
 class DesignTeamReviewResponse(DesignTeamReviewBase):
     id: int
     design_team_id: int
+    design_team_name: Optional[str] = None
     submitter_email: str
     status: str = "pending"
     created_at: datetime
