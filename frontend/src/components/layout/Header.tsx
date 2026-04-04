@@ -63,8 +63,8 @@ export default function Header({
             </div>
 
             {/* High Impact Headline */}
-            <div className="mb-12 animate-fade-up" style={{ animationDelay: '100ms' }}>
-                <h1 className="font-playfair text-5xl md:text-6xl font-bold text-[#222] dark:text-white leading-[1.1] mb-6">
+            <div className="mb-8 md:mb-12 animate-fade-up" style={{ animationDelay: '100ms' }}>
+                <h1 className="font-playfair text-4xl md:text-6xl font-bold text-[#222] dark:text-white leading-[1.1] mb-4 md:mb-6">
                     Know before <br />
                     you <span className="text-maceng-maroon dark:text-maceng-orange italic">{accentText}</span>
                 </h1>
@@ -78,30 +78,30 @@ export default function Header({
             </div>
 
             {/* Platform Stats - Refined Full Width Section */}
-            <div className="relative -mx-4 md:-mx-8 my-12 border-y border-[#eee] dark:border-[#222] animate-fade-up" style={{ animationDelay: '200ms' }}>
+            <div className="relative -mx-4 md:-mx-8 my-8 md:my-12 border-y border-[#eee] dark:border-[#222] animate-fade-up" style={{ animationDelay: '200ms' }}>
                 <div className="grid grid-cols-3 divide-x divide-[#eee] dark:divide-[#222]">
-                    <div className="py-10 flex flex-col items-center justify-center text-center">
-                        <div className="text-4xl md:text-5xl font-bold text-maceng-maroon dark:text-maceng-orange mb-2 tracking-tight">
+                    <div className="py-6 md:py-10 flex flex-col items-center justify-center text-center">
+                        <div className="text-2xl md:text-5xl font-bold text-maceng-maroon dark:text-maceng-orange mb-1 md:mb-2 tracking-tight">
                             <AnimatedNumber value={experienceCount} />
                         </div>
-                        <div className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.15em] text-[#888] dark:text-[#666]">
-                            Experiences Shared
+                        <div className="text-[8px] md:text-[12px] font-bold uppercase tracking-[0.1em] md:tracking-[0.15em] text-[#888] dark:text-[#666] px-1">
+                            Experiences
                         </div>
                     </div>
-                    <div className="py-10 flex flex-col items-center justify-center text-center">
-                        <div className="text-4xl md:text-5xl font-bold text-maceng-maroon dark:text-maceng-orange mb-2 tracking-tight">
+                    <div className="py-6 md:py-10 flex flex-col items-center justify-center text-center">
+                        <div className="text-2xl md:text-5xl font-bold text-maceng-maroon dark:text-maceng-orange mb-1 md:mb-2 tracking-tight">
                             <AnimatedNumber value={companyCount} />
                         </div>
-                        <div className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.15em] text-[#888] dark:text-[#666]">
-                            Companies Listed
+                        <div className="text-[8px] md:text-[12px] font-bold uppercase tracking-[0.1em] md:tracking-[0.15em] text-[#888] dark:text-[#666] px-1">
+                            Companies
                         </div>
                     </div>
-                    <div className="py-10 flex flex-col items-center justify-center text-center">
-                        <div className="text-4xl md:text-5xl font-bold text-maceng-maroon dark:text-maceng-orange mb-2 tracking-tight">
+                    <div className="py-6 md:py-10 flex flex-col items-center justify-center text-center">
+                        <div className="text-2xl md:text-5xl font-bold text-maceng-maroon dark:text-maceng-orange mb-1 md:mb-2 tracking-tight">
                             <AnimatedNumber value={designTeamCount} />
                         </div>
-                        <div className="text-[11px] md:text-[12px] font-bold uppercase tracking-[0.15em] text-[#888] dark:text-[#666]">
-                            Design Teams Active
+                        <div className="text-[8px] md:text-[12px] font-bold uppercase tracking-[0.1em] md:tracking-[0.15em] text-[#888] dark:text-[#666] px-1">
+                            Design Teams
                         </div>
                     </div>
                 </div>
@@ -109,10 +109,10 @@ export default function Header({
 
             {/* CTAs & Tab Nav */}
             <div className="space-y-12 animate-fade-up" style={{ animationDelay: '300ms' }}>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                     <Link
                         to={activeTab === 'companies' ? "/submit" : "/submit-design-team"}
-                        className="px-6 py-2.5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-lg font-bold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md shadow-maceng-maroon/20 dark:shadow-maceng-orange/20"
+                        className="w-full sm:w-auto px-6 py-3.5 md:py-2.5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-lg font-bold text-sm text-center hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md shadow-maceng-maroon/20 dark:shadow-maceng-orange/20"
                     >
                         + Share your {activeTab === 'companies' ? 'company' : 'design team'} experience
                     </Link>
@@ -121,7 +121,7 @@ export default function Header({
                             const el = document.getElementById('search-filters');
                             el?.scrollIntoView({ behavior: 'smooth' });
                         }}
-                        className="px-6 py-2.5 border border-maceng-maroon/30 dark:border-maceng-orange/30 text-maceng-maroon dark:text-maceng-orange rounded-lg font-bold text-sm hover:bg-maceng-maroon/5 dark:hover:bg-maceng-orange/5 transition-all"
+                        className="w-full sm:w-auto px-6 py-3.5 md:py-2.5 border border-maceng-maroon/30 dark:border-maceng-orange/30 text-maceng-maroon dark:text-maceng-orange rounded-lg font-bold text-sm hover:bg-maceng-maroon/5 dark:hover:bg-maceng-orange/5 transition-all text-center"
                     >
                         Browse all {activeTab === 'companies' ? 'companies' : 'design teams'}
                     </button>

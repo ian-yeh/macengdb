@@ -52,6 +52,14 @@ async def get_design_team(team_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Design team not found")
     return team
 
+
+@router.get(
+    "/design-teams/{team_id}/reviews", response_model=List[DesignTeamReviewResponse]
+)
+async def get_design_team_reviews(team_id: int, db: Session = Depends(get_db)):
+    team = team_crud.get_design_team(db, team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Design team not found")
     return review_crud.get_reviews_for_team(db, team_id)
 
 

@@ -226,42 +226,42 @@ export default function SubmitDesignTeamExperiencePage() {
             </button>
 
             {/* Main Content Area */}
-            <div className="flex-grow flex items-center justify-center p-6 md:p-12 overflow-y-auto">
+            <div className="flex-grow flex items-center justify-center p-6 md:p-12 pb-24 md:pb-12 overflow-y-auto">
                 <div className="max-w-2xl w-full">
                     
                     {/* Step 0: Welcome */}
                     {step === 0 && (
-                        <div className="animate-fade-up text-center space-y-8">
-                            <h1 className="font-playfair text-5xl md:text-6xl font-bold text-[#222] dark:text-white leading-tight">
+                        <div className="animate-fade-up text-center space-y-6 md:space-y-8">
+                            <h1 className="font-playfair text-4xl md:text-6xl font-bold text-[#222] dark:text-white leading-tight">
                                 You survived it. Now <span className="text-maceng-maroon dark:text-maceng-orange">own your experience</span>.
                             </h1>
-                            <p className="text-xl text-[#666] dark:text-[#a0a0a0] max-w-lg mx-auto">
-                                You went through it. Now, document exactly how it was.
+                            <p className="text-lg md:text-xl text-[#666] dark:text-[#a0a0a0] max-w-lg mx-auto">
+                                Your experience is power. Help others navigate their path by sharing your story.
                             </p>
-                            <div className="flex flex-col items-center gap-6">
+                            <div className="flex flex-col items-center gap-4 md:gap-6">
                                 <button 
                                     onClick={nextStep}
-                                    className="px-10 py-5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-2xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-maceng-maroon/20 dark:shadow-maceng-orange/30"
+                                    className="w-full sm:w-auto px-10 py-4 md:py-5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-2xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-maceng-maroon/20 dark:shadow-maceng-orange/30"
                                 >
-                                    Start Application Review
+                                    Get Started
                                 </button>
                                 <button 
                                     onClick={() => navigate('/')}
-                                    className="text-sm font-medium text-[#999] hover:text-maceng-maroon dark:hover:text-maceng-orange transition-colors"
+                                    className="text-xs md:text-sm font-medium text-[#999] hover:text-maceng-maroon dark:hover:text-maceng-orange transition-colors"
                                 >
                                     Maybe later, take me back
                                 </button>
                             </div>
-                            <p className="text-xs text-[#999] dark:text-[#555]">takes ~90 seconds • press ⌘+Enter to skip</p>
+                            <p className="text-[10px] md:text-xs text-[#999] dark:text-[#555]">takes ~90 seconds</p>
                         </div>
                     )}
 
                     {/* Step 1: Team & Position */}
                     {step === 1 && (
-                        <div className="animate-fade-up space-y-12">
-                            <div className="space-y-4">
-                                <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-maceng-maroon dark:text-maceng-orange">01. TEAM DETAILS</h2>
-                                <h3 className="font-playfair text-4xl font-bold dark:text-white">Which team did you apply for?</h3>
+                        <div className="animate-fade-up space-y-8 md:space-y-12">
+                            <div className="space-y-2 md:space-y-4">
+                                <h2 className="text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] text-maceng-maroon dark:text-maceng-orange">01. TEAM DETAILS</h2>
+                                <h3 className="font-playfair text-2xl md:text-4xl font-bold dark:text-white">Which team did you apply for?</h3>
                             </div>
 
                             <div className="space-y-10" ref={suggestionsRef}>
@@ -491,7 +491,7 @@ export default function SubmitDesignTeamExperiencePage() {
             </div>
 
             {/* Footer Navigation Tip */}
-            <div className="absolute bottom-8 left-0 w-full flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold text-[#ccc] dark:text-[#333] pointer-events-none">
+            <div className="absolute bottom-6 md:bottom-8 left-0 w-full flex justify-center text-[8px] md:text-[10px] px-4 text-center uppercase tracking-[0.2em] font-bold text-[#ccc] dark:text-[#333] pointer-events-none opacity-60">
                 Step {step} of {totalSteps} — McMaster Engineering Design Teams
             </div>
 
