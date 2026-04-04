@@ -176,7 +176,7 @@ export default function DesignTeamDetailPage() {
     const inputClass = "w-full py-2.5 px-3.5 text-sm border border-[#ddd] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 dark:focus:ring-maceng-orange/10 focus:border-maceng-maroon dark:focus:border-maceng-orange transition-all";
 
     return (
-        <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto flex flex-col">
+        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-4xl mx-auto flex flex-col">
             {/* Back Link */}
             <div className="animate-row-in">
                 <Link
@@ -189,7 +189,7 @@ export default function DesignTeamDetailPage() {
 
             {/* Header */}
             <header className="mb-8">
-                <h1 className="font-playfair text-2xl md:text-3xl lg:text-4xl font-bold text-maceng-maroon dark:text-maceng-orange mb-3 tracking-tight animate-row-in" style={{ animationDelay: '50ms' }}>
+                <h1 className="font-playfair text-2xl md:text-4xl font-bold text-maceng-maroon dark:text-maceng-orange mb-2 md:mb-3 tracking-tight animate-row-in" style={{ animationDelay: '50ms' }}>
                     {team.name}
                 </h1>
                 {team.description && (
@@ -227,7 +227,7 @@ export default function DesignTeamDetailPage() {
             {/* Application Experiences */}
             <section className="flex-grow">
                 <div className="flex items-center justify-between mb-8 animate-row-in" style={{ animationDelay: '200ms' }}>
-                    <h2 className="font-playfair text-xl md:text-2xl font-semibold text-[#333] dark:text-white">
+                    <h2 className="font-playfair text-lg md:text-2xl font-semibold text-[#333] dark:text-white">
                         Application Experiences ({reviews.length})
                     </h2>
                     {!showForm && (
@@ -401,18 +401,18 @@ export default function DesignTeamDetailPage() {
                             <div key={review.id} className="border-b border-[#e5e5e5] dark:border-[#444] pb-8 animate-row-in" style={{ animationDelay: `${250 + index * 60}ms` }}>
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
                                     <div>
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h3 className="font-semibold text-maceng-maroon dark:text-maceng-orange text-[17px]">
+                                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                                            <h3 className="font-semibold text-maceng-maroon dark:text-maceng-orange text-[16px] md:text-[17px]">
                                                 {review.position}
                                             </h3>
-                                            <span className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${review.accepted
+                                            <span className={`text-[9px] md:text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${review.accepted
                                                 ? 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400'
                                                 : 'bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400'
                                                 }`}>
                                                 {review.accepted ? 'Accepted' : 'Not Accepted'}
                                             </span>
                                         </div>
-                                        <p className="text-[13px] text-[#888] dark:text-[#a0a0a0] italic font-inter text-nowrap">
+                                        <p className="text-xs md:text-[13px] text-[#888] dark:text-[#a0a0a0] italic font-inter">
                                             {review.term}
                                         </p>
                                     </div>

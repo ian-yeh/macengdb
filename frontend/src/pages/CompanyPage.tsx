@@ -52,7 +52,7 @@ export default function CompanyPage() {
     }
 
     return (
-        <div className="min-h-screen py-12 px-8 max-w-4xl mx-auto flex flex-col">
+        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-4xl mx-auto flex flex-col">
             {/* Header */}
             <header className="mb-8">
                 <div className="animate-row-in">
@@ -65,7 +65,7 @@ export default function CompanyPage() {
                     </Link>
                 </div>
 
-                <h1 className="font-playfair text-3xl font-semibold text-maceng-maroon dark:text-maceng-orange mt-6 mb-2 animate-row-in" style={{ animationDelay: '50ms' }}>
+                <h1 className="font-playfair text-2xl md:text-3xl font-semibold text-maceng-maroon dark:text-maceng-orange mt-4 md:mt-6 mb-2 animate-row-in" style={{ animationDelay: '50ms' }}>
                     {company.name}
                 </h1>
 
@@ -108,9 +108,9 @@ export default function CompanyPage() {
                             return (
                                 <article key={experience.id} className="border-b border-[#e5e5e5] dark:border-[#444] pb-8 animate-row-in" style={{ animationDelay: `${250 + index * 60}ms` }}>
                                     {/* Title row */}
-                                    <div className="flex justify-between items-start mb-3 flex-wrap gap-2">
-                                        <h3 className="font-playfair text-lg text-[#222] dark:text-white">{experience.position}</h3>
-                                        <span className="text-sm text-[#888] dark:text-[#a0a0a0] font-mono shrink-0">{experience.term}</span>
+                                    <div className="flex flex-col sm:flex-row justify-between items-start mb-2 sm:mb-3 gap-1 sm:gap-2">
+                                        <h3 className="font-playfair text-lg text-[#222] dark:text-white leading-snug">{experience.position}</h3>
+                                        <span className="text-xs sm:text-sm text-[#888] dark:text-[#a0a0a0] font-mono shrink-0">{experience.term}</span>
                                     </div>
 
                                     {/* Meta pills */}
@@ -129,9 +129,9 @@ export default function CompanyPage() {
                                     {/* Interview Acquisition / Source - Highlighted */}
                                     {experience.interview_acquisition && (
                                         <div className="mb-5 flex items-center gap-2.5 animate-row-in" style={{ animationDelay: `${300 + index * 60}ms` }}>
-                                            <div className="flex items-center gap-2 px-3 py-1.5 bg-maceng-orange/5 dark:bg-maceng-orange/10 border border-maceng-orange/20 dark:border-maceng-orange/40 rounded-lg group">
-                                                <span className="text-[10px] uppercase tracking-wider font-bold text-maceng-orange/60">Applied via</span>
-                                                <span className="text-[13px] text-maceng-orange font-semibold">{experience.interview_acquisition}</span>
+                                            <div className="flex items-center gap-2 px-2.5 py-1 bg-maceng-orange/5 dark:bg-maceng-orange/10 border border-maceng-orange/20 dark:border-maceng-orange/40 rounded-lg group">
+                                                <span className="text-[9px] md:text-[10px] uppercase tracking-wider font-bold text-maceng-orange/60">Applied via</span>
+                                                <span className="text-xs md:text-[13px] text-maceng-orange font-semibold">{experience.interview_acquisition}</span>
                                             </div>
                                         </div>
                                     )}
