@@ -53,7 +53,9 @@ async def get_design_team(team_id: int, db: Session = Depends(get_db)):
     return team
 
 
-@router.get("/design-teams/{team_id}/reviews", response_model=List[DesignTeamReviewResponse])
+@router.get(
+    "/design-teams/{team_id}/reviews", response_model=List[DesignTeamReviewResponse]
+)
 async def get_design_team_reviews(team_id: int, db: Session = Depends(get_db)):
     team = team_crud.get_design_team(db, team_id)
     if not team:
