@@ -236,14 +236,14 @@ export default function SubmitDesignTeamExperiencePage() {
                                 You survived it. Now <span className="text-maceng-maroon dark:text-maceng-orange">own your experience</span>.
                             </h1>
                             <p className="text-xl text-[#666] dark:text-[#a0a0a0] max-w-lg mx-auto">
-                                You went through it. Now, document exactly how it was.
+                                Your experience is power. Help others navigate their path by sharing your story.
                             </p>
                             <div className="flex flex-col items-center gap-6">
                                 <button 
                                     onClick={nextStep}
                                     className="px-10 py-5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-2xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-maceng-maroon/20 dark:shadow-maceng-orange/30"
                                 >
-                                    Start Application Review
+                                    Get Started
                                 </button>
                                 <button 
                                     onClick={() => navigate('/')}
@@ -252,7 +252,7 @@ export default function SubmitDesignTeamExperiencePage() {
                                     Maybe later, take me back
                                 </button>
                             </div>
-                            <p className="text-xs text-[#999] dark:text-[#555]">takes ~90 seconds • press ⌘+Enter to skip</p>
+                            <p className="text-xs text-[#999] dark:text-[#555]">takes ~90 seconds</p>
                         </div>
                     )}
 

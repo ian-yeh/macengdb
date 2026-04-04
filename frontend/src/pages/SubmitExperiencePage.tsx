@@ -241,7 +241,7 @@ export default function SubmitExperiencePage() {
                                 You survived it. Now <span className="text-maceng-maroon dark:text-maceng-orange">own your experience</span>.
                             </h1>
                             <p className="text-xl text-[#666] dark:text-[#a0a0a0] max-w-lg mx-auto">
-                                You've navigated the process. Now, tell your side of it.
+                                Your experience is power. Help others navigate their path by sharing your story.
                             </p>
                             <div className="flex flex-col items-center gap-6">
                                 <button 
@@ -257,7 +257,7 @@ export default function SubmitExperiencePage() {
                                     Maybe later, take me back
                                 </button>
                             </div>
-                            <p className="text-xs text-[#999] dark:text-[#555]">takes ~2 mins • press ⌘+Enter to skip</p>
+                            <p className="text-xs text-[#999] dark:text-[#555]">takes ~2 mins</p>
                         </div>
                     )}
 
