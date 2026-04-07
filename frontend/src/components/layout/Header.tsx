@@ -108,25 +108,28 @@ export default function Header({
             </div>
 
             {/* CTAs & Tab Nav */}
-            <div className="space-y-12 animate-fade-up" style={{ animationDelay: '300ms' }}>
-                <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                    <Link
-                        to={activeTab === 'companies' ? "/submit" : "/submit-design-team"}
-                        className="w-full sm:w-auto px-6 py-3.5 md:py-2.5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-lg font-bold text-sm text-center hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md shadow-maceng-maroon/20 dark:shadow-maceng-orange/20"
-                    >
-                        + Share your {activeTab === 'companies' ? 'company' : 'design team'} experience
-                    </Link>
-                    <button
-                        onClick={() => {
-                            const el = document.getElementById('search-filters');
-                            el?.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        className="w-full sm:w-auto px-6 py-3.5 md:py-2.5 border border-maceng-maroon/30 dark:border-maceng-orange/30 text-maceng-maroon dark:text-maceng-orange rounded-lg font-bold text-sm hover:bg-maceng-maroon/5 dark:hover:bg-maceng-orange/5 transition-all text-center"
-                    >
-                        Browse all {activeTab === 'companies' ? 'companies' : 'design teams'}
-                    </button>
-                    {/* Tiny request link moved down */}
-                    <div className="w-full mt-2">
+            <div className="space-y-10 animate-fade-up" style={{ animationDelay: '300ms' }}>
+                <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+                        <Link
+                            to={activeTab === 'companies' ? "/submit" : "/submit-design-team"}
+                            className="w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-maceng-maroon dark:bg-maceng-orange text-white rounded-lg font-bold text-sm text-center hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md shadow-maceng-maroon/20 dark:shadow-maceng-orange/20"
+                        >
+                            + Share your {activeTab === 'companies' ? 'company' : 'design team'} experience
+                        </Link>
+                        <button
+                            onClick={() => {
+                                const el = document.getElementById('search-filters');
+                                el?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="w-full sm:w-auto px-6 py-3 sm:py-2.5 border border-maceng-maroon/30 dark:border-maceng-orange/30 text-maceng-maroon dark:text-maceng-orange rounded-lg font-bold text-sm hover:bg-maceng-maroon/5 dark:hover:bg-maceng-orange/5 transition-all text-center"
+                        >
+                            Browse all {activeTab === 'companies' ? 'companies' : 'design teams'}
+                        </button>
+                    </div>
+
+                    {/* Tiny request link below buttons */}
+                    <div className="w-full pl-0.5">
                         <p className="text-[13px] text-[#777] dark:text-[#555]">
                             Don't see your {activeTab === 'companies' ? 'company' : 'team'}?{' '}
                             <button
