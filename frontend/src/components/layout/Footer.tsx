@@ -8,10 +8,10 @@ export default function Footer() {
             <span className="text-[#666] dark:text-[#e5e5e5]">DB</span>
           </div>
           <div className="flex gap-6">
-            <a href="#about" className="text-[#666] dark:text-[#e5e5e5] no-underline text-sm hover:text-[#333] dark:hover:text-white">About</a>
-            <a href="#contact" className="text-[#666] dark:text-[#e5e5e5] no-underline text-sm hover:text-[#333] dark:hover:text-white">Contact</a>
-            <a href="#privacy" className="text-[#666] dark:text-[#e5e5e5] no-underline text-sm hover:text-[#333] dark:hover:text-white">Privacy</a>
-            <a href="#terms" className="text-[#666] dark:text-[#e5e5e5] no-underline text-sm hover:text-[#333] dark:hover:text-white">Terms</a>
+            <a href="/about" className="text-[#666] dark:text-[#e5e5e5] no-underline text-sm hover:text-[#333] dark:hover:text-white">About</a>
+
+            <a href="/privacy" className="text-[#666] dark:text-[#e5e5e5] no-underline text-sm hover:text-[#333] dark:hover:text-white">Privacy</a>
+
           </div>
         </div>
       </div>
