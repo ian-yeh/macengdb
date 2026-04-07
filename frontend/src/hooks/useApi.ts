@@ -61,10 +61,11 @@ export function useSubmitExperience() {
     onSuccess: (newExperience) => {
       // Invalidate queries to refetch data that might have changed
       // For example, if submitting an experience should update a company's experience list
-      queryClient.invalidateQueries({ queryKey: companyKeys.experiences(newExperience.company_id) });
-      // If there's a list of all experiences (e.g., admin view), you might invalidate that too
-      // queryClient.invalidateQueries({ queryKey: ['experiences', 'pending'] });
-      // queryClient.invalidateQueries({ queryKey: ['experiences', 'all'] });
+      if (newExperience.company_id) {
+        queryClient.invalidateQueries({ 
+          queryKey: companyKeys.experiences(String(newExperience.company_id)) 
+        });
+      }
     },
   });
 }
