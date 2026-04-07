@@ -59,6 +59,22 @@
   animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes fade-in-subtle {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-subtle {
+  animation: fade-in-subtle 0.6s ease-out both;
+}
+
 @keyframes loader-dot {
 
   0%,
@@ -96,4 +112,62 @@
 
 .skeleton {
   @apply bg-[#f0f0f0] dark:bg-[#1e1e1e] rounded animate-pulse;
+}
+
+/* Markdown prose styles */
+.prose-maceng p {
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.7;
+}
+
+.dark .prose-maceng p {
+  color: #e5e5e5;
+}
+
+.prose-maceng h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.dark .prose-maceng h2 {
+  color: #fff;
+}
+
+.prose-maceng ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.dark .prose-maceng ul {
+  color: #e5e5e5;
+}
+
+.prose-maceng li {
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+}
+
+.prose-maceng strong {
+  font-weight: 600;
+  color: #333;
+}
+
+.dark .prose-maceng strong {
+  color: #fff;
+}
+
+.prose-maceng a {
+  color: rgb(var(--maceng-maroon));
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose-maceng a:hover {
+  opacity: 0.8;
 }

@@ -1,27 +1,18 @@
 import { useParams, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { fetchCompany, fetchCompanyExperiences } from '../api/api';
 import { type Experience as ExperienceType } from '../api/types';
 import CompanyDetailSkeleton from '../components/features/companies/CompanyDetailSkeleton';
 import Footer from '../components/layout/Footer';
 import { useEffect } from 'react';
 import { usePostHog } from '@posthog/react';
+import { useCompany, useCompanyExperiences } from '../hooks/useApi';
 
 export default function CompanyPage() {
     const { companyId } = useParams<{ companyId: string }>();
     const posthog = usePostHog();
 
-    const { data: company, isLoading, error } = useQuery({
-        queryKey: ['company', companyId],
-        queryFn: () => fetchCompany(companyId!),
-        enabled: !!companyId,
-    });
+    const { data: company, isLoading, error } = useCompany(companyId!);
 
-    const { data: experiences = [], isLoading: experiencesLoading, error: experiencesError } = useQuery({
-        queryKey: ['experiences', companyId],
-        queryFn: () => fetchCompanyExperiences(companyId!),
-        enabled: !!companyId,
-    });
+    const { data: experiences = [], isLoading: experiencesLoading, error: experiencesError } = useCompanyExperiences(companyId!);
 
     useEffect(() => {
         if (company) {

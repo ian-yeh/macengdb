@@ -6,6 +6,9 @@ import SubmitExperiencePage from './pages/SubmitExperiencePage';
 import SubmitDesignTeamExperiencePage from './pages/SubmitDesignTeamExperiencePage';
 import AdminPage from './admin/AdminPage';
 import DesignTeamDetailPage from './pages/DesignTeamDetailPage';
+import AboutPage from './pages/AboutPage';
+import PrivacyPage from './pages/PrivacyPage';
+import FAQPage from './pages/FAQPage';
 import './App.css';
 
 function App() {
@@ -19,6 +22,9 @@ function App() {
           <Route path="/submit-design-team" element={<SubmitDesignTeamExperiencePage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/design-teams/:teamId" element={<DesignTeamDetailPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/faq" element={<FAQPage />} />
         </Routes>
       </Router>
       <Analytics />
