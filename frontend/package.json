@@ -12,7 +12,6 @@
   "dependencies": {
     "@tanstack/react-query": "^5.90.16",
     "@vercel/analytics": "^1.6.1",
-    "posthog-js": "^1.351.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
