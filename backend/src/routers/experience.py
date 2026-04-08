@@ -15,7 +15,9 @@ import os
 
 router = APIRouter()
 
-ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY", "macengdb-admin-2026")
+ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY")
+if not ADMIN_SECRET_KEY:
+    raise RuntimeError("ADMIN_SECRET_KEY environment variable is required")
 
 
 def verify_admin_key(x_admin_key: str = Header(...)):
