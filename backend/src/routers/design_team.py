@@ -9,7 +9,8 @@ from src.schemas.design_team import (
     DesignTeamUpdate,
 )
 from src.schemas.design_team_review import (
-    DesignTeamReviewResponse,
+    DesignTeamReviewPublicResponse,
+    DesignTeamReviewAdminResponse,
     DesignTeamReviewSubmit,
     DesignTeamReviewUpdate,
 )
@@ -54,7 +55,8 @@ async def get_design_team(team_id: int, db: Session = Depends(get_db)):
 
 
 @router.get(
-    "/design-teams/{team_id}/reviews", response_model=List[DesignTeamReviewResponse]
+    "/design-teams/{team_id}/reviews",
+    response_model=List[DesignTeamReviewPublicResponse],
 )
 async def get_design_team_reviews(team_id: int, db: Session = Depends(get_db)):
     team = team_crud.get_design_team(db, team_id)
@@ -92,7 +94,7 @@ async def update_design_team_admin(
 
 @router.post(
     "/design-teams/{team_id}/reviews",
-    response_model=DesignTeamReviewResponse,
+    response_model=DesignTeamReviewPublicResponse,
     status_code=201,
 )
 async def submit_design_team_review(
@@ -112,7 +114,7 @@ async def submit_design_team_review(
 
 @router.get(
     "/admin/design-team-reviews",
-    response_model=List[DesignTeamReviewResponse],
+    response_model=List[DesignTeamReviewAdminResponse],
 )
 async def get_pending_design_team_reviews(
     db: Session = Depends(get_db),
@@ -124,7 +126,7 @@ async def get_pending_design_team_reviews(
 
 @router.get(
     "/admin/design-team-reviews/all",
-    response_model=List[DesignTeamReviewResponse],
+    response_model=List[DesignTeamReviewAdminResponse],
 )
 async def get_all_design_team_reviews_admin(
     db: Session = Depends(get_db),
@@ -136,7 +138,7 @@ async def get_all_design_team_reviews_admin(
 
 @router.patch(
     "/admin/design-team-reviews/{review_id}/approve",
-    response_model=DesignTeamReviewResponse,
+    response_model=DesignTeamReviewAdminResponse,
 )
 async def approve_design_team_review(
     review_id: int,
@@ -152,7 +154,7 @@ async def approve_design_team_review(
 
 @router.patch(
     "/admin/design-team-reviews/{review_id}/reject",
-    response_model=DesignTeamReviewResponse,
+    response_model=DesignTeamReviewAdminResponse,
 )
 async def reject_design_team_review(
     review_id: int,
@@ -180,7 +182,8 @@ async def delete_design_team_review(
 
 
 @router.patch(
-    "/admin/design-team-reviews/{review_id}", response_model=DesignTeamReviewResponse
+    "/admin/design-team-reviews/{review_id}",
+    response_model=DesignTeamReviewAdminResponse,
 )
 async def update_design_team_review_admin(
     review_id: int,

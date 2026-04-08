@@ -1,17 +1,9 @@
-import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchDesignTeam, fetchDesignTeamReviews, submitDesignTeamReview } from '../api/api';
+import { useQuery } from '@tanstack/react-query';
+import { fetchDesignTeam, fetchDesignTeamReviews } from '../api/api';
 import { type DesignTeamReview } from '../api/types';
 import CompanyDetailSkeleton from '../components/features/companies/CompanyDetailSkeleton';
 import Footer from '../components/layout/Footer';
-import { usePostHog } from '@posthog/react';
-
-const TERM_OPTIONS = [
-    'Fall 2023', 'Winter 2024', 'Spring 2024', 'Summer 2024',
-    'Fall 2024', 'Winter 2025', 'Spring 2025', 'Summer 2025',
-    'Fall 2025', 'Winter 2026', 'Spring 2026', 'Summer 2026',
-];
 
 const DIFFICULTY_LABELS: Record<number, string> = {
     1: 'Very Easy',
@@ -23,8 +15,6 @@ const DIFFICULTY_LABELS: Record<number, string> = {
 
 export default function DesignTeamDetailPage() {
     const { teamId } = useParams<{ teamId: string }>();
-    const queryClient = useQueryClient();
-    const posthog = usePostHog();
 
     const { data: team, isLoading, error } = useQuery({
         queryKey: ['design-team', teamId],
@@ -37,87 +27,6 @@ export default function DesignTeamDetailPage() {
         queryFn: () => fetchDesignTeamReviews(teamId!),
         enabled: !!teamId,
     });
-
-    useEffect(() => {
-        if (team) {
-            posthog.capture('design_team_viewed', {
-                team_id: team.id,
-                team_name: team.name
-            });
-        }
-    }, [team, posthog]);
-
-    // Form state
-    const [showForm, setShowForm] = useState(false);
-    const [formData, setFormData] = useState({
-        submitter_email: '',
-        position: '',
-        term: '',
-        accepted: false,
-        difficulty: 0,
-        description: '',
-        tips: '',
-        interview_acquisition: '',
-    });
-    const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-    const [submitError, setSubmitError] = useState('');
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!teamId || formData.difficulty === 0) return;
-
-        setSubmitStatus('submitting');
-        setSubmitError('');
-
-        try {
-            await submitDesignTeamReview({
-                design_team_id: parseInt(teamId),
-                submitter_email: formData.submitter_email,
-                position: formData.position,
-                term: formData.term,
-                accepted: formData.accepted,
-                difficulty: formData.difficulty,
-                description: formData.description || undefined,
-                tips: formData.tips || undefined,
-                interview_acquisition: formData.interview_acquisition || undefined,
-            });
-
-            posthog.capture('design_team_experience_submit_success', {
-                design_team_id: teamId,
-                team_name: team?.name,
-                position: formData.position
-            });
-
-            setSubmitStatus('success');
-            setFormData({
-                submitter_email: '',
-                position: '',
-                term: '',
-                accepted: false,
-                difficulty: 0,
-                description: '',
-                tips: '',
-                interview_acquisition: '',
-            });
-
-            queryClient.invalidateQueries({ queryKey: ['design-team-reviews', teamId] });
-            queryClient.invalidateQueries({ queryKey: ['design-team', teamId] });
-
-            setTimeout(() => {
-                setSubmitStatus('idle');
-                setShowForm(false);
-            }, 2000);
-        } catch (err) {
-            setSubmitStatus('error');
-            const errorMessage = err instanceof Error ? err.message : 'Failed to submit';
-            setSubmitError(errorMessage);
-            posthog.capture('design_team_experience_submit_failed', {
-                design_team_id: teamId,
-                team_name: team?.name,
-                error: errorMessage
-            });
-        }
-    };
 
     if (isLoading || reviewsLoading) {
         return (
@@ -151,29 +60,6 @@ export default function DesignTeamDetailPage() {
             </div>
         );
     };
-
-    const renderClickableDifficulty = (difficulty: number, onChange: (v: number) => void) => {
-        return (
-            <div className="flex gap-1 items-center">
-                {Array.from({ length: 5 }, (_, i) => (
-                    <button
-                        key={i}
-                        type="button"
-                        onClick={() => onChange(i + 1)}
-                        className={`w-6 h-6 rounded-full transition-colors cursor-pointer border-2 ${i < difficulty
-                            ? 'bg-maceng-orange border-maceng-orange'
-                            : 'bg-white border-[#ddd] hover:border-maceng-orange/50'
-                            }`}
-                    />
-                ))}
-                {difficulty > 0 && (
-                    <span className="text-xs text-[#888] dark:text-[#a0a0a0] ml-2">{DIFFICULTY_LABELS[difficulty]}</span>
-                )}
-            </div>
-        );
-    };
-
-    const inputClass = "w-full py-2.5 px-3.5 text-sm border border-[#ddd] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#111111] dark:text-white focus:outline-none focus:ring-4 focus:ring-maceng-maroon/10 dark:focus:ring-maceng-orange/10 focus:border-maceng-maroon dark:focus:border-maceng-orange transition-all";
 
     return (
         <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-4xl mx-auto flex flex-col">
@@ -230,168 +116,15 @@ export default function DesignTeamDetailPage() {
                     <h2 className="font-playfair text-lg md:text-2xl font-semibold text-[#333] dark:text-white">
                         Application Experiences ({reviews.length})
                     </h2>
-                    {!showForm && (
-                        <button
-                            onClick={() => {
-                                setShowForm(true);
-                                posthog.capture('experience_submit_started', {
-                                    type: 'design_team',
-                                    team_name: team.name
-                                });
-                            }}
-                            className="px-3 py-1.5 md:px-4 md:py-2 bg-maceng-maroon text-white text-xs md:text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors cursor-pointer"
-                        >
-                            + Share your design team experience
-                        </button>
-                    )}
+                    <Link
+                        to="/submit-design-team"
+                        className="px-3 py-1.5 md:px-4 md:py-2 bg-maceng-maroon text-white text-xs md:text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 transition-colors cursor-pointer"
+                    >
+                        + Share your design team experience
+                    </Link>
                 </div>
 
-                {/* Submission Form */}
-                {showForm && (
-                    <div className="mb-10 p-4 md:p-6 bg-[#fafafa] dark:bg-[#111111] border border-[#eee] dark:border-[#444] rounded-xl animate-fade-in">
-                        <h3 className="font-playfair text-lg text-maceng-maroon dark:text-maceng-orange mb-1">Share Your Design Team Experience</h3>
-                        <p className="text-xs text-[#888] dark:text-[#999999] mb-5">Help others prepare to apply. Your submission will be reviewed before publishing.</p>
-
-                        {submitStatus === 'success' ? (
-                            <div className="text-center py-6">
-                                <p className="text-green-600 font-medium text-sm">✓ Experience submitted! It will appear after review.</p>
-                            </div>
-                        ) : (
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
-                                            Verify you're a McMaster student (private) *
-                                        </label>
-                                        <input
-                                            type="email"
-                                            required
-                                            placeholder="you@mcmaster.ca"
-                                            value={formData.submitter_email}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, submitter_email: e.target.value }))}
-                                            className={inputClass}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
-                                            Position Applied For *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            required
-                                            placeholder="e.g. Mechanical Lead, Software Developer"
-                                            value={formData.position}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, position: e.target.value }))}
-                                            className={inputClass}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
-                                            Term *
-                                        </label>
-                                        <select
-                                            required
-                                            value={formData.term}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, term: e.target.value }))}
-                                            className={inputClass}
-                                        >
-                                            <option value="">Select term...</option>
-                                            {TERM_OPTIONS.map(t => (
-                                                <option key={t} value={t}>{t}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
-                                            Received an Acceptance
-                                        </label>
-                                        <div className="flex items-center gap-3 mt-1.5">
-                                            <label className="relative inline-flex items-center cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.accepted}
-                                                    onChange={(e) => setFormData(prev => ({ ...prev, accepted: e.target.checked }))}
-                                                    className="sr-only peer"
-                                                />
-                                                <div className="w-11 h-6 bg-[#ddd] dark:bg-[#333] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-maceng-maroon dark:peer-checked:bg-maceng-orange"></div>
-                                            </label>
-                                            <span className="text-sm text-[#555] dark:text-[#d4d4d4]">{formData.accepted ? 'Yes' : 'No'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
-                                        Application Difficulty *
-                                    </label>
-                                    {renderClickableDifficulty(formData.difficulty, (v) => setFormData(prev => ({ ...prev, difficulty: v })))}
-                                </div>
-
-                                <div>
-                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
-                                        How Did You Find Out About Recruiting?
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Club fair, friend, Instagram, Discord"
-                                        value={formData.interview_acquisition}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, interview_acquisition: e.target.value }))}
-                                        className={inputClass}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
-                                        Describe the Application Process
-                                    </label>
-                                    <textarea
-                                        rows={4}
-                                        placeholder="What was the application process like? Were there interviews, technical challenges, or portfolio reviews?"
-                                        value={formData.description}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                                        className={`${inputClass} min-h-[120px]`}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60 mb-1 block">
-                                        Tips for Future Applicants
-                                    </label>
-                                    <textarea
-                                        rows={2}
-                                        placeholder="Any advice for someone applying to this team?"
-                                        value={formData.tips}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, tips: e.target.value }))}
-                                        className={`${inputClass} min-h-[80px]`}
-                                    />
-                                </div>
-
-                                {submitStatus === 'error' && (
-                                    <p className="text-xs text-red-600">{submitError}</p>
-                                )}
-
-                                <div className="flex gap-2 justify-end pt-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => { setShowForm(false); setSubmitStatus('idle'); }}
-                                        className="px-4 py-2 text-sm text-[#666] dark:text-[#e5e5e5] hover:text-[#333] dark:hover:text-white transition-colors cursor-pointer"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={submitStatus === 'submitting' || formData.difficulty === 0 || !formData.position || !formData.term || !formData.submitter_email}
-                                        className="px-5 py-2 bg-maceng-maroon dark:bg-maceng-orange text-white text-sm font-medium rounded-lg hover:bg-maceng-maroon/90 dark:hover:bg-maceng-orange/90 transition-colors disabled:opacity-50 cursor-pointer"
-                                    >
-                                        {submitStatus === 'submitting' ? 'Submitting...' : 'Submit Design Team Experience'}
-                                    </button>
-                                </div>
-                            </form>
-                        )}
-                    </div>
-                )}
-
-                {reviews.length === 0 && !showForm ? (
+                {reviews.length === 0 ? (
                     <div className="text-center py-12 text-[#999] italic">
                         No application experiences yet. Be the first to share yours!
                     </div>

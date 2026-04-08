@@ -4,7 +4,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { fetchDesignTeams, submitDesignTeamReview } from '../api/api';
 import { type DesignTeam } from '../api/types';
 import DesignTeamRequestModal from '../components/features/design-teams/DesignTeamRequestModal';
-import { usePostHog } from '@posthog/react';
 
 const TERM_OPTIONS = [
     'Fall 2023', 'Winter 2024', 'Spring 2024', 'Summer 2024',
@@ -23,7 +22,6 @@ const DIFFICULTY_LABELS: Record<number, string> = {
 export default function SubmitDesignTeamExperiencePage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const posthog = usePostHog();
 
     // Step state
     const [step, setStep] = useState(0);
@@ -151,10 +149,6 @@ export default function SubmitDesignTeamExperiencePage() {
             queryClient.invalidateQueries({ queryKey: ['design-teams'] });
             queryClient.invalidateQueries({ queryKey: ['design-team-reviews'] });
             setSuccess(true);
-            posthog.capture('design_team_experience_submit_success', {
-                team_name: selectedTeam!.name,
-                position: position.trim()
-            });
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Something went wrong';
             setError(errorMessage);
@@ -369,15 +363,28 @@ export default function SubmitDesignTeamExperiencePage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     <div className="space-y-4">
-                                        <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">Were you accepted?</label>
-                                        <button 
-                                            onClick={() => setAccepted(!accepted)}
-                                            className={`w-full py-4 rounded-xl border-2 font-bold transition-all ${accepted 
-                                                ? 'bg-green-500/10 border-green-500 text-green-500' 
-                                                : 'border-[#eee] dark:border-[#333] text-[#999]'}`}
-                                        >
-                                            {accepted ? 'Yes, Joined!' : 'No / Declined'}
-                                        </button>
+                                        <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">Did you get the offer?</label>
+                                        <div className="flex rounded-xl border-2 border-[#eee] dark:border-[#333] overflow-hidden">
+                                            <button
+                                                type="button"
+                                                onClick={() => setAccepted(true)}
+                                                className={`flex-1 py-4 font-bold text-sm tracking-wide transition-all duration-200 ${accepted
+                                                    ? 'bg-green-500 text-white shadow-inner'
+                                                    : 'bg-transparent text-[#999] hover:bg-green-500/10 hover:text-green-500'}`}
+                                            >
+                                                ✓ Yes
+                                            </button>
+                                            <div className="w-px bg-[#eee] dark:bg-[#333]" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setAccepted(false)}
+                                                className={`flex-1 py-4 font-bold text-sm tracking-wide transition-all duration-200 ${!accepted
+                                                    ? 'bg-[#f0f0f0] dark:bg-[#2a2a2a] text-[#555] dark:text-[#aaa] shadow-inner'
+                                                    : 'bg-transparent text-[#999] hover:bg-[#f5f5f5] dark:hover:bg-[#222]'}`}
+                                            >
+                                                ✕ No
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="space-y-3">
                                         <label className="text-xs font-bold text-[#999] uppercase tracking-widest block">How did you find it?</label>
