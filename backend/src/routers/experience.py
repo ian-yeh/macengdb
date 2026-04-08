@@ -116,7 +116,9 @@ async def delete_experience(
     return {"detail": "Experience deleted"}
 
 
-@router.patch("/admin/experiences/{experience_id}", response_model=ExperienceAdminResponse)
+@router.patch(
+    "/admin/experiences/{experience_id}", response_model=ExperienceAdminResponse
+)
 async def update_experience_admin(
     experience_id: int,
     experience: ExperienceUpdate,
