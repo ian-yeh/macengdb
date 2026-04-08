@@ -4,7 +4,6 @@ from typing import List, Optional
 from src.utils.database import get_db
 from src.schemas.design_team import (
     DesignTeamResponse,
-    DesignTeamCreate,
     DesignTeamApprove,
     DesignTeamUpdate,
 )

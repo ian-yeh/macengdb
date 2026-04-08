@@ -8,22 +8,21 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env from backend directory (3 levels up from this file)
-env_path = Path(__file__).resolve().parent.parent.parent / ".env"
-print(f"DEBUG: Loading .env from: {env_path}")
-print(f"DEBUG: .env exists: {env_path.exists()}")
-load_dotenv(env_path)
-
 import httpx
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import jwt, JWTError, jwk
-from jose.utils import base64url_decode
+from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 from functools import lru_cache
 
 from src.utils.database import get_db
 from src.crud.user import get_user_by_supabase_id
+
+# Load .env from backend directory (3 levels up from this file)
+env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+print(f"DEBUG: Loading .env from: {env_path}")
+print(f"DEBUG: .env exists: {env_path.exists()}")
+load_dotenv(env_path)
 
 security = HTTPBearer()
 
@@ -75,12 +74,12 @@ def get_public_key_from_jwks(token: str):
 
         for key in jwks["keys"]:
             if key.get("kid") == kid:
-                print(f"DEBUG: Found matching key in JWKS")
+                print("DEBUG: Found matching key in JWKS")
                 return key
 
         # If no kid match, return first key
         if jwks["keys"]:
-            print(f"DEBUG: No kid match, using first key")
+            print("DEBUG: No kid match, using first key")
             return jwks["keys"][0]
 
     except Exception as e:

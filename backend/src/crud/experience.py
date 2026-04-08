@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 
 from src.models.experience import ExperienceModel
-from src.models.company_request import CompanyRequestModel
 from src.schemas.experience import ExperienceCreate, ExperienceUpdate, ExperienceSubmit
 
 

@@ -3,14 +3,13 @@ from sqlalchemy.orm import Session
 from src.schemas import (
     ExperiencePublicResponse,
     ExperienceAdminResponse,
-    ExperienceCreate,
     ExperienceSubmit,
     ExperienceUpdate,
 )
 import src.crud.experience as crud
 from src.utils.database import get_db
 from src.utils.limiter import limiter
-from typing import List, Optional
+from typing import List
 import os
 
 router = APIRouter()
