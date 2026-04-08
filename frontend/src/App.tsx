@@ -12,6 +12,9 @@ import FAQPage from './pages/FAQPage';
 import './App.css';
 
 function App() {
+  const enableVercelAnalytics =
+    import.meta.env.PROD && import.meta.env.VITE_ENABLE_VERCEL_ANALYTICS === 'true';
+
   return (
     <>
       <Router>
@@ -27,7 +30,7 @@ function App() {
           <Route path="/faq" element={<FAQPage />} />
         </Routes>
       </Router>
-      <Analytics />
+      {enableVercelAnalytics && <Analytics />}
     </>
   );
 }
