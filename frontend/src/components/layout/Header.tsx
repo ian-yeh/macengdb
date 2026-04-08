@@ -71,7 +71,7 @@ export default function Header({
 
                 <p className="text-[17px] md:text-[19px] text-[#555] dark:text-[#b0b0b0] max-w-2xl leading-relaxed font-inter">
                     {activeTab === 'companies'
-                        ? "Real interview experiences from Mac students. Read what they asked, how hard it was, and whether they got the offer."
+                        ? "Real interview experiences from Mac students. Read what they were asked, how hard it was, and whether they got the offer."
                         : "Explore McMaster Engineering's design teams. Read about real application experiences to help you prepare smarter."
                     }
                 </p>
