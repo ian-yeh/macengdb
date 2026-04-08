@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text, desc
+from sqlalchemy import func, text
 from src.models.design_team import DesignTeamModel
 from src.models.design_team_review import DesignTeamReviewModel
 from src.schemas.design_team import DesignTeamCreate, DesignTeamUpdate

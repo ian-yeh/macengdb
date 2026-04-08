@@ -9,7 +9,6 @@ import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import CompanyRequestModal from '../components/features/companies/CompanyRequestModal';
 import DesignTeamRequestModal from '../components/features/design-teams/DesignTeamRequestModal';
-import { usePostHog } from '@posthog/react';
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -28,27 +27,16 @@ export default function LandingPage() {
     const ITEMS_PER_PAGE = 10;
     const [showCompanyRequestModal, setShowCompanyRequestModal] = useState(false);
     const [showDesignTeamRequestModal, setShowDesignTeamRequestModal] = useState(false);
-    const posthog = usePostHog();
 
     const debouncedSearchQuery = useDebounce(searchQuery, 1000);
 
     useEffect(() => {
-        if (debouncedSearchQuery) {
-            posthog.capture('search_performed', {
-                query: debouncedSearchQuery,
-                tab: activeTab
-            });
-        }
-    }, [debouncedSearchQuery, activeTab, posthog]);
+        // Search performed
+    }, [debouncedSearchQuery, activeTab]);
 
     useEffect(() => {
-        if (debouncedPosition) {
-            posthog.capture('filter_changed', {
-                type: 'position_search',
-                value: debouncedPosition
-            });
-        }
-    }, [debouncedPosition, posthog]);
+        // Filter changed
+    }, [debouncedPosition]);
 
     const { data: companies = [], isLoading, error } = useQuery({
         queryKey: ['companies', selectedIndustry, minRating, hasOffer, debouncedPosition],
@@ -93,20 +81,10 @@ export default function LandingPage() {
     );
 
     const handleCompanyClick = (companyId: number) => {
-        const company = companies.find(c => c.id === companyId);
-        posthog.capture('company_clicked', {
-            company_id: companyId,
-            company_name: company?.name
-        });
         navigate(`/company/${companyId}`);
     };
 
     const handleTeamClick = (teamId: number) => {
-        const team = designTeams.find(t => t.id === teamId);
-        posthog.capture('design_team_clicked', {
-            team_id: teamId,
-            team_name: team?.name
-        });
         navigate(`/design-teams/${teamId}`);
     };
 
@@ -125,15 +103,12 @@ export default function LandingPage() {
                     setActiveTab(tab);
                     setSearchQuery('');
                     setCurrentPage(1);
-                    posthog.capture('tab_changed', { tab });
                 }} 
                 onRequestCompany={() => {
                     setShowCompanyRequestModal(true);
-                    posthog.capture('request_modal_opened', { type: 'company' });
                 }} 
                 onRequestDesignTeam={() => {
                     setShowDesignTeamRequestModal(true);
-                    posthog.capture('request_modal_opened', { type: 'design_team' });
                 }} 
                 experienceCount={stats.experienceCount}
                 companyCount={stats.companyCount}
@@ -174,7 +149,6 @@ export default function LandingPage() {
                         <button
                             onClick={() => {
                                 setShowFilters(!showFilters);
-                                if (!showFilters) posthog.capture('filters_opened');
                             }}
                             className={`px-4 py-2 border rounded-lg flex items-center gap-2 text-sm font-medium transition-all ${showFilters ? 'bg-maceng-maroon text-white border-maceng-maroon' : 'bg-white text-[#666] border-[#ddd] hover:border-maceng-maroon/40'}`}
                         >
@@ -196,7 +170,6 @@ export default function LandingPage() {
                                 onChange={(e) => {
                                     setSelectedIndustry(e.target.value);
                                     setCurrentPage(1);
-                                    posthog.capture('filter_changed', { type: 'industry', value: e.target.value });
                                 }}
                                 className="py-2 px-3 text-sm border border-[#ddd] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
                             >
@@ -221,7 +194,6 @@ export default function LandingPage() {
                                     const val = e.target.value ? Number(e.target.value) : undefined;
                                     setMinRating(val);
                                     setCurrentPage(1);
-                                    posthog.capture('filter_changed', { type: 'min_rating', value: val });
                                 }}
                                 className="py-2 px-3 text-sm border border-[#ddd] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
                             >
@@ -242,7 +214,6 @@ export default function LandingPage() {
                                     onChange={(e) => {
                                         setHasOffer(e.target.checked ? true : undefined);
                                         setCurrentPage(1);
-                                        posthog.capture('filter_changed', { type: 'has_offer', value: e.target.checked });
                                     }}
                                     className="w-4 h-4 rounded border-[#ddd] text-maceng-maroon focus:ring-maceng-maroon transition-all"
                                 />
@@ -272,7 +243,6 @@ export default function LandingPage() {
                                     setPosition('');
                                     setSearchQuery('');
                                     setCurrentPage(1);
-                                    posthog.capture('filters_reset');
                                 }}
                                 className="text-[12px] font-bold text-maceng-orange hover:text-maceng-maroon transition-colors mb-2"
                             >

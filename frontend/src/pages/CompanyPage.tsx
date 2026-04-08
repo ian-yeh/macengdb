@@ -2,26 +2,14 @@ import { useParams, Link } from 'react-router-dom';
 import { type Experience as ExperienceType } from '../api/types';
 import CompanyDetailSkeleton from '../components/features/companies/CompanyDetailSkeleton';
 import Footer from '../components/layout/Footer';
-import { useEffect } from 'react';
-import { usePostHog } from '@posthog/react';
 import { useCompany, useCompanyExperiences } from '../hooks/useApi';
 
 export default function CompanyPage() {
     const { companyId } = useParams<{ companyId: string }>();
-    const posthog = usePostHog();
 
     const { data: company, isLoading, error } = useCompany(companyId!);
 
     const { data: experiences = [], isLoading: experiencesLoading, error: experiencesError } = useCompanyExperiences(companyId!);
-
-    useEffect(() => {
-        if (company) {
-            posthog.capture('company_viewed', {
-                company_id: company.id,
-                company_name: company.name
-            });
-        }
-    }, [company, posthog]);
 
     if (isLoading || experiencesLoading) {
         return (
@@ -49,7 +37,6 @@ export default function CompanyPage() {
                 <div className="animate-row-in">
                     <Link
                         to="/"
-                        onClick={() => posthog.capture('back_to_companies_clicked')}
                         className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange text-sm"
                     >
                         ← Back to companies
@@ -82,7 +69,6 @@ export default function CompanyPage() {
                         No experiences shared yet. Be the first to{' '}
                         <Link
                             to="/submit"
-                            onClick={() => posthog.capture('submit_experience_from_empty_clicked', { company_name: company.name })}
                             className="text-maceng-orange underline decoration-maceng-orange/50 hover:decoration-maceng-orange"
                         >
                             submit a company experience

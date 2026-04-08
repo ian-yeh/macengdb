@@ -1,20 +1,22 @@
 from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from src.schemas import (
-    ExperienceResponse,
-    ExperienceCreate,
+    ExperiencePublicResponse,
+    ExperienceAdminResponse,
     ExperienceSubmit,
     ExperienceUpdate,
 )
 import src.crud.experience as crud
 from src.utils.database import get_db
 from src.utils.limiter import limiter
-from typing import List, Optional
+from typing import List
 import os
 
 router = APIRouter()
 
-ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY", "macengdb-admin-2026")
+ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY")
+if not ADMIN_SECRET_KEY:
+    raise RuntimeError("ADMIN_SECRET_KEY environment variable is required")
 
 
 def verify_admin_key(x_admin_key: str = Header(...)):
@@ -24,7 +26,7 @@ def verify_admin_key(x_admin_key: str = Header(...)):
     return x_admin_key
 
 
-@router.post("/experiences/submit", response_model=ExperienceResponse)
+@router.post("/experiences/submit", response_model=ExperiencePublicResponse)
 @limiter.limit("5/minute")
 async def submit_experience(
     request: Request,
@@ -40,7 +42,7 @@ async def submit_experience(
 
 
 @router.get(
-    "/companies/{company_id}/experiences", response_model=List[ExperienceResponse]
+    "/companies/{company_id}/experiences", response_model=List[ExperiencePublicResponse]
 )
 async def get_company_experiences(company_id: int, db: Session = Depends(get_db)):
     """
@@ -53,7 +55,7 @@ async def get_company_experiences(company_id: int, db: Session = Depends(get_db)
 # --- Admin endpoints ---
 
 
-@router.get("/admin/experiences/pending", response_model=List[ExperienceResponse])
+@router.get("/admin/experiences/pending", response_model=List[ExperienceAdminResponse])
 async def get_pending_experiences(
     db: Session = Depends(get_db), _admin_key: str = Depends(verify_admin_key)
 ):
@@ -61,7 +63,7 @@ async def get_pending_experiences(
     return crud.get_pending_experiences(db)
 
 
-@router.get("/admin/experiences/all", response_model=List[ExperienceResponse])
+@router.get("/admin/experiences/all", response_model=List[ExperienceAdminResponse])
 async def get_all_experiences_admin(
     db: Session = Depends(get_db), _admin_key: str = Depends(verify_admin_key)
 ):
@@ -72,7 +74,7 @@ async def get_all_experiences_admin(
 
 
 @router.patch(
-    "/admin/experiences/{experience_id}/approve", response_model=ExperienceResponse
+    "/admin/experiences/{experience_id}/approve", response_model=ExperienceAdminResponse
 )
 async def approve_experience(
     experience_id: int,
@@ -87,7 +89,7 @@ async def approve_experience(
 
 
 @router.patch(
-    "/admin/experiences/{experience_id}/reject", response_model=ExperienceResponse
+    "/admin/experiences/{experience_id}/reject", response_model=ExperienceAdminResponse
 )
 async def reject_experience(
     experience_id: int,
@@ -114,7 +116,9 @@ async def delete_experience(
     return {"detail": "Experience deleted"}
 
 
-@router.patch("/admin/experiences/{experience_id}", response_model=ExperienceResponse)
+@router.patch(
+    "/admin/experiences/{experience_id}", response_model=ExperienceAdminResponse
+)
 async def update_experience_admin(
     experience_id: int,
     experience: ExperienceUpdate,

@@ -20,17 +20,20 @@ class DesignTeamReviewBase(BaseModel):
         return v
 
 
-class DesignTeamReviewResponse(DesignTeamReviewBase):
+class DesignTeamReviewPublicResponse(DesignTeamReviewBase):
     id: int
     design_team_id: int
     design_team_name: Optional[str] = None
-    submitter_email: str
     status: str = "pending"
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class DesignTeamReviewAdminResponse(DesignTeamReviewPublicResponse):
+    submitter_email: str
 
 
 class DesignTeamReviewSubmit(DesignTeamReviewBase):

@@ -2,12 +2,15 @@
 # alembic revision --autogenerate -m "update tables"
 # alembic upgrade head
 
+import os
 from logging.config import fileConfig
 
+import dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+from src.utils.database import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -20,16 +23,8 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from src.utils.database import Base
 
 # Import all models so their tables are registered with Base.metadata
-from src.models import (
-    CompanyModel,
-    ExperienceModel,
-    UserModel,
-    DesignTeamModel,
-    DesignTeamReviewModel,
-)
 
 target_metadata = Base.metadata
 
@@ -37,8 +32,6 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-import dotenv
-import os
 
 dotenv.load_dotenv()
 

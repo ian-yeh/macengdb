@@ -1,10 +1,11 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import func
 from typing import List, Optional
+
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 from src.models import CompanyModel
 from src.models.experience import ExperienceModel
-from src.schemas import CompanyCreate  # , CompanyUpdate
+from src.schemas import CompanyCreate, CompanyUpdate
 
 
 def get_all_companies(
@@ -45,7 +46,7 @@ def get_all_companies(
         if has_offer:
             query = query.filter(
                 CompanyModel.experiences.any(
-                    (ExperienceModel.offer_received == True)
+                    ExperienceModel.offer_received
                     & (ExperienceModel.status == "approved")
                 )
             )
@@ -107,9 +108,6 @@ def delete_company(db: Session, company_id: int) -> bool:
     db.delete(db_company)
     db.commit()
     return True
-
-
-from src.schemas import CompanyCreate, CompanyUpdate
 
 
 def update_company(

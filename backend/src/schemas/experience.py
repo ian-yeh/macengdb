@@ -28,19 +28,22 @@ class ExperienceBase(BaseModel):
         return v
 
 
-class ExperienceResponse(ExperienceBase):
+class ExperiencePublicResponse(ExperienceBase):
     id: int
-    user_id: Optional[int] = None
     company_id: Optional[int] = None
     company_name: Optional[str] = None
     new_company_name: Optional[str] = None
-    submitter_email: str
     status: str = "pending"
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class ExperienceAdminResponse(ExperiencePublicResponse):
+    user_id: Optional[int] = None
+    submitter_email: str
 
 
 class ExperienceCreate(ExperienceBase):
