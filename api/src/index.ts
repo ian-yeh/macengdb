@@ -1,5 +1,8 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { HTTPException } from 'hono/http-exception'
+import { admin } from './admin'
+import { db, type AppEnv } from './db'
 
 declare global {
   namespace Cloudflare {
@@ -26,7 +29,7 @@ const ORIGINS = new Set([
   'https://macengdb-api.ianyeh.ca',
 ])
 
-const app = new Hono<{ Bindings: Cloudflare.Env }>()
+const app = new Hono<AppEnv>()
 
 app.use(
   cors({
@@ -38,8 +41,12 @@ app.use(
 app.get('/', (c) => c.json('MacEng Course Database API'))
 app.get('/health', (c) => c.json({ status: 'healthy' }))
 
+app.use('/api/*', db)
+app.use('/api/admin/*', admin)
+
 app.notFound((c) => c.json({ detail: 'Not Found' }, 404))
 app.onError((err, c) => {
+  if (err instanceof HTTPException) return c.json({ detail: err.message }, err.status)
   console.error(err)
   return c.json({ detail: 'Internal Server Error' }, 500)
 })
