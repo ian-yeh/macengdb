@@ -4,6 +4,7 @@ import { HTTPException } from 'hono/http-exception'
 import { admin } from './admin'
 import { db, type AppEnv } from './db'
 import companies from './routes/companies'
+import experiences from './routes/experiences'
 
 declare global {
   namespace Cloudflare {
@@ -45,6 +46,7 @@ app.get('/health', (c) => c.json({ status: 'healthy' }))
 app.use('/api/*', db)
 app.use('/api/admin/*', admin)
 app.route('/api', companies)
+app.route('/api', experiences)
 
 app.notFound((c) => c.json({ detail: 'Not Found' }, 404))
 app.onError((err, c) => {

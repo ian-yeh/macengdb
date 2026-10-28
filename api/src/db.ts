@@ -1,7 +1,7 @@
 import type { Context, MiddlewareHandler } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import postgres from 'postgres'
-import type { z } from 'zod'
+import { z } from 'zod'
 
 export type AppEnv = { Bindings: Cloudflare.Env; Variables: { sql: postgres.Sql } }
 
@@ -58,3 +58,12 @@ export const NOW = "now() AT TIME ZONE 'utc'"
 // UPDATE ... SET ${patch(sql, body)}: the keys present in a PATCH body, plus updated_at
 export const patch = (sql: postgres.Sql, body: object) =>
   sql({ ...body, updated_at: sql.unsafe(NOW) } as Record<string, any>)
+
+export const email = z
+  .string()
+  .max(255)
+  .transform((v) => v.trim().toLowerCase())
+  .refine((v) => v.endsWith('@mcmaster.ca'), 'Must be a McMaster email address (@mcmaster.ca)')
+
+const DIFFICULTY = 'Difficulty must be between 1 and 5'
+export const difficulty = z.number().int().min(1, DIFFICULTY).max(5, DIFFICULTY)
