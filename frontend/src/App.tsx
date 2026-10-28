@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Analytics } from "@vercel/analytics/react"
 import LandingPage from './pages/LandingPage';
+import MaintenancePage from './pages/MaintenancePage';
 import CompanyPage from './pages/CompanyPage';
 import SubmitExperiencePage from './pages/SubmitExperiencePage';
 import SubmitDesignTeamExperiencePage from './pages/SubmitDesignTeamExperiencePage';
@@ -11,6 +12,8 @@ import PrivacyPage from './pages/PrivacyPage';
 import FAQPage from './pages/FAQPage';
 import './App.css';
 
+const MAINTENANCE = true;
+
 function App() {
   const enableVercelAnalytics =
     import.meta.env.PROD && import.meta.env.VITE_ENABLE_VERCEL_ANALYTICS === 'true';
@@ -19,7 +22,7 @@ function App() {
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={MAINTENANCE ? <MaintenancePage /> : <LandingPage />} />
           <Route path="/company/:companyId" element={<CompanyPage />} />
           <Route path="/submit" element={<SubmitExperiencePage />} />
           <Route path="/submit-design-team" element={<SubmitDesignTeamExperiencePage />} />
