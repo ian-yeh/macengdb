@@ -39,10 +39,16 @@ const hook = (r: Result, c: Context) => {
     )
 }
 
+// optional JSON body: a missing or empty body parses as {}
+export const optionalJson = async <T extends z.ZodType>(c: Context, schema: T) => {
+  const r = schema.safeParse(await c.req.json().catch(() => ({})))
+  return { bad: hook({ target: 'json', ...r }, c), data: r.data as z.output<T> }
+}
+
 export const validate = <T extends z.ZodType, K extends 'json' | 'query'>(target: K, schema: T) =>
   zValidator(target, schema, hook)
 
-type Limiter = { [K in keyof Cloudflare.Env]: Cloudflare.Env[K] extends RateLimit ? K : never }[keyof Cloudflare.Env]
+export type Limiter = { [K in keyof Cloudflare.Env]: Cloudflare.Env[K] extends RateLimit ? K : never }[keyof Cloudflare.Env]
 
 export const limit =
   (binding: Limiter): MiddlewareHandler<AppEnv> =>

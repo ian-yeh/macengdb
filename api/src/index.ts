@@ -4,6 +4,7 @@ import { HTTPException } from 'hono/http-exception'
 import { admin } from './admin'
 import { db, type AppEnv } from './db'
 import companies from './routes/companies'
+import companyRequests from './routes/company-requests'
 import experiences from './routes/experiences'
 
 declare global {
@@ -47,6 +48,7 @@ app.use('/api/*', db)
 app.use('/api/admin/*', admin)
 app.route('/api', companies)
 app.route('/api', experiences)
+app.route('/api', companyRequests)
 
 app.notFound((c) => c.json({ detail: 'Not Found' }, 404))
 app.onError((err, c) => {
