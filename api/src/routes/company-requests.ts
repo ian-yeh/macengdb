@@ -29,20 +29,20 @@ export const requests = (app: Hono<AppEnv>, path: 'company-requests' | 'design-t
     return c.json(await sql`SELECT ${sql.unsafe(COLS)} FROM ${sql(table)} WHERE status = 'pending' ORDER BY created_at DESC`)
   })
 
-  app.patch(`/admin/${path}/:id{[0-9]+}`, validate('json', z.object({ name })), async (c) => {
+  app.patch(`/admin/${path}/:id{[0-9]{1,9}}`, validate('json', z.object({ name })), async (c) => {
     const sql = c.var.sql
     const [row] = await sql`
       UPDATE ${sql(table)} SET name = ${c.req.valid('json').name} WHERE id = ${c.req.param('id')} RETURNING ${sql.unsafe(COLS)}`
     return row ? c.json(row) : c.json({ detail: 'Request not found' }, 404)
   })
 
-  app.delete(`/admin/${path}/:id{[0-9]+}`, async (c) => {
+  app.delete(`/admin/${path}/:id{[0-9]{1,9}}`, async (c) => {
     const sql = c.var.sql
     const r = await sql`UPDATE ${sql(table)} SET status = 'rejected' WHERE id = ${c.req.param('id')}`
     return r.count ? c.json({ detail: 'Request rejected' }) : c.json({ detail: 'Request not found' }, 404)
   })
 
-  app.post(`/admin/${path}/bulk-reject`, validate('json', z.array(z.number().int())), async (c) => {
+  app.post(`/admin/${path}/bulk-reject`, validate('json', z.array(z.number().int().positive().max(2147483647))), async (c) => {
     const sql = c.var.sql
     const r = await sql`UPDATE ${sql(table)} SET status = 'rejected' WHERE id = ANY(${c.req.valid('json')}::int[])`
     return c.json({ detail: `Rejected ${r.count} requests` })
@@ -52,7 +52,7 @@ export const requests = (app: Hono<AppEnv>, path: 'company-requests' | 'design-t
 const app = new Hono<AppEnv>()
 requests(app, 'company-requests', 'COMPANY_REQUEST_LIMITER')
 
-app.patch('/admin/company-requests/:id{[0-9]+}/approve', async (c) => {
+app.patch('/admin/company-requests/:id{[0-9]{1,9}}/approve', async (c) => {
   const { bad, data } = await optionalJson(c, z.object({ industries: z.array(z.string().max(100)).default([]) }))
   if (bad) return bad
   const id = c.req.param('id')

@@ -29,7 +29,7 @@ const stages = z.array(
 
 const submit = z.object({
   submitter_email: email,
-  company_id: z.number().int().nullish(),
+  company_id: z.number().int().max(2147483647).nullish(),
   new_company_name: z.string().max(255).nullish(),
   position: z.string().max(255),
   term: z.string().max(50),
@@ -51,7 +51,7 @@ const update = z.object({
 
 const app = new Hono<AppEnv>()
 
-app.get('/companies/:id{[0-9]+}/experiences', async (c) => {
+app.get('/companies/:id{[0-9]{1,9}}/experiences', async (c) => {
   const sql = c.var.sql
   const rows = await sql`${select(sql, false)} WHERE x.company_id = ${c.req.param('id')} AND x.status = 'approved' ORDER BY x.id`
   return c.json(out(rows))
@@ -88,7 +88,7 @@ app.get('/admin/experiences/all', async (c) => {
 })
 
 for (const [action, status] of [['approve', 'approved'], ['reject', 'rejected']]) {
-  app.patch(`/admin/experiences/:id{[0-9]+}/${action}`, async (c) => {
+  app.patch(`/admin/experiences/:id{[0-9]{1,9}}/${action}`, async (c) => {
     const sql = c.var.sql
     const rows = await sql`
       WITH x AS (UPDATE experiences SET status = ${status}, updated_at = ${sql.unsafe(NOW)} WHERE id = ${c.req.param('id')} RETURNING *)
@@ -97,7 +97,7 @@ for (const [action, status] of [['approve', 'approved'], ['reject', 'rejected']]
   })
 }
 
-app.patch('/admin/experiences/:id{[0-9]+}', validate('json', update), async (c) => {
+app.patch('/admin/experiences/:id{[0-9]{1,9}}', validate('json', update), async (c) => {
   const sql = c.var.sql
   const b = c.req.valid('json')
   const rows = await sql`
@@ -107,7 +107,7 @@ app.patch('/admin/experiences/:id{[0-9]+}', validate('json', update), async (c) 
   return rows.length ? c.json(out(rows)[0]) : c.json({ detail: 'Experience not found' }, 404)
 })
 
-app.delete('/admin/experiences/:id{[0-9]+}', async (c) => {
+app.delete('/admin/experiences/:id{[0-9]{1,9}}', async (c) => {
   const rows = await c.var.sql`DELETE FROM experiences WHERE id = ${c.req.param('id')} RETURNING id`
   return rows.length ? c.json({ detail: 'Experience deleted' }) : c.json({ detail: 'Experience not found' }, 404)
 })

@@ -37,7 +37,7 @@ app.get('/companies/search', async (c) => {
   return c.json(await sql`${company(sql)} WHERE c.name ILIKE ${'%' + q + '%'} ORDER BY c.id LIMIT 10`)
 })
 
-app.get('/companies/:id{[0-9]+}', async (c) => {
+app.get('/companies/:id{[0-9]{1,9}}', async (c) => {
   const sql = c.var.sql
   const [row] = await sql`${company(sql)} WHERE c.id = ${c.req.param('id')}`
   return row ? c.json(row) : c.json({ detail: 'Company not found' }, 404)
@@ -58,7 +58,7 @@ app.post(
 )
 
 app.patch(
-  '/admin/companies/:id{[0-9]+}',
+  '/admin/companies/:id{[0-9]{1,9}}',
   validate('json', z.object({ name: name.optional(), industries: industries.optional(), rating: z.number().optional() })),
   async (c) => {
     const sql = c.var.sql
@@ -72,7 +72,7 @@ app.patch(
   },
 )
 
-app.delete('/admin/companies/:id{[0-9]+}', async (c) => {
+app.delete('/admin/companies/:id{[0-9]{1,9}}', async (c) => {
   const id = c.req.param('id')
   const rows = await c.var.sql.begin(async (tx) => {
     await tx`DELETE FROM experiences WHERE company_id = ${id}`

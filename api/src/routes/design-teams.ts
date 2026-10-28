@@ -56,20 +56,20 @@ app.get('/design-teams', validate('query', z.object({ category: z.string().optio
   return c.json(await sql`${team(sql, category ? sql`WHERE ${category} = ANY(t.categories)` : sql``)} ORDER BY review_count DESC, t.name`)
 })
 
-app.get('/design-teams/:id{[0-9]+}', async (c) => {
+app.get('/design-teams/:id{[0-9]{1,9}}', async (c) => {
   const sql = c.var.sql
   const [row] = await team(sql, sql`WHERE t.id = ${c.req.param('id')}`)
   return row ? c.json(row) : c.json(NO_TEAM, 404)
 })
 
-app.get('/design-teams/:id{[0-9]+}/reviews', async (c) => {
+app.get('/design-teams/:id{[0-9]{1,9}}/reviews', async (c) => {
   const sql = c.var.sql
   const id = c.req.param('id')
   if (!(await sql`SELECT 1 FROM design_teams WHERE id = ${id}`).length) return c.json(NO_TEAM, 404)
   return c.json(await sql`${review(sql, false)} WHERE x.design_team_id = ${id} AND x.status = 'approved' ORDER BY x.created_at DESC`)
 })
 
-app.post('/design-teams/:id{[0-9]+}/reviews', limit('REVIEW_LIMITER'), validate('json', submit), async (c) => {
+app.post('/design-teams/:id{[0-9]{1,9}}/reviews', limit('REVIEW_LIMITER'), validate('json', submit), async (c) => {
   const sql = c.var.sql
   const b = c.req.valid('json')
   const [row] = await sql`
@@ -84,7 +84,7 @@ app.post('/design-teams/:id{[0-9]+}/reviews', limit('REVIEW_LIMITER'), validate(
   return row ? c.json(row, 201) : c.json(NO_TEAM, 404)
 })
 
-app.patch('/admin/design-teams/:id{[0-9]+}', validate('json', teamUpdate), async (c) => {
+app.patch('/admin/design-teams/:id{[0-9]{1,9}}', validate('json', teamUpdate), async (c) => {
   const sql = c.var.sql
   const id = c.req.param('id')
   if (!(await sql`UPDATE design_teams SET ${patch(sql, c.req.valid('json'))} WHERE id = ${id} RETURNING id`).length)
@@ -93,7 +93,7 @@ app.patch('/admin/design-teams/:id{[0-9]+}', validate('json', teamUpdate), async
   return c.json(row)
 })
 
-app.delete('/admin/design-teams/:id{[0-9]+}', async (c) => {
+app.delete('/admin/design-teams/:id{[0-9]{1,9}}', async (c) => {
   const id = c.req.param('id')
   const rows = await c.var.sql.begin(async (tx) => {
     await tx`DELETE FROM design_team_reviews WHERE design_team_id = ${id}`
@@ -113,7 +113,7 @@ app.get('/admin/design-team-reviews/all', async (c) => {
 })
 
 for (const [action, status] of [['approve', 'approved'], ['reject', 'rejected']]) {
-  app.patch(`/admin/design-team-reviews/:id{[0-9]+}/${action}`, async (c) => {
+  app.patch(`/admin/design-team-reviews/:id{[0-9]{1,9}}/${action}`, async (c) => {
     const sql = c.var.sql
     const [row] = await sql`
       WITH x AS (UPDATE design_team_reviews SET status = ${status}, updated_at = ${sql.unsafe(NOW)}
@@ -123,7 +123,7 @@ for (const [action, status] of [['approve', 'approved'], ['reject', 'rejected']]
   })
 }
 
-app.patch('/admin/design-team-reviews/:id{[0-9]+}', validate('json', reviewUpdate), async (c) => {
+app.patch('/admin/design-team-reviews/:id{[0-9]{1,9}}', validate('json', reviewUpdate), async (c) => {
   const sql = c.var.sql
   const [row] = await sql`
     WITH x AS (UPDATE design_team_reviews SET ${patch(sql, c.req.valid('json'))} WHERE id = ${c.req.param('id')} RETURNING *)
@@ -131,14 +131,14 @@ app.patch('/admin/design-team-reviews/:id{[0-9]+}', validate('json', reviewUpdat
   return row ? c.json(row) : c.json(NO_REVIEW, 404)
 })
 
-app.delete('/admin/design-team-reviews/:id{[0-9]+}', async (c) => {
+app.delete('/admin/design-team-reviews/:id{[0-9]{1,9}}', async (c) => {
   const rows = await c.var.sql`DELETE FROM design_team_reviews WHERE id = ${c.req.param('id')} RETURNING id`
   return rows.length ? c.json({ detail: 'Review deleted' }) : c.json(NO_REVIEW, 404)
 })
 
 requests(app, 'design-team-requests', 'DESIGN_TEAM_REQUEST_LIMITER')
 
-app.patch('/admin/design-team-requests/:id{[0-9]+}/approve', async (c) => {
+app.patch('/admin/design-team-requests/:id{[0-9]{1,9}}/approve', async (c) => {
   const { bad, data } = await optionalJson(c, z.object({ categories: z.array(z.string().max(100)).default([]) }))
   if (bad) return bad
   const id = c.req.param('id')

@@ -1,7 +1,7 @@
 // Needs the local Postgres from README (docker + migrations/0000_baseline.sql).
 import { env, exports } from 'cloudflare:workers'
 import postgres from 'postgres'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 
 type Json = any
 
@@ -66,9 +66,10 @@ const review = (teamId: number, difficulty = 3) =>
     difficulty,
   })
 
-beforeEach(async () => {
-  await sql`TRUNCATE experiences, companies, company_requests, design_team_reviews, design_teams, design_team_requests RESTART IDENTITY CASCADE`
-})
+const truncate = () =>
+  sql`TRUNCATE experiences, companies, company_requests, design_team_reviews, design_teams, design_team_requests RESTART IDENTITY CASCADE`
+beforeEach(truncate)
+afterAll(truncate)
 
 describe('serialization', () => {
   it('formats naive timestamps like pydantic', async () => {
@@ -303,6 +304,11 @@ describe('company requests', () => {
     expect((await adm('POST', '/api/admin/company-requests/bulk-reject', [])).body).toEqual({ detail: 'Rejected 0 requests' })
     expect((await adm('POST', '/api/admin/company-requests/bulk-reject', { x: 1 })).status).toBe(422)
   })
+})
+
+it('bulk reject rejects ids beyond int4 with 422', async () => {
+  expect((await adm('POST', '/api/admin/company-requests/bulk-reject', [99999999999])).status).toBe(422)
+  expect((await adm('POST', '/api/admin/design-team-requests/bulk-reject', [0])).status).toBe(422)
 })
 
 describe('design teams', () => {

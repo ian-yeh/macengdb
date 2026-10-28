@@ -23,6 +23,11 @@ describe('basics', () => {
   })
 })
 
+it('returns 404 for path ids beyond int4', async () => {
+  expect(await (await get('/api/companies/99999999999')).json()).toEqual({ detail: 'Not Found' })
+  expect((await get('/api/design-teams/99999999999')).status).toBe(404)
+})
+
 describe('cors', () => {
   const acao = async (origin: string) => (await get('/health', { origin })).headers.get('access-control-allow-origin')
 
