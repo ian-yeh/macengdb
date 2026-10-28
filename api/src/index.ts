@@ -5,6 +5,7 @@ import { admin } from './admin'
 import { db, type AppEnv } from './db'
 import companies from './routes/companies'
 import companyRequests from './routes/company-requests'
+import designTeams from './routes/design-teams'
 import experiences from './routes/experiences'
 
 declare global {
@@ -49,6 +50,7 @@ app.use('/api/admin/*', admin)
 app.route('/api', companies)
 app.route('/api', experiences)
 app.route('/api', companyRequests)
+app.route('/api', designTeams)
 
 app.notFound((c) => c.json({ detail: 'Not Found' }, 404))
 app.onError((err, c) => {
