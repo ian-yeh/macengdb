@@ -51,3 +51,10 @@ export const limit =
     if (!success) return c.json({ detail: 'Rate limit exceeded' }, 429)
     await next()
   }
+
+export const NOW = "now() AT TIME ZONE 'utc'"
+
+
+// UPDATE ... SET ${patch(sql, body)}: the keys present in a PATCH body, plus updated_at
+export const patch = (sql: postgres.Sql, body: object) =>
+  sql({ ...body, updated_at: sql.unsafe(NOW) } as Record<string, any>)
