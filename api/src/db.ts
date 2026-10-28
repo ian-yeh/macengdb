@@ -19,8 +19,9 @@ export const db: MiddlewareHandler<AppEnv> = async (c, next) => {
       types: { ts: { to: 1114, from: [1114], serialize: (x: string) => x, parse: ts } },
     }),
   )
+  // no sql.end(): per current Hyperdrive docs the runtime closes the socket after the request,
+  // and ending it ourselves makes postgres.js raise an unhandled "socket has been closed" rejection
   await next()
-  c.executionCtx.waitUntil(c.var.sql.end())
 }
 
 type Result = { target: string } & ({ success: true } | { success: false; error: { issues: readonly z.core.$ZodIssue[] } })

@@ -18,6 +18,9 @@ declare global {
       DESIGN_TEAM_REQUEST_LIMITER: RateLimit
       REVIEW_LIMITER: RateLimit
     }
+    interface GlobalProps {
+      mainModule: typeof import('./index')
+    }
   }
 }
 
