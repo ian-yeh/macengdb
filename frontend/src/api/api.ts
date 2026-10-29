@@ -1,6 +1,6 @@
 import { type Company, type Experience, type ExperienceSubmitData, type CompanyRequest, type DesignTeam, type DesignTeamReview, type DesignTeamReviewSubmitData, type DesignTeamRequest } from './types';
 
-const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api`;
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8787'}/api`;
 
 // companies API
 export async function fetchCompanies(
@@ -44,6 +44,13 @@ export async function fetchCompanyExperiences(companyId: string): Promise<Experi
     throw new Error('Failed to fetch company experiences');
   }
 
+  return response.json();
+}
+
+export async function fetchRecentExperiences(): Promise<Experience[]> {
+  const response = await fetch(`${API_BASE_URL}/experiences/recent`);
+
+  if (!response.ok) throw new Error('Failed to fetch recent experiences');
   return response.json();
 }
 

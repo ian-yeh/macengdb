@@ -1,6 +1,4 @@
-import { Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
-import Footer from './layout/Footer';
 
 function parseFrontmatter(raw: string) {
   const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
@@ -22,35 +20,11 @@ export default function MarkdownPage({ content }: MarkdownPageProps) {
   const title = data.title || '';
 
   return (
-    <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-4xl mx-auto flex flex-col">
-      <Link
-        to="/"
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-maceng-maroon dark:text-maceng-orange hover:underline mb-6 group animate-fade-in-subtle"
-        style={{ animationDelay: '0ms' }}
-      >
-        <span className="group-hover:-translate-x-0.5 transition-transform">←</span> Back to Home
-      </Link>
-
-      <h1
-        className="font-playfair text-4xl md:text-6xl font-bold text-[#222] dark:text-white leading-[1.1] mb-6 animate-fade-in-subtle"
-        style={{ animationDelay: '100ms' }}
-      >
-        {title}
-      </h1>
-
-      <hr
-        className="border-t border-[#eee] dark:border-[#333] mb-8 animate-fade-in-subtle"
-        style={{ animationDelay: '200ms' }}
-      />
-
-      <div
-        className="flex-grow animate-fade-in-subtle prose-maceng"
-        style={{ animationDelay: '300ms' }}
-      >
+    <main className="mx-auto max-w-[720px] px-4 pt-14 sm:px-6 animate-rise">
+      <h1 className="text-[clamp(36px,5vw,52px)] font-bold leading-[1.05] tracking-tight">{title}</h1>
+      <div className="prose-maceng mt-8 border-t border-line pt-8">
         <ReactMarkdown>{body}</ReactMarkdown>
       </div>
-
-      <Footer />
-    </div>
+    </main>
   );
 }

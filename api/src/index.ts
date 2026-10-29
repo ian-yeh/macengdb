@@ -25,10 +25,6 @@ declare global {
 }
 
 const ORIGINS = new Set([
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'http://127.0.0.1:5173',
-  'http://127.0.0.1:3000',
   'https://macengdb.ca',
   'https://www.macengdb.ca',
   'https://macengdb.ianyeh.ca',
@@ -40,7 +36,8 @@ const app = new Hono<AppEnv>()
 
 app.use(
   cors({
-    origin: (o) => (ORIGINS.has(o) || /^https:\/\/macengdb-.*\.vercel\.app$/.test(o) ? o : null),
+    origin: (o) =>
+      ORIGINS.has(o) || /^https:\/\/macengdb-.*\.vercel\.app$/.test(o) || /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(o) ? o : null,
     credentials: true,
   }),
 )

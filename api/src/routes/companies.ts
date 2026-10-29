@@ -5,7 +5,8 @@ import { NOW, patch, validate, type AppEnv } from '../db'
 
 const company = (sql: postgres.Sql) => sql`
   SELECT c.id, c.name, c.industries, c.rating, c.created_at, c.updated_at,
-    (SELECT count(*)::int FROM experiences e WHERE e.company_id = c.id AND e.status = 'approved') AS experience_count
+    (SELECT count(*)::int FROM experiences e WHERE e.company_id = c.id AND e.status = 'approved') AS experience_count,
+    round((SELECT avg(e.difficulty) FROM experiences e WHERE e.company_id = c.id AND e.status = 'approved') * 10)::float8 / 10 AS avg_difficulty
   FROM companies c`
 
 const filters = z.object({
@@ -52,7 +53,7 @@ app.post(
     const [row] = await sql`
       INSERT INTO companies (name, industries, rating, created_at, updated_at)
       VALUES (${b.name}, ${b.industries}::varchar[], ${b.rating}, ${sql.unsafe(NOW)}, ${sql.unsafe(NOW)})
-      RETURNING id, name, industries, rating, created_at, updated_at, 0 AS experience_count`
+      RETURNING id, name, industries, rating, created_at, updated_at, 0 AS experience_count, NULL::float8 AS avg_difficulty`
     return c.json(row)
   },
 )
@@ -66,7 +67,8 @@ app.patch(
     const [row] = await sql`
       WITH u AS (UPDATE companies SET ${patch(sql, b)} WHERE id = ${c.req.param('id')} RETURNING *)
       SELECT u.id, u.name, u.industries, u.rating, u.created_at, u.updated_at,
-        (SELECT count(*)::int FROM experiences e WHERE e.company_id = u.id AND e.status = 'approved') AS experience_count
+        (SELECT count(*)::int FROM experiences e WHERE e.company_id = u.id AND e.status = 'approved') AS experience_count,
+        round((SELECT avg(e.difficulty) FROM experiences e WHERE e.company_id = u.id AND e.status = 'approved') * 10)::float8 / 10 AS avg_difficulty
       FROM u`
     return row ? c.json(row) : c.json({ detail: 'Company not found' }, 404)
   },

@@ -57,6 +57,11 @@ app.get('/companies/:id{[0-9]{1,9}}/experiences', async (c) => {
   return c.json(out(rows))
 })
 
+app.get('/experiences/recent', async (c) => {
+  const sql = c.var.sql
+  return c.json(out(await sql`${select(sql, false)} WHERE x.status = 'approved' AND x.company_id IS NOT NULL ORDER BY x.created_at DESC LIMIT 8`))
+})
+
 app.post('/experiences/submit', limit('EXPERIENCE_LIMITER'), validate('json', submit), async (c) => {
   const sql = c.var.sql
   const b = c.req.valid('json')

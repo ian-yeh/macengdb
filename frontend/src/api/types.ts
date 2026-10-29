@@ -4,6 +4,7 @@ export interface Company {
     industries: string[];
     rating: number;
     experience_count: number;
+    avg_difficulty: number | null;
     created_at: string;
     updated_at: string;
 }

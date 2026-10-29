@@ -34,6 +34,9 @@ describe('cors', () => {
   it('allows listed origins and vercel previews, denies others', async () => {
     expect(await acao('https://macengdb.ca')).toBe('https://macengdb.ca')
     expect(await acao('http://localhost:5173')).toBe('http://localhost:5173')
+    expect(await acao('http://localhost:5174')).toBe('http://localhost:5174')
+    expect(await acao('http://localhost.evil.com')).toBeNull()
+    expect(await acao('https://localhost:5173')).toBeNull()
     expect(await acao('https://macengdb-git-x.vercel.app')).toBe('https://macengdb-git-x.vercel.app')
     expect(await acao('https://evil.com')).toBeNull()
     expect(await acao('https://macengdb-x.vercel.app.evil.com')).toBeNull()
