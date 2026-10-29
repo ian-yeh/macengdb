@@ -116,3 +116,7 @@ temp/
 
 # Mock data
 mock_data/
+
+# Cloudflare Workers
+.dev.vars
+.wrangler/

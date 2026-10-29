@@ -12,7 +12,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import FAQPage from './pages/FAQPage';
 import './App.css';
 
-const MAINTENANCE = true;
+const MAINTENANCE = false;
 
 function App() {
   const enableVercelAnalytics =

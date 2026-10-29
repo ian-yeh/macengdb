@@ -8,19 +8,38 @@ on:
     branches: [ main ]
 
 jobs:
-  backend-lint:
+  api-check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: macengdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: api
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.12'
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: api/package-lock.json
       - name: Install dependencies
-        run: pip install -r backend/requirements.txt
-      - name: Run black check
-        run: black --check backend/
+        run: npm ci
+      - name: Load baseline schema
+        run: psql postgres://postgres:postgres@localhost:5432/macengdb -v ON_ERROR_STOP=1 -f migrations/0000_baseline.sql
+      - name: Type check
+        run: npx tsc --noEmit
+      - name: Test
+        run: npx vitest run
 
   frontend-check:
     runs-on: ubuntu-latest
