@@ -62,7 +62,7 @@ app.patch('/admin/company-requests/:id{[0-9]{1,9}}/approve', async (c) => {
     const [company] = await tx`
       INSERT INTO companies (name, industries, rating, created_at, updated_at)
       VALUES (${req.name}, ${data.industries}::varchar[], 0, ${tx.unsafe(NOW)}, ${tx.unsafe(NOW)})
-      RETURNING id, name, industries, rating, created_at, updated_at, 0 AS experience_count`
+      RETURNING id, name, industries, rating, created_at, updated_at, 0 AS experience_count, NULL::float8 AS avg_difficulty`
     await tx`UPDATE company_requests SET status = 'approved' WHERE id = ${id}`
     return company
   })
