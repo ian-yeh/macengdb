@@ -1,24 +1,62 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "macengdb-api",
-  "main": "src/index.ts",
-  "compatibility_date": "2026-10-01",
-  "compatibility_flags": ["nodejs_compat"],
-  "workers_dev": true,
-  "routes": [{ "pattern": "api.macengdb.ca", "custom_domain": true }],
-  "observability": { "enabled": true, "head_sampling_rate": 1 },
-  "hyperdrive": [
-    {
-      "binding": "HYPERDRIVE",
-      // TODO: replace with the id printed by `npx wrangler hyperdrive create macengdb-db --caching-disabled ...`
-      "id": "REPLACE_WITH_HYPERDRIVE_ID",
-      "localConnectionString": "postgres://postgres:postgres@localhost:5432/macengdb"
-    }
-  ],
-  "ratelimits": [
-    { "name": "EXPERIENCE_LIMITER", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } },
-    { "name": "COMPANY_REQUEST_LIMITER", "namespace_id": "1002", "simple": { "limit": 3, "period": 60 } },
-    { "name": "DESIGN_TEAM_REQUEST_LIMITER", "namespace_id": "1003", "simple": { "limit": 3, "period": 60 } },
-    { "name": "REVIEW_LIMITER", "namespace_id": "1004", "simple": { "limit": 5, "period": 60 } }
-  ]
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "macengdb-api",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-10-01",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"workers_dev": true,
+	"routes": [
+		{
+			"pattern": "api.macengdb.ca",
+			"custom_domain": true
+		}
+	],
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1
+	},
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			// TODO: replace with the id printed by `npx wrangler hyperdrive create macengdb-db --caching-disabled ...`
+			"id": "fabfabf708214e2cb85005e3387383a7",
+			"localConnectionString": "postgres://postgres:postgres@localhost:5432/macengdb"
+		}
+	],
+	"ratelimits": [
+		{
+			"name": "EXPERIENCE_LIMITER",
+			"namespace_id": "1001",
+			"simple": {
+				"limit": 5,
+				"period": 60
+			}
+		},
+		{
+			"name": "COMPANY_REQUEST_LIMITER",
+			"namespace_id": "1002",
+			"simple": {
+				"limit": 3,
+				"period": 60
+			}
+		},
+		{
+			"name": "DESIGN_TEAM_REQUEST_LIMITER",
+			"namespace_id": "1003",
+			"simple": {
+				"limit": 3,
+				"period": 60
+			}
+		},
+		{
+			"name": "REVIEW_LIMITER",
+			"namespace_id": "1004",
+			"simple": {
+				"limit": 5,
+				"period": 60
+			}
+		}
+	]
 }
