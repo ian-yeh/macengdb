@@ -25,7 +25,7 @@ const adm = (method: string, path: string, body?: unknown) => call(method, path,
 const DT = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d{6})?$/
 const keys = (o: object) => Object.keys(o).sort()
 
-const COMPANY = ['created_at', 'experience_count', 'id', 'industries', 'name', 'rating', 'updated_at']
+const COMPANY = ['avg_difficulty', 'created_at', 'experience_count', 'id', 'industries', 'name', 'rating', 'updated_at']
 const EXP = [
   'company_id', 'company_name', 'created_at', 'difficulty', 'id', 'interview_acquisition', 'new_company_name',
   'offer_received', 'position', 'stages', 'status', 'term', 'tips', 'updated_at',
@@ -123,6 +123,7 @@ describe('companies', () => {
     expect(await names('?position=engineer')).toEqual(['Acme'])
     expect(await names('?search=zzz')).toEqual(['Acme', 'Bolt'])
     expect((await get('/api/companies')).body[0].experience_count).toBe(1)
+    expect((await get('/api/companies')).body.map((c: Json) => c.avg_difficulty)).toEqual([3, null])
   })
 
   it('searches by name', async () => {
@@ -183,6 +184,19 @@ describe('experiences', () => {
     expect(row.submitter_email).toBe('foo@mcmaster.ca')
     expect(row.user_id).toBeNull()
     expect(row.stages).toEqual([{ name: 'OA', duration: null, questions: [] }])
+  })
+
+  it('lists recent approved experiences with a company, newest first', async () => {
+    const c = await company()
+    const a = await experience(c.id, { position: 'A' })
+    const b = await experience(c.id, { position: 'B' })
+    await experience(c.id, { position: 'pending' })
+    const orphan = await experience(null, { new_company_name: 'NewCo' })
+    for (const e of [a, b, orphan]) await adm('PATCH', `/api/admin/experiences/${e.id}/approve`)
+    await sql`UPDATE experiences SET created_at = created_at - interval '1 day' WHERE id = ${a.id}`
+    const { body } = await get('/api/experiences/recent')
+    expect(body.map((e: Json) => e.position)).toEqual(['B', 'A'])
+    expect(keys(body[0])).toEqual(EXP)
   })
 
   it('accepts a new company name without company_id', async () => {

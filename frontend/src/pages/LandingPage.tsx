@@ -1,443 +1,222 @@
-import { useState, useEffect } from 'react';
-import useDebounce from '../hooks/useDebounce';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { type Company, type DesignTeam } from '../api/types';
+import { useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCompanies, fetchDesignTeams } from '../api/api';
+import { fetchCompanies, fetchDesignTeams, fetchRecentExperiences } from '../api/api';
 import CompanyListSkeleton from '../components/features/companies/CompanyListSkeleton';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
-import CompanyRequestModal from '../components/features/companies/CompanyRequestModal';
-import DesignTeamRequestModal from '../components/features/design-teams/DesignTeamRequestModal';
+import { Pips } from '../components/ExperienceCard';
+import RequestModal from '../components/RequestModal';
+
+interface Row {
+    id: number;
+    href: string;
+    name: string;
+    tags: string[];
+    difficulty: number | null;
+    count: number;
+}
+
+const GRID = 'grid grid-cols-[minmax(0,1fr)_auto_16px] items-center gap-4 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_112px_88px_20px]';
 
 export default function LandingPage() {
-    const navigate = useNavigate();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedIndustry, setSelectedIndustry] = useState('All');
-    const [minRating, setMinRating] = useState<number | undefined>(undefined);
-    const [hasOffer, setHasOffer] = useState<boolean | undefined>(undefined);
-    const [position, setPosition] = useState('');
-    const debouncedPosition = useDebounce(position, 500);
-    const [showFilters, setShowFilters] = useState(false);
-    const [searchParams] = useSearchParams();
-    const initialTab = searchParams.get('tab') === 'design-teams' ? 'design-teams' : 'companies';
-    const [activeTab, setActiveTab] = useState<'companies' | 'design-teams'>(initialTab);
-
-    const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 10;
-    const [showCompanyRequestModal, setShowCompanyRequestModal] = useState(false);
-    const [showDesignTeamRequestModal, setShowDesignTeamRequestModal] = useState(false);
-
-    const debouncedSearchQuery = useDebounce(searchQuery, 1000);
-
-    useEffect(() => {
-        // Search performed
-    }, [debouncedSearchQuery, activeTab]);
-
-    useEffect(() => {
-        // Filter changed
-    }, [debouncedPosition]);
+    const [params, setParams] = useSearchParams();
+    const teams = params.get('tab') === 'design-teams';
+    const [search, setSearch] = useState('');
+    const [industry, setIndustry] = useState('');
+    const [offersOnly, setOffersOnly] = useState(false);
+    const [showEmpty, setShowEmpty] = useState(false);
+    const [requesting, setRequesting] = useState(false);
 
     const { data: companies = [], isLoading, error } = useQuery({
-        queryKey: ['companies', selectedIndustry, minRating, hasOffer, debouncedPosition],
-        queryFn: () => fetchCompanies(
-            undefined, // search is handled by local filtering
-            selectedIndustry,
-            minRating,
-            hasOffer,
-            debouncedPosition || undefined
-        ),
+        queryKey: ['companies'],
+        queryFn: () => fetchCompanies(),
     });
-
+    const { data: withOffers } = useQuery({
+        queryKey: ['companies', 'offers'],
+        queryFn: () => fetchCompanies(undefined, undefined, undefined, true),
+        enabled: offersOnly,
+    });
     const { data: designTeams = [], isLoading: teamsLoading, error: teamsError } = useQuery({
         queryKey: ['design-teams'],
         queryFn: () => fetchDesignTeams(),
     });
-
-    const filteredCompanies = companies
-        .filter((company: Company) => {
-            if (!searchQuery) return true;
-            const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                company.industries.some(ind => ind.toLowerCase().includes(searchQuery.toLowerCase()));
-            return matchesSearch;
-        })
-        .sort((a: Company, b: Company) => b.experience_count - a.experience_count || a.name.localeCompare(b.name));
-
-    const filteredTeams = designTeams.filter((team: DesignTeam) => {
-        if (!searchQuery) return true;
-        const q = searchQuery.toLowerCase();
-        return (
-            team.name.toLowerCase().includes(q) ||
-            team.categories.some(c => c.toLowerCase().includes(q)) ||
-            (team.description && team.description.toLowerCase().includes(q))
-        );
+    const { data: recent = [] } = useQuery({
+        queryKey: ['experiences', 'recent'],
+        queryFn: fetchRecentExperiences,
     });
 
-    const totalPages = Math.max(1, Math.ceil(filteredCompanies.length / ITEMS_PER_PAGE));
-    const safePage = Math.min(currentPage, totalPages);
-    const paginatedCompanies = filteredCompanies.slice(
-        (safePage - 1) * ITEMS_PER_PAGE,
-        safePage * ITEMS_PER_PAGE
-    );
+    const quotes = recent.flatMap(e => {
+        const round = e.stages.findIndex(s => s.questions.some(q => q.trim()));
+        if (round < 0 || !e.company_id) return [];
+        const stage = e.stages[round];
+        return [{ id: e.id, companyId: e.company_id, company: e.company_name, round: round + 1, stage: stage.name, term: e.term, text: stage.questions.find(q => q.trim())! }];
+    }).slice(0, 4);
 
-    const handleCompanyClick = (companyId: number) => {
-        navigate(`/company/${companyId}`);
-    };
+    const experienceCount =
+        companies.reduce((n, c) => n + c.experience_count, 0) + designTeams.reduce((n, t) => n + t.review_count, 0);
 
-    const handleTeamClick = (teamId: number) => {
-        navigate(`/design-teams/${teamId}`);
-    };
+    const offerIds = new Set(withOffers?.map(c => c.id));
+    const rows: Row[] = teams
+        ? designTeams.map(t => ({ id: t.id, href: `/design-teams/${t.id}`, name: t.name, tags: t.categories, difficulty: t.avg_difficulty, count: t.review_count }))
+        : companies
+            .filter(c => !industry || c.industries.includes(industry))
+            .filter(c => !offersOnly || !withOffers || offerIds.has(c.id))
+            .map(c => ({ id: c.id, href: `/company/${c.id}`, name: c.name, tags: c.industries, difficulty: c.avg_difficulty, count: c.experience_count }));
 
-    const stats = {
-        experienceCount: companies.reduce((acc: number, c: Company) => acc + (c.experience_count || 0), 0) + 
-                        designTeams.reduce((acc: number, t: DesignTeam) => acc + (t.review_count || 0), 0),
-        companyCount: companies.length,
-        designTeamCount: designTeams.length
+    const q = search.trim().toLowerCase();
+    const matches = rows
+        .filter(r => !q || r.name.toLowerCase().includes(q) || r.tags.some(t => t.toLowerCase().includes(q)))
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+    const shown = q || showEmpty ? matches : matches.filter(r => r.count > 0);
+    const hiddenCount = matches.length - shown.length;
+
+    const industries = [...new Set(companies.flatMap(c => c.industries))].sort();
+    const noun = teams ? 'design team' : 'company';
+    const nouns = teams ? 'design teams' : 'companies';
+    const loading = teams ? teamsLoading : isLoading;
+    const failed = teams ? teamsError : error;
+
+    const switchTab = (toTeams: boolean) => {
+        setParams(toTeams ? { tab: 'design-teams' } : {}, { replace: true });
+        setSearch('');
+        setShowEmpty(false);
     };
 
     return (
-        <div className="min-h-screen py-8 md:py-12 px-4 md:px-8 max-w-4xl mx-auto flex flex-col">
-            <Header 
-                activeTab={activeTab} 
-                onTabChange={(tab: 'companies' | 'design-teams') => {
-                    setActiveTab(tab);
-                    setSearchQuery('');
-                    setCurrentPage(1);
-                }} 
-                onRequestCompany={() => {
-                    setShowCompanyRequestModal(true);
-                }} 
-                onRequestDesignTeam={() => {
-                    setShowDesignTeamRequestModal(true);
-                }} 
-                experienceCount={stats.experienceCount}
-                companyCount={stats.companyCount}
-                designTeamCount={stats.designTeamCount}
-            />
-
-            {/* Request Modals */}
-            <CompanyRequestModal
-                isOpen={showCompanyRequestModal}
-                onClose={() => setShowCompanyRequestModal(false)}
-            />
-            <DesignTeamRequestModal
-                isOpen={showDesignTeamRequestModal}
-                onClose={() => setShowDesignTeamRequestModal(false)}
-            />
-
-            {/* Search and Filters */}
-            <div id="search-filters" className="mb-6 space-y-4 pt-16 -mt-16">
-                <div className="flex gap-3">
-                    <div className="relative group flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <svg className="h-4 w-4 text-[#999] group-focus-within:text-maceng-orange transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                        <input
-                            type="text"
-                            placeholder={activeTab === 'companies' ? "Search company or industry..." : "Search team or category..."}
-                            value={searchQuery}
-                            onChange={(e) => {
-                                setSearchQuery(e.target.value);
-                                setCurrentPage(1);
-                            }}
-                            className="w-full py-3 pl-10 pr-4 text-sm border border-[#ddd] dark:border-[#444] rounded-lg font-inter bg-white dark:bg-[#111111] dark:text-white shadow-sm ring-maceng-orange/0 focus:ring-4 focus:border-maceng-maroon/40 focus:outline-none transition-all placeholder:text-[#aaa] dark:placeholder:text-[#666]"
-                        />
+        <main className="mx-auto max-w-[1080px] px-4 sm:px-6">
+            <section className={`grid items-center gap-10 py-10 md:py-[72px] ${quotes.length ? 'md:grid-cols-[1.05fr_1fr] md:gap-14' : ''}`}>
+                <div className="animate-rise">
+                    <h1 className="text-[clamp(44px,6vw,72px)] font-bold leading-[1.02] tracking-[-.02em]">
+                        Know before<br />you <em className="text-accent">interview.</em>
+                    </h1>
+                    <p className="mt-5 max-w-[30em] text-lg text-ink-2">
+                        Real interview experiences from McMaster engineering students. See what each round asked, how hard it was, and who got the offer.
+                    </p>
+                    <div className="mt-7 flex flex-wrap gap-2.5">
+                        <a href="#directory" className="btn btn-primary btn-lg">Browse {nouns}</a>
+                        <Link to={teams ? '/submit-design-team' : '/submit'} className="btn btn-ghost btn-lg">
+                            Share your {teams ? 'application' : 'interview'}
+                        </Link>
                     </div>
-                    {activeTab === 'companies' && (
-                        <button
-                            onClick={() => {
-                                setShowFilters(!showFilters);
-                            }}
-                            className={`px-4 py-2 border rounded-lg flex items-center gap-2 text-sm font-medium transition-all ${showFilters ? 'bg-maceng-maroon text-white border-maceng-maroon' : 'bg-white text-[#666] border-[#ddd] hover:border-maceng-maroon/40'}`}
-                        >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                            </svg>
-                            Filters
-                        </button>
+                    <p className="mt-[22px] text-base text-ink-3">
+                        <b className="font-semibold text-ink">{experienceCount}</b> experiences across{' '}
+                        <b className="font-semibold text-ink">{companies.length}</b> companies and{' '}
+                        <b className="font-semibold text-ink">{designTeams.length}</b> design teams
+                    </p>
+                </div>
+
+                {quotes.length > 0 && (
+                    <div className="grid gap-3" aria-label="Recently asked in interviews">
+                        {quotes.map((quote, i) => (
+                            <Link
+                                key={quote.id}
+                                to={`/company/${quote.companyId}`}
+                                style={{ animationDelay: `${80 + i * 60}ms` }}
+                                className={`animate-rise rounded-xl border border-line bg-surface px-[18px] py-4 shadow-card transition hover:-translate-y-0.5 hover:border-accent/40
+                                    ${i === 1 ? 'md:ml-7' : ''} ${i === 2 ? 'md:ml-14 md:opacity-70' : ''} ${i === 3 ? 'max-md:hidden' : ''}`}
+                            >
+                                <blockquote className="line-clamp-3 font-playfair text-lg leading-snug">
+                                    <span className="text-accent">&ldquo;</span>{quote.text}<span className="text-accent">&rdquo;</span>
+                                </blockquote>
+                                <div className="mt-2.5 flex flex-wrap gap-1.5 font-mono text-xs text-ink-3">
+                                    <b className="font-inter font-semibold text-ink">{quote.company}</b> · Round {quote.round} · {quote.stage} · {quote.term}
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </section>
+
+            <section id="directory" className="scroll-mt-20 border-t border-line pt-8">
+                <div className="seg" role="group" aria-label="Directory">
+                    <button aria-pressed={!teams} onClick={() => switchTab(false)}>
+                        Companies <span className="ml-1 font-mono text-xs font-normal text-ink-3">{companies.length}</span>
+                    </button>
+                    <button aria-pressed={teams} onClick={() => switchTab(true)}>
+                        Design teams <span className="ml-1 font-mono text-xs font-normal text-ink-3">{designTeams.length}</span>
+                    </button>
+                </div>
+
+                <div className="mb-2 mt-5 flex flex-wrap gap-2.5">
+                    <label className="relative min-w-[240px] flex-1">
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+                        <input
+                            type="search"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder={teams ? 'Search design teams or categories' : 'Search companies or industries'}
+                            aria-label={`Search ${nouns}`}
+                            className="field pl-[38px]"
+                        />
+                    </label>
+                    {!teams && (
+                        <>
+                            <select value={industry} onChange={(e) => setIndustry(e.target.value)} aria-label="Industry" className="field">
+                                <option value="">All industries</option>
+                                {industries.map(i => <option key={i}>{i}</option>)}
+                            </select>
+                            <button aria-pressed={offersOnly} onClick={() => setOffersOnly(!offersOnly)} className="choice h-[42px]">
+                                Offers only
+                            </button>
+                        </>
                     )}
                 </div>
 
-                {activeTab === 'companies' && showFilters && (
-                    <div className="p-4 md:p-5 bg-[#fafafa] dark:bg-[#111111] border border-[#eee] dark:border-[#444] rounded-xl flex flex-col sm:flex-row flex-wrap gap-4 md:gap-6 animate-fade-in shadow-sm">
-                        {/* Industry Filter */}
-                        <div className="flex flex-col gap-2 min-w-[150px]">
-                            <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60">Industry</label>
-                            <select
-                                value={selectedIndustry}
-                                onChange={(e) => {
-                                    setSelectedIndustry(e.target.value);
-                                    setCurrentPage(1);
-                                }}
-                                className="py-2 px-3 text-sm border border-[#ddd] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
-                            >
-                                <option value="All">All Industries</option>
-                                <option value="Software">Software</option>
-                                <option value="Hardware">Hardware</option>
-                                <option value="Civil">Civil</option>
-                                <option value="Chemical">Chemical</option>
-                                <option value="Electrical">Electrical</option>
-                                <option value="Mechanical">Mechanical</option>
-                                <option value="Finance">Finance</option>
-                                <option value="Consulting">Consulting</option>
-                            </select>
-                        </div>
-
-                        {/* Rating Filter */}
-                        <div className="flex flex-col gap-2 min-w-[100px]">
-                            <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60">Min Rating</label>
-                            <select
-                                value={minRating || ''}
-                                onChange={(e) => {
-                                    const val = e.target.value ? Number(e.target.value) : undefined;
-                                    setMinRating(val);
-                                    setCurrentPage(1);
-                                }}
-                                className="py-2 px-3 text-sm border border-[#ddd] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
-                            >
-                                <option value="">Any</option>
-                                <option value="4">4+ Stars</option>
-                                <option value="3">3+ Stars</option>
-                                <option value="2">2+ Stars</option>
-                            </select>
-                        </div>
-
-                        {/* Offer Toggle */}
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60">Offer Status</label>
-                            <label className="flex items-center gap-2 cursor-pointer py-2 group">
-                                <input
-                                    type="checkbox"
-                                    checked={hasOffer === true}
-                                    onChange={(e) => {
-                                        setHasOffer(e.target.checked ? true : undefined);
-                                        setCurrentPage(1);
-                                    }}
-                                    className="w-4 h-4 rounded border-[#ddd] text-maceng-maroon focus:ring-maceng-maroon transition-all"
-                                />
-                                <span className="text-sm text-[#444] dark:text-[#bbb] group-hover:text-maceng-maroon dark:group-hover:text-maceng-orange transition-colors">Only with offers</span>
-                            </label>
-                        </div>
-
-                        {/* Position Search */}
-                        <div className="flex flex-col gap-2 flex-grow">
-                            <label className="text-[11px] uppercase tracking-wider font-bold text-maceng-maroon/60 dark:text-maceng-orange/60">Position</label>
-                            <input
-                                type="text"
-                                placeholder="Filter by role (e.g. Intern)"
-                                value={position}
-                                onChange={(e) => { setPosition(e.target.value); setCurrentPage(1); }}
-                                className="py-2 px-3 text-sm border border-[#ddd] dark:border-[#444] rounded-lg bg-white dark:bg-[#202020] dark:text-white focus:outline-none focus:ring-2 focus:ring-maceng-maroon/10 focus:border-maceng-maroon transition-all"
-                            />
-                        </div>
-
-                        {/* Reset Button */}
-                        <div className="flex items-end self-stretch">
-                            <button
-                                onClick={() => {
-                                    setSelectedIndustry('All');
-                                    setMinRating(undefined);
-                                    setHasOffer(undefined);
-                                    setPosition('');
-                                    setSearchQuery('');
-                                    setCurrentPage(1);
-                                }}
-                                className="text-[12px] font-bold text-maceng-orange hover:text-maceng-maroon transition-colors mb-2"
-                            >
-                                Reset All
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Content Area */}
-            <div className="flex-grow">
-                {activeTab === 'companies' ? (
-                    <>
-
-                        {error ? (
-                            <div className="text-center py-12 text-red-600 italic">
-                                Failed to load companies. Please try again later.
-                            </div>
-                        ) : isLoading ? (
-                            <div className="mb-8">
-                                <CompanyListSkeleton />
-                            </div>
-                        ) : (
-                            <>
-                                <div className="mb-8 overflow-hidden">
-                                    <table className="w-full border-collapse">
-                                        <thead>
-                                            <tr className="border-b-2 border-maceng-maroon/20 dark:border-maceng-maroon/40">
-                                                <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
-                                                    Company
-                                                </th>
-                                                <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[16px] uppercase tracking-wider">
-                                                    Industry
-                                                </th>
-                                                <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
-                                                    Experiences
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-[#eee] dark:divide-[#333]">
-                                            {paginatedCompanies.map((company: Company, index: number) => (
-                                                <tr
-                                                    key={`${company.id}-${searchQuery}-${safePage}`}
-                                                    className={`group hover:bg-[#fafafa] dark:hover:bg-[#282828] transition-all cursor-pointer animate-row-in ${company.experience_count === 0 ? 'opacity-60 hover:opacity-100' : ''}`}
-                                                    style={{ animationDelay: `${index * 30}ms` }}
-                                                    onClick={() => handleCompanyClick(company.id)}
-                                                >
-                                                    <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
-                                                        <div className="flex flex-col">
-                                                            <span className="font-semibold text-[#333] dark:text-white group-hover:text-maceng-orange transition-colors">
-                                                                {company.name}
-                                                            </span>
-                                                            <span className="md:hidden text-[#888] dark:text-[#b8b8b8] text-[11px] italic font-inter mt-0.5 line-clamp-1">
-                                                                {company.industries.join(', ')}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="hidden md:table-cell py-3 pr-6 text-[#777] dark:text-[#cccccc] text-sm italic font-inter leading-tight">
-                                                        {company.industries.join(', ')}
-                                                    </td>
-                                                    <td className="py-3 text-right md:text-center text-[15px]">
-                                                        {company.experience_count > 0 ? (
-                                                            <span className="font-bold text-maceng-maroon dark:text-maceng-orange">
-                                                                {company.experience_count}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-[#bbb] dark:text-[#666]">—</span>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                {filteredCompanies.length === 0 && (
-                                    <div className="text-center py-12 text-[#666] italic">
-                                        No companies found matching your search.
-                                    </div>
-                                )}
-
-                                {totalPages > 1 && (
-                                    <div className="flex items-center justify-center gap-1 md:gap-1.5 mt-4 flex-wrap">
-                                        <button
-                                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                            disabled={safePage === 1}
-                                            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
-                                        >
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                                            </svg>
-                                        </button>
-                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                            <button
-                                                key={page}
-                                                onClick={() => setCurrentPage(page)}
-                                                className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border text-xs md:text-sm font-semibold transition-all ${page === safePage
-                                                    ? 'bg-maceng-maroon dark:bg-maceng-orange text-white border-maceng-maroon dark:border-maceng-orange shadow-md shadow-maceng-maroon/20 dark:shadow-maceng-orange/20'
-                                                    : 'border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666]'
-                                                    }`}
-                                            >
-                                                {page}
-                                            </button>
-                                        ))}
-                                        <button
-                                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                            disabled={safePage === totalPages}
-                                            className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] dark:border-[#444] text-[#777] dark:text-[#e5e5e5] hover:bg-[#fafafa] dark:hover:bg-[#282828] hover:border-[#ddd] dark:hover:border-[#666] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
-                                        >
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </>
+                {failed ? (
+                    <p className="py-12 text-center text-ink-2">We couldn't load the {nouns}. Refresh to try again.</p>
+                ) : loading ? (
+                    <CompanyListSkeleton />
                 ) : (
                     <>
+                        <div className={`${GRID} border-b border-line px-2 pb-2 pt-4 text-xs font-semibold text-ink-3`}>
+                            <span>{teams ? 'Design team' : 'Company'}</span>
+                            <span className="max-sm:hidden">{teams ? 'Category' : 'Industry'}</span>
+                            <span className="max-sm:hidden">Avg. difficulty</span>
+                            <span className="text-right">Experiences</span>
+                            <span />
+                        </div>
+                        <ul>
+                            {shown.map(r => (
+                                <li key={r.id}>
+                                    <Link to={r.href} className={`${GRID} group border-b border-line px-2 py-3.5 transition-colors hover:bg-sunken`}>
+                                        <span className="font-semibold">
+                                            {r.name}
+                                            <small className="block truncate text-xs font-normal text-ink-3 sm:hidden">{r.tags.join(', ')}</small>
+                                        </span>
+                                        <span className="truncate text-[13px] text-ink-3 max-sm:hidden">{r.tags.join(', ')}</span>
+                                        <span className="max-sm:hidden">{r.difficulty ? <Pips value={r.difficulty} /> : null}</span>
+                                        <span className="text-right font-mono text-[13px] text-ink-2">{r.count || '-'}</span>
+                                        <span className="text-ink-3 transition group-hover:translate-x-[3px] group-hover:text-accent" aria-hidden="true">&rsaquo;</span>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
 
-                        {teamsError ? (
-                            <div className="text-center py-12 text-red-600 italic">
-                                Failed to load design teams. Please try again later.
-                            </div>
-                        ) : teamsLoading ? (
-                            <div className="mb-8">
-                                <CompanyListSkeleton />
-                            </div>
-                        ) : (
-                            <>
-                                <div className="mb-8 overflow-hidden">
-                                    <table className="w-full border-collapse">
-                                        <thead>
-                                            <tr className="border-b-2 border-maceng-maroon/20 dark:border-maceng-maroon/40">
-                                                <th className="text-left py-3 pr-4 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider">
-                                                    Team
-                                                </th>
-                                                <th className="hidden md:table-cell text-left py-3 pr-6 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[16px] uppercase tracking-wider">
-                                                    Category
-                                                </th>
-                                                <th className="text-right md:text-center py-3 font-playfair italic text-maceng-maroon dark:text-maceng-orange font-semibold text-[15px] md:text-[16px] uppercase tracking-wider w-24 md:w-32">
-                                                    Experiences
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-[#eee] dark:divide-[#333]">
-                                            {filteredTeams.map((team: DesignTeam, index: number) => (
-                                                <tr
-                                                    key={team.id}
-                                                    className={`group hover:bg-[#fafafa] dark:hover:bg-[#282828] transition-all cursor-pointer animate-row-in ${team.review_count === 0 ? 'opacity-60 hover:opacity-100' : ''}`}
-                                                    style={{ animationDelay: `${index * 30}ms` }}
-                                                    onClick={() => handleTeamClick(team.id)}
-                                                >
-                                                    <td className="py-3 pr-4 transition-transform group-hover:translate-x-1 duration-200">
-                                                        <div className="flex flex-col">
-                                                            <span className="font-semibold text-[#333] dark:text-white group-hover:text-maceng-orange transition-colors">
-                                                                {team.name}
-                                                            </span>
-                                                            <span className="md:hidden text-[#888] dark:text-[#b8b8b8] text-[11px] italic font-inter mt-0.5 line-clamp-1">
-                                                                {team.categories.join(', ')}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="hidden md:table-cell py-3 pr-6 text-[#777] dark:text-[#cccccc] text-sm italic font-inter leading-tight">
-                                                        {team.categories.join(', ')}
-                                                    </td>
-                                                    <td className="py-3 text-right md:text-center text-[15px]">
-                                                        {team.review_count > 0 ? (
-                                                            <span className="font-bold text-maceng-maroon dark:text-maceng-orange">
-                                                                {team.review_count}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-[#bbb] dark:text-[#666]">—</span>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                {filteredTeams.length === 0 && (
-                                    <div className="text-center py-12 text-[#666] italic">
-                                        No design teams found matching your search.
-                                    </div>
-                                )}
-                            </>
+                        {shown.length === 0 && (
+                            <p className="py-10 text-center text-ink-2">
+                                {q ? `No ${nouns} match "${search.trim()}".` : `No ${nouns} match these filters.`}
+                            </p>
                         )}
+
+                        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-dashed border-line px-4 py-3.5 text-sm text-ink-2">
+                            {hiddenCount > 0 ? (
+                                <>
+                                    <span>{hiddenCount} more {hiddenCount === 1 ? noun : nouns} {hiddenCount === 1 ? 'has' : 'have'} no experiences yet.</span>
+                                    <button onClick={() => setShowEmpty(true)} className="font-semibold text-accent">Show them</button>
+                                </>
+                            ) : (
+                                <>
+                                    <span>Can't find a {noun}?</span>
+                                    <button onClick={() => setRequesting(true)} className="font-semibold text-accent">Request it</button>
+                                </>
+                            )}
+                        </div>
                     </>
                 )}
-            </div>
+            </section>
 
-            <Footer />
-        </div>
+            {requesting && (
+                <RequestModal kind={teams ? 'design team' : 'company'} initialName={search.trim()} onClose={() => setRequesting(false)} />
+            )}
+        </main>
     );
 }
